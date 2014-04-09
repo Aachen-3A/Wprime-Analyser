@@ -130,11 +130,11 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
       }
     }
 
-    HistClass::Fill("MC_LLE_Gen",m_GenEvtView->findUserRecord< double >( "MC_LLE" ),weight);
-    HistClass::Fill("MC_LQD_Gen",m_GenEvtView->findUserRecord< double >( "MC_LQD" ),weight);
-    HistClass::Fill("MC_MSnl_Gen",m_GenEvtView->findUserRecord< double >( "MC_MSnl" ),weight);
+    //HistClass::Fill("MC_LLE_Gen",m_GenEvtView->findUserRecord< double >( "MC_LLE" ),weight);
+    //HistClass::Fill("MC_LQD_Gen",m_GenEvtView->findUserRecord< double >( "MC_LQD" ),weight);
+    //HistClass::Fill("MC_MSnl_Gen",m_GenEvtView->findUserRecord< double >( "MC_MSnl" ),weight);
     
-    if(!(taumu_mass_gen > 580. && taumu_mass_gen < 620.))return;
+    //if(!(taumu_mass_gen > 580. && taumu_mass_gen < 620.))return;
     
     if(taumu_mass_gen > 0.){
       HistClass::Fill("TauMu_mass_Gen",sel_taumu_gen->getMass(),weight);

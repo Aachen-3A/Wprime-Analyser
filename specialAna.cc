@@ -9,84 +9,91 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    d_mydisc(  {"againstElectronDeadECAL","againstElectronLoose","againstElectronLooseMVA5","againstElectronMVA5category","againstElectronMVA5raw","againstElectronMedium","againstElectronMediumMVA5","againstElectronTight","againstElectronTightMVA5","againstElectronVLooseMVA5","againstElectronVTightMVA5","againstMuonLoose","againstMuonLoose2","againstMuonLoose3","againstMuonLooseMVA","againstMuonMVAraw","againstMuonMedium","againstMuonMedium2","againstMuonMediumMVA","againstMuonTight","againstMuonTight2","againstMuonTight3","againstMuonTightMVA","byCombinedIsolationDeltaBetaCorrRaw","byCombinedIsolationDeltaBetaCorrRaw3Hits","byIsolationMVA3newDMwLTraw","byIsolationMVA3newDMwoLTraw","byIsolationMVA3oldDMwLTraw","byIsolationMVA3oldDMwoLTraw","byLooseCombinedIsolationDeltaBetaCorr","byLooseCombinedIsolationDeltaBetaCorr3Hits","byLooseIsolation","byLooseIsolationMVA3newDMwLT","byLooseIsolationMVA3newDMwoLT","byLooseIsolationMVA3oldDMwLT","byLooseIsolationMVA3oldDMwoLT","byMediumCombinedIsolationDeltaBetaCorr","byMediumCombinedIsolationDeltaBetaCorr3Hits","byMediumIsolationMVA3newDMwLT","byMediumIsolationMVA3newDMwoLT","byMediumIsolationMVA3oldDMwLT","byMediumIsolationMVA3oldDMwoLT","byTightCombinedIsolationDeltaBetaCorr","byTightCombinedIsolationDeltaBetaCorr3Hits","byTightIsolationMVA3newDMwLT","byTightIsolationMVA3newDMwoLT","byTightIsolationMVA3oldDMwLT","byTightIsolationMVA3oldDMwoLT","byVLooseCombinedIsolationDeltaBetaCorr","byVLooseIsolationMVA3newDMwLT","byVLooseIsolationMVA3newDMwoLT","byVLooseIsolationMVA3oldDMwLT","byVLooseIsolationMVA3oldDMwoLT","byVTightIsolationMVA3newDMwLT","byVTightIsolationMVA3newDMwoLT","byVTightIsolationMVA3oldDMwLT","byVTightIsolationMVA3oldDMwoLT","byVVTightIsolationMVA3newDMwLT","byVVTightIsolationMVA3newDMwoLT","byVVTightIsolationMVA3oldDMwLT","byVVTightIsolationMVA3oldDMwoLT","chargedIsoPtSum","decayModeFinding","decayModeFindingNewDMs","decayModeFindingOldDMs","neutralIsoPtSum","puCorrPtSum"}  ),
    d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"}   )
 {
+	  std::string safeFileName = "SpecialHistos.root";
+    file1 = new TFile(safeFileName.c_str(), "RECREATE");
+
     HistClass::CreateHisto("Tau_nums","num_Taus", 40, 0, 39, "N_{#taus}");
-    HistClass::CreateHisto(2,"Tau_pt","Tau_pt", 2000, 0, 2000, "p_{T}^{#tau} (GeV)");
-    HistClass::CreateHisto(2,"Tau_eta","Tau_eta", 80, -4, 4, "#eta_{#tau}");
-    HistClass::CreateHisto(2,"Tau_phi","Tau_phi", 40, -3.2, 3.2, "#phi_{#tau} (rad)");
-    HistClass::CreateHisto(2,"Tau_decayMode","Tau_decayMode", 100, 0, 10, "#N_{decay mode}^{#tau}");
-    HistClass::CreateHisto(2,"Tau_Vtx_X","Tau_Vtx_X", 100, -1, 1, "Vtx_{x}^{#tau} (cm)");
-    HistClass::CreateHisto(2,"Tau_Vtx_Y","Tau_Vtx_Y", 100, -1, 1, "Vtx_{y}^{#tau} (cm)");
-    HistClass::CreateHisto(2,"Tau_Vtx_Z","Tau_Vtx_Z", 200, -30, 30, "Vtx_{z}^{#tau} (cm)");
-    HistClass::CreateHisto(2,"Tau_EtaEta","Tau_EtaEta", 200, -1, 1, "#eta#eta_{#tau}");
-    HistClass::CreateHisto(2,"Tau_EtaPhi","Tau_EtaPhi", 200, -1, 1, "#eta#phi_{#tau}");
-    HistClass::CreateHisto(2,"Tau_PhiPhi","Tau_PhiPhi", 200, -1, 1, "#phi#phi_{#tau}");
-    HistClass::CreateHisto(2,"Tau_NumSignaltracks","Tau_NumSignaltracks", 40, -3, 37, "N_{sig tracks}^{#tau}");
-    HistClass::CreateHisto(2,"Tau_NumPFChargedHadrCands","Tau_NumPFChargedHadrCands", 40, -3, 37, "N_{PFChargedHadrCands}^{#tau}");
-    HistClass::CreateHisto(2,"Tau_NumPFGammaCands","Tau_NumPFGammaCands", 40, -3, 37, "N_{PFGammaCands}^{#tau}");
-    HistClass::CreateHisto(2,"Tau_NumPFNeutralHadrCands","Tau_NumPFNeutralHadrCands", 40, -3, 37, "N_{PFNeutralHadrCands}^{#tau}");
-    HistClass::CreateHisto(2,"Tau_LeadingHadronPt","Tau_LeadingHadronPt", 2000, 0, 2000, "p_{T}^{leading hadron} (GeV)");
-    HistClass::CreateHisto(2,"Tau_EMFraction","Tau_EMFraction", 100, 0, 10, "EM Fraction^{#tau}");
-    HistClass::CreateHisto(2,"Tau_HcalEoverLeadChargedP","Tau_HcalEoverLeadChargedP", 100, 0, 10, "#frac{E_{Hcal}}{P_{leading charged}}");
-    HistClass::CreateHisto(2,"Tau_EcalEnergy","Tau_EcalEnergy", 2000, 0, 2000, "E_{Ecal}^{#tau} (GeV)");
-    HistClass::CreateHisto(2,"Tau_HcalEnergy","Tau_HcalEnergy", 2000, 0, 2000, "E_{Hcal}^{#tau} (GeV)");
-    HistClass::CreateHisto(2,"Tau_Jet_pt","Tau_Jet_pt", 2000, 0, 2000, "p_{T}^{jet} (GeV)");
-    HistClass::CreateHisto(2,"Tau_Jet_eta","Tau_Jet_eta", 80, -4, 4, "#eta_{jet}");
-    HistClass::CreateHisto(2,"Tau_Jet_phi","Tau_Jet_phi", 40, -3.2, 3.2, "#phi_{jet} (rad)");
-    HistClass::CreateHisto(2,"Tau_dxy","Tau_dxy", 100, 0, 0.1, "d_{xy}^{#tau} (cm)");
-    HistClass::CreateHisto(2,"Tau_dxy_error","Tau_dxy_error", 100, 0, 0.1, "#sigma(d_{xy}^{#tau}) (cm)");
-    HistClass::CreateHisto(2,"Tau_dxy_Sig","Tau_dxy_Sig", 100, 0, 10, "Sig(d_{xy}^{#tau})");
+    HistClass::CreateHisto(3,"Tau_pt","Tau_pt", 5000, 0, 5000, "p_{T}^{#tau} (GeV)");
+    HistClass::CreateHisto(3,"Tau_eta","Tau_eta", 80, -4, 4, "#eta_{#tau}");
+    HistClass::CreateHisto(3,"Tau_phi","Tau_phi", 40, -3.2, 3.2, "#phi_{#tau} (rad)");
+    HistClass::CreateHisto(3,"Tau_decayMode","Tau_decayMode", 100, 0, 10, "#N_{decay mode}^{#tau}");
+    HistClass::CreateHisto(3,"Tau_Vtx_X","Tau_Vtx_X", 100, -1, 1, "Vtx_{x}^{#tau} (cm)");
+    HistClass::CreateHisto(3,"Tau_Vtx_Y","Tau_Vtx_Y", 100, -1, 1, "Vtx_{y}^{#tau} (cm)");
+    HistClass::CreateHisto(3,"Tau_Vtx_Z","Tau_Vtx_Z", 200, -30, 30, "Vtx_{z}^{#tau} (cm)");
+    HistClass::CreateHisto(3,"Tau_EtaEta","Tau_EtaEta", 200, -1, 1, "#eta#eta_{#tau}");
+    HistClass::CreateHisto(3,"Tau_EtaPhi","Tau_EtaPhi", 200, -1, 1, "#eta#phi_{#tau}");
+    HistClass::CreateHisto(3,"Tau_PhiPhi","Tau_PhiPhi", 200, -1, 1, "#phi#phi_{#tau}");
+    HistClass::CreateHisto(3,"Tau_NumSignaltracks","Tau_NumSignaltracks", 40, -3, 37, "N_{sig tracks}^{#tau}");
+    HistClass::CreateHisto(3,"Tau_NumPFChargedHadrCands","Tau_NumPFChargedHadrCands", 40, -3, 37, "N_{PFChargedHadrCands}^{#tau}");
+    HistClass::CreateHisto(3,"Tau_NumPFGammaCands","Tau_NumPFGammaCands", 40, -3, 37, "N_{PFGammaCands}^{#tau}");
+    HistClass::CreateHisto(3,"Tau_NumPFNeutralHadrCands","Tau_NumPFNeutralHadrCands", 40, -3, 37, "N_{PFNeutralHadrCands}^{#tau}");
+    HistClass::CreateHisto(3,"Tau_LeadingHadronPt","Tau_LeadingHadronPt", 5000, 0, 5000, "p_{T}^{leading hadron} (GeV)");
+    HistClass::CreateHisto(3,"Tau_EMFraction","Tau_EMFraction", 100, 0, 10, "EM Fraction^{#tau}");
+    HistClass::CreateHisto(3,"Tau_HcalEoverLeadChargedP","Tau_HcalEoverLeadChargedP", 100, 0, 10, "#frac{E_{Hcal}}{P_{leading charged}}");
+    HistClass::CreateHisto(3,"Tau_EcalEnergy","Tau_EcalEnergy", 5000, 0, 5000, "E_{Ecal}^{#tau} (GeV)");
+    HistClass::CreateHisto(3,"Tau_HcalEnergy","Tau_HcalEnergy", 5000, 0, 5000, "E_{Hcal}^{#tau} (GeV)");
+    HistClass::CreateHisto(3,"Tau_Jet_pt","Tau_Jet_pt", 5000, 0, 5000, "p_{T}^{jet} (GeV)");
+    HistClass::CreateHisto(3,"Tau_Jet_eta","Tau_Jet_eta", 80, -4, 4, "#eta_{jet}");
+    HistClass::CreateHisto(3,"Tau_Jet_phi","Tau_Jet_phi", 40, -3.2, 3.2, "#phi_{jet} (rad)");
+    HistClass::CreateHisto(3,"Tau_dxy","Tau_dxy", 100, 0, 0.1, "d_{xy}^{#tau} (cm)");
+    HistClass::CreateHisto(3,"Tau_dxy_error","Tau_dxy_error", 100, 0, 0.1, "#sigma(d_{xy}^{#tau}) (cm)");
+    HistClass::CreateHisto(3,"Tau_dxy_Sig","Tau_dxy_Sig", 100, 0, 10, "Sig(d_{xy}^{#tau})");
     HistClass::CreateHisto("Tau_num_Gen","Tau_num_Gen", 40, 0, 39, "N_{#taus}^{gen}");
-    HistClass::CreateHisto("Tau_pt_Gen","Tau_pt_Gen", 2000, 0, 2000, "p_{T}^{gen #tau} (GeV)");
+    HistClass::CreateHisto("Tau_pt_Gen","Tau_pt_Gen", 5000, 0, 5000, "p_{T}^{gen #tau} (GeV)");
     HistClass::CreateHisto("Tau_eta_Gen","Tau_eta_Gen", 80, -4, 4, "#eta_{gen #tau}");
     HistClass::CreateHisto("Tau_phi_Gen","Tau_phi_Gen", 40, -3.2, 3.2, "#phi_{gen #tau} (rad)");
     HistClass::CreateHisto("Tau_eta_phi","Tau_eta_phi", 80, -4, 4, 40, -3.2, 3.2,"#eta_{#tau}","#phi_{#tau} (rad)");
-    HistClass::CreateHisto(2,"Tau_discriminator","Tau_discriminator", 67, 0, 67,"discriminator_{#tau}");
-    HistClass::NameBins(2,"Tau_discriminator",67,d_mydisc);
+    HistClass::CreateHisto(3,"Tau_discriminator","Tau_discriminator", 67, 0, 67,"discriminator_{#tau}");
+    HistClass::NameBins(3,"Tau_discriminator",67,d_mydisc);
 
     HistClass::CreateHisto("MC_LLE_Gen","MC_LLE_Gen",100,0,1,"LLE");
     HistClass::CreateHisto("MC_LQD_Gen","MC_LQD_Gen",100,0,0.001,"LQD");
     HistClass::CreateHisto("MC_MSnl_Gen","MC_MSnl_Gen",4000,0,4000,"MSnl");
 
     HistClass::CreateHisto("Muon_num","Muon_num", 40, 0, 39,"N_{#mus}");
-    HistClass::CreateHisto(2,"Muon_pt","Muon_pt", 2000, 0, 2000,"p_{T}^{#mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_eta","Muon_eta", 80, -4, 4,"#eta_{#mu}");
-    HistClass::CreateHisto(2,"Muon_phi","Muon_phi", 40, -3.2, 3.2,"#phi_{#mu} (rad)");
-    HistClass::CreateHisto(2,"Muon_Vtx_X","Muon_Vtx_X", 100, -1, 1,"Vtx_{x}^{#mu} (cm)");
-    HistClass::CreateHisto(2,"Muon_Vtx_Y","Muon_Vtx_Y", 100, -1, 1,"Vtx_{y}^{#mu} (cm)");
-    HistClass::CreateHisto(2,"Muon_Vtx_Z","Muon_Vtx_Z", 200, -30, 30,"Vtx_{z}^{#mu} (cm)");
-    HistClass::CreateHisto(2,"Muon_Chi2","Muon_Chi2", 400, 0, 200,"#chi_{#mu}^{2}");
-    HistClass::CreateHisto(2,"Muon_Ndof","Muon_Ndof", 200, 0, 200,"N_{dof}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_LHits","Muon_LHits", 20, 0, 20,"N_{lost hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_VHits","Muon_VHits", 100, 0, 100,"N_{valid hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_VHitsPixel","Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_VHitsTracker","Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_VHitsMuonSys","Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_TrackerLayersWithMeas","Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_PixelLayersWithMeas","Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_NMatchedStations","Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}^{#mu}");
-    HistClass::CreateHisto(2,"Muon_qoverp","Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
-    HistClass::CreateHisto(2,"Muon_qoverpError","Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
-    HistClass::CreateHisto(2,"Muon_ptError","Muon_ptError", 100, 0, 100,"#sigma(p_{T}^{#mu}) (GeV)");
-    HistClass::CreateHisto(2,"Muon_Cocktail_pt","Muon_Cocktail_pt", 2000, 0, 2000,"p_{T}^{cocktail #mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_Cocktail_eta","Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
-    HistClass::CreateHisto(2,"Muon_Cocktail_phi","Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} (rad)");
-    HistClass::CreateHisto(2,"Muon_CaloIso","Muon_CaloIso", 100, 0, 100,"ISO_{Calo}^{#mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_TrkIso","Muon_TrkIso", 100, 0, 100,"ISO_{Trk}^{#mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_ECALIso","Muon_ECALIso", 100, 0, 100,"ISO_{ECAL}^{#mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_HCALIso","Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
-    HistClass::CreateHisto(2,"Muon_ID","Muon_ID", 6, 0, 6,"ID_{#tau}");
-    HistClass::NameBins(2,"Muon_ID",6,d_mydiscmu);
+    HistClass::CreateHisto(3,"Muon_pt","Muon_pt", 5000, 0, 5000,"p_{T}^{#mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_eta","Muon_eta", 80, -4, 4,"#eta_{#mu}");
+    HistClass::CreateHisto(3,"Muon_phi","Muon_phi", 40, -3.2, 3.2,"#phi_{#mu} (rad)");
+    HistClass::CreateHisto(3,"Muon_Vtx_X","Muon_Vtx_X", 100, -1, 1,"Vtx_{x}^{#mu} (cm)");
+    HistClass::CreateHisto(3,"Muon_Vtx_Y","Muon_Vtx_Y", 100, -1, 1,"Vtx_{y}^{#mu} (cm)");
+    HistClass::CreateHisto(3,"Muon_Vtx_Z","Muon_Vtx_Z", 200, -30, 30,"Vtx_{z}^{#mu} (cm)");
+    HistClass::CreateHisto(3,"Muon_Chi2","Muon_Chi2", 400, 0, 200,"#chi_{#mu}^{2}");
+    HistClass::CreateHisto(3,"Muon_Ndof","Muon_Ndof", 200, 0, 200,"N_{dof}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_LHits","Muon_LHits", 20, 0, 20,"N_{lost hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_VHits","Muon_VHits", 100, 0, 100,"N_{valid hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_VHitsPixel","Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_VHitsTracker","Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_VHitsMuonSys","Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_TrackerLayersWithMeas","Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_PixelLayersWithMeas","Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_NMatchedStations","Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}^{#mu}");
+    HistClass::CreateHisto(3,"Muon_qoverp","Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
+    HistClass::CreateHisto(3,"Muon_qoverpError","Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
+    HistClass::CreateHisto(3,"Muon_ptError","Muon_ptError", 1000, 0, 1000,"#sigma(p_{T}^{#mu}) (GeV)");
+    HistClass::CreateHisto(3,"Muon_Cocktail_pt","Muon_Cocktail_pt", 5000, 0, 5000,"p_{T}^{cocktail #mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_Cocktail_eta","Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
+    HistClass::CreateHisto(3,"Muon_Cocktail_phi","Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} (rad)");
+    HistClass::CreateHisto(3,"Muon_CaloIso","Muon_CaloIso", 100, 0, 100,"ISO_{Calo}^{#mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_TrkIso","Muon_TrkIso", 100, 0, 100,"ISO_{Trk}^{#mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_ECALIso","Muon_ECALIso", 100, 0, 100,"ISO_{ECAL}^{#mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_HCALIso","Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
+    HistClass::CreateHisto(3,"Muon_ID","Muon_ID", 6, 0, 6,"ID_{#tau}");
+    HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
     HistClass::CreateHisto("Muon_num_Gen","Muon_num_Gen", 40, 0, 39, "N_{#mu}^{gen}");
-    HistClass::CreateHisto("Muon_pt_Gen","Muon_pt_Gen", 2000, 0, 2000, "p_{T}^{gen #mu} (GeV)");
+    HistClass::CreateHisto("Muon_pt_Gen","Muon_pt_Gen", 5000, 0, 5000, "p_{T}^{gen #mu} (GeV)");
     HistClass::CreateHisto("Muon_eta_Gen","Muon_eta_Gen", 80, -4, 4, "#eta_{gen #mu}");
     HistClass::CreateHisto("Muon_phi_Gen","Muon_phi_Gen", 40, -3.2, 3.2, "#phi_{gen #mu} (rad)");
 
-    HistClass::CreateHisto(2,"TauMu_mass","TauMu_mass", 2000, 0, 2000, "M_{#tau#mu} (GeV)");
-    HistClass::CreateHisto("TauMu_mass_Gen","TauMu_mass_Gen", 2000, 0, 2000, "M_{#tau#mu}^{gen} (GeV)");
-    HistClass::CreateHisto(2,"TauMu_DeltaPhi","TauMu_DeltaPhi", 100, 0, 3.2, "#Delta#phi(#tau,#mu) (rad)");
+    HistClass::CreateHisto(3,"TauMu_mass","TauMu_mass", 8000, 0, 8000, "M_{#tau#mu} (GeV)");
+    HistClass::CreateHisto("TauMu_mass_Gen","TauMu_mass_Gen", 8000, 0, 8000, "M_{#tau#mu}^{gen} (GeV)");
+    HistClass::CreateHisto(3,"TauMu_DeltaPhi","TauMu_DeltaPhi", 100, 0, 3.2, "#Delta#phi(#tau,#mu) (rad)");
     HistClass::CreateHisto("TauMu_DeltaPhi_Gen","TauMu_DeltaPhi_Gen", 100, 0, 3.2, "#Delta#phi^{gen}(#tau,#mu) (rad)");
-    HistClass::CreateHisto(2,"TauMu_tauomuratio","TauMu_tauomuratio", 100, 0, 10, "#frac{p_{T}^{#tau}}{p_{T}^{#mu}}");
+    HistClass::CreateHisto(3,"TauMu_tauomuratio","TauMu_tauomuratio", 100, 0, 10, "#frac{p_{T}^{#tau}}{p_{T}^{#mu}}");
     HistClass::CreateHisto("TauMu_tauomuratio_Gen","TauMu_tauomuratio_Gen", 100, 0, 10, "#frac{p_{T}^{gen #tau}}{p_{T}^{gen #mu}}");
+    const char* varlist = "Run:LumiSection:Event:M_mu_tau:weight";
+    HistClass::CreateTree("EventNumbers",varlist,320000);
+    const char* varlist2 = "muo_pt:muo_phi:muo_eta:met_et:met_phi:tau_pt:tau_phi:tau_eta:tau_corr_pt:tau_corr_phi:tau_corr_eta:weight";
+    HistClass::CreateTree("Kinematics",varlist2,320000);
 }
 
 specialAna::~specialAna() {
@@ -176,6 +183,7 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 
     taumu_mass = 0.;
     bool found = false;
+    bool metmatched = false;
     for(uint i = 0; i < TauList->size(); i++){
       for(uint j = 0; j < MuonList->size(); j++){
 				bool tau_ID = TauList->at(i)->findUserRecord< float >("decayModeFindingNewDMs") >= 1 ? true : false;
@@ -185,13 +193,14 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 				if(MuonList->at(j)->findUserRecord< bool >("isHighPtMuon") && tau_ID && tau_ISO && tau_ELE && tau_MUO){
 					pxl::Particle* dummy_taumu = ( pxl::Particle* ) MuonList->at(j)->clone();
           dummy_taumu->addP4(TauList->at(i));
+          pxl::Particle* dummy_met = new pxl::Particle();
           if(METList->size()>0){
 						double dummy_p1 = METList->at(0)->getPx()/(TMath::Sin(TauList->at(i)->getTheta()) * TMath::Cos(TauList->at(i)->getPhi()));
 						double dummy_p2 = METList->at(0)->getPy()/(TMath::Sin(TauList->at(i)->getTheta()) * TMath::Sin(TauList->at(i)->getPhi()));
 						double dummy_p = (dummy_p1 + dummy_p2) / 2.;
-						pxl::Particle* dummy_met = new pxl::Particle();
 						dummy_met->setP4(dummy_p*TMath::Sin(TauList->at(i)->getTheta()) * TMath::Cos(TauList->at(i)->getPhi()),dummy_p*TMath::Sin(TauList->at(i)->getTheta()) * TMath::Sin(TauList->at(i)->getPhi()),dummy_p*TMath::Cos(TauList->at(i)->getTheta()),dummy_p);
 						dummy_taumu->addP4(dummy_met);
+						metmatched = true;
 					}
           if (dummy_taumu->getMass() > taumu_mass){
 						found = true;
@@ -199,6 +208,8 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
             sel_taumu = ( pxl::Particle* ) dummy_taumu->clone();
             sel_muon = ( pxl::Particle* ) MuonList->at(j)->clone();
             sel_tau = ( pxl::Particle* ) TauList->at(i)->clone();
+            sel_tau_corr = ( pxl::Particle* ) TauList->at(j)->clone();
+            sel_tau_corr->addP4(dummy_met);
           }
 				}
       }
@@ -208,8 +219,48 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 			Fill_Tau_Controll_histo(1, sel_tau, weight);
 			Fill_Muo_Controll_histo(1, sel_muon, weight);
 			Fill_TauMu_Controll_histo(1,sel_taumu,sel_tau,sel_muon,weight);
+			double bla[12];
+			if(METList->size()>0){
+				bla[0] = sel_muon->getPt();
+				bla[1] = sel_muon->getPhi();
+				bla[2] = sel_muon->getEta();
+				bla[3] = METList->at(0)->getPt();
+				bla[4] = METList->at(0)->getPhi();
+				bla[5] = sel_tau->getPt();
+				bla[6] = sel_tau->getPhi();
+				bla[7] = sel_tau->getEta();
+				bla[8] = sel_tau_corr->getPt();
+				bla[9] = sel_tau_corr->getPhi();
+				bla[10] = sel_tau_corr->getEta();
+				bla[11] = weight;
+			}else{
+				bla[0] = sel_muon->getPt();
+				bla[1] = sel_muon->getPhi();
+				bla[2] = sel_muon->getEta();
+				bla[3] = 0.;
+				bla[4] = 0.;
+				bla[5] = sel_tau->getPt();
+				bla[6] = sel_tau->getPhi();
+				bla[7] = sel_tau->getEta();
+				bla[8] = sel_tau->getPt();
+				bla[9] = sel_tau->getPhi();
+				bla[10] = sel_tau->getEta();
+				bla[11] = weight;
+			}
+			///"muo_pt:muo_phi:muo_eta:met_et:met_phi:tau_pt:tau_phi:tau_eta:tau_corr_pt:tau_corr_phi:tau_corr_eta:weight"
+			HistClass::FillTree("Kinematics",bla);
     }
 
+    if(metmatched && found && DeltaPhi(sel_tau->getPhi(),METList->at(0)->getPhi()) < 1.0){
+			Fill_Tau_Controll_histo(2, sel_tau, weight);
+			Fill_Muo_Controll_histo(2, sel_muon, weight);
+			Fill_TauMu_Controll_histo(2,sel_taumu,sel_tau,sel_muon,weight);
+			if(sel_taumu->getMass() > 1000.){
+				///"Run","LumiSection","Event","M_mu_tau","weight"
+				double bla[] = {temp_run,temp_ls,temp_event,sel_taumu->getMass(),weight};
+				HistClass::FillTree("EventNumbers", bla);
+			}
+    }
     endEvent( event );
 }
 
@@ -300,26 +351,28 @@ double specialAna::DeltaPhi(double a, double b) {
 }
 
 void specialAna::endJob( const pxl::ObjectOwner* input ) {
-
-   std::string safeFileName = "SpecialHistos.root";
-   TFile file1(safeFileName.c_str(), "RECREATE");
-   file1.mkdir("MC");
-   file1.cd("MC/");
+   file1->mkdir("MC");
+   file1->cd("MC/");
    HistClass::WriteAll("MC_");
-   file1.cd();
-   file1.mkdir("Taus");
-   file1.cd("Taus/");
+   file1->cd();
+   file1->mkdir("Taus");
+   file1->cd("Taus/");
    HistClass::WriteAll("_Tau_");
    HistClass::Write2("Tau_eta_phi");
-   file1.cd();
-   file1.mkdir("Muons");
-   file1.cd("Muons/");
+   file1->cd();
+   file1->mkdir("Muons");
+   file1->cd("Muons/");
    HistClass::WriteAll("_Muon_");
-   file1.cd();
-   file1.mkdir("TauMu");
-   file1.cd("TauMu/");
+   file1->cd();
+   file1->mkdir("TauMu");
+   file1->cd("TauMu/");
    HistClass::WriteAll("_TauMu_");
-   file1.Close();
+   file1->cd();
+   file1->mkdir("Trees");
+   file1->cd("Trees/");
+   HistClass::WriteAllTrees();
+   file1->Close();
+   delete file1;
 }
 
 void specialAna::initEvent( const pxl::Event &event ){
@@ -327,6 +380,10 @@ void specialAna::initEvent( const pxl::Event &event ){
    weight = 1;
    m_RecEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Rec" );
    m_GenEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Gen" );
+
+	 temp_run = event.findUserRecord< uint >( "Run" );
+	 temp_ls = event.findUserRecord< uint >( "LumiSection" );
+	 temp_event = event.findUserRecord< uint >( "EventNum" );
 
    numMuon  = m_RecEvtView->findUserRecord< int >( "NumMuon" );
    numEle   = m_RecEvtView->findUserRecord< int >( "NumEle" );

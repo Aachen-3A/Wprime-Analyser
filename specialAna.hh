@@ -22,6 +22,8 @@ public:
    virtual void endJob(const pxl::ObjectOwner* input = 0);
    virtual void analyseEvent( const pxl::Event &event );
 
+	 TFile* file1;
+
 	void Fill_Muo_Controll_histo(int hist_number, pxl::Particle* muon, double weight);
 	void Fill_Tau_Controll_histo(int hist_number, pxl::Particle* tau, double weight);
 	void Fill_TauMu_Controll_histo(int hist_number, pxl::Particle* sel_taumu, pxl::Particle* sel_tau, pxl::Particle* sel_muon, double weight);
@@ -35,6 +37,10 @@ public:
    pxl::EventView *m_GenEvtView;
    std::string const m_JetAlgo, m_BJets_algo, m_METType;
    bool runOnData;
+
+	 double temp_run;
+	 double temp_ls;
+	 double temp_event;
 
    double weight;
 
@@ -69,6 +75,7 @@ public:
    double taumu_mass;
    pxl::Particle* sel_muon;
    pxl::Particle* sel_tau;
+   pxl::Particle* sel_tau_corr;
    pxl::Particle* sel_taumu;
 
    TString d_mydisc[67];

@@ -6,10 +6,12 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TString.h"
+#include "TNtupleD.h"
 
 namespace HistClass {
   static std::map<TString, TH1D * > histo;
   static std::map<TString, TH2D * > histo2;
+  static std::map<TString, TNtupleD * > trees;
 
    static void CreateHisto(Int_t n_histos,const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = ""){
      for(int i = 0; i < n_histos; i++){
@@ -25,7 +27,20 @@ namespace HistClass {
      std::string dummy = Form("h1_%d_%s", n_histo, name);
      histo[dummy]->Fill(value,weight);
    }
+
+   static void CreateTree(const char* name, const char* varlist,int bufsize){
+			std::string dummy = Form("tree_%s", name);
+			//std::cout << varlist << std::endl;
+			trees[dummy] = new TNtupleD(Form("tree_%s", name),name,varlist,bufsize);
+   }
  
+   static void FillTree(const char * name, double* values)
+   {
+			std::string dummy = Form("tree_%s", name);
+			//std::cout << *values << std::endl;
+			trees[dummy]->Fill(values);
+   }
+
 //   static void Write(Int_t n_histo,const char * name)
 //   {
 //     std::string dummy = Form("h1_%d_%s", n_histo, name);
@@ -97,6 +112,18 @@ namespace HistClass {
   {
     std::map<TString, TH1D * >::iterator it;
     for (std::map<TString, TH1D * >::iterator it=histo.begin(); it!=histo.end(); ++it){
+      if(strcmp( name, "") != 0 && it->first.Contains(name)){
+        it->second -> Write();
+      }else if(strcmp( name, "") == 0){
+        it->second -> Write();
+      }
+    }
+  }
+
+  static void WriteAllTrees(const char * name = "")
+  {
+    std::map<TString, TNtupleD * >::iterator it;
+    for (std::map<TString, TNtupleD * >::iterator it=trees.begin(); it!=trees.end(); ++it){
       if(strcmp( name, "") != 0 && it->first.Contains(name)){
         it->second -> Write();
       }else if(strcmp( name, "") == 0){

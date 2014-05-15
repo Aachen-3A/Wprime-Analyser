@@ -77,6 +77,7 @@ public:
    pxl::Particle* sel_tau;
    pxl::Particle* sel_tau_corr;
    pxl::Particle* sel_taumu;
+   pxl::Particle* sel_taumu_corr;
 
    TString d_mydisc[67];
    TString d_mydiscmu[6];

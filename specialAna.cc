@@ -136,17 +136,29 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
     endEvent( event );
 }
 
+bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
+	bool passed = false;
+	bool tau_ID = tau->findUserRecord< float >("decayModeFindingNewDMs") >= 1 ? true : false;
+	bool tau_ISO = tau->findUserRecord< float >("byTightIsolationMVA3newDMwLT") >= 1 ? true : false;
+	bool tau_ELE = tau->findUserRecord< float >("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/) >= 1 ? true : false;
+	bool tau_MUO = tau->findUserRecord< float >("againstMuonMedium2"/*"againstMuonTightMVA"*/) >= 1 ? true : false;
+	if (tau_ID && tau_ISO && tau_ELE && tau_MUO) passed = true;
+	return passed;
+}
+
+bool specialAna::Check_Muo_ID(pxl::Particle* muon) {
+	bool passed = false;
+	muon->findUserRecord< bool >("isHighPtMuon") ? passed = true : passed = false;
+	return passed;
+}
+
 double specialAna::Make_MET_recalculation(double taumu_mass) {
     double mass = 0.;
     found = false;
     metmatched = false;
     for(uint i = 0; i < TauList->size(); i++){
       for(uint j = 0; j < MuonList->size(); j++){
-				bool tau_ID = TauList->at(i)->findUserRecord< float >("decayModeFindingNewDMs") >= 1 ? true : false;
-				bool tau_ISO = TauList->at(i)->findUserRecord< float >("byTightIsolationMVA3newDMwLT") >= 1 ? true : false;
-				bool tau_ELE = TauList->at(i)->findUserRecord< float >("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/) >= 1 ? true : false;
-				bool tau_MUO = TauList->at(i)->findUserRecord< float >("againstMuonMedium2"/*"againstMuonTightMVA"*/) >= 1 ? true : false;
-				if(MuonList->at(j)->findUserRecord< bool >("isHighPtMuon") && tau_ID && tau_ISO && tau_ELE && tau_MUO){
+				if(Check_Muo_ID(MuonList->at(j)) && Check_Tau_ID(TauList->at(i))){
 					pxl::Particle* dummy_taumu = ( pxl::Particle* ) MuonList->at(j)->clone();
 					pxl::Particle* dummy_taumu_uncorr = ( pxl::Particle* ) MuonList->at(j)->clone();
           dummy_taumu->addP4(TauList->at(i));

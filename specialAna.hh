@@ -36,8 +36,11 @@ public:
 	void Fill_TauMu_Controll_histo(int hist_number, pxl::Particle* sel_taumu, pxl::Particle* sel_tau, pxl::Particle* sel_muon, double weight);
 	void Fill_resolution(double taumu_mass_gen, bool found);
 
-   void initEvent( const pxl::Event &event );
-   void endEvent( const pxl::Event &event );
+  void initEvent( const pxl::Event &event );
+  void endEvent( const pxl::Event &event );
+
+	bool Check_Muo_ID(pxl::Particle* muon);
+	bool Check_Tau_ID(pxl::Particle* tau);
 
 	void Make_zeta_stuff(bool found, bool metmatched);
 

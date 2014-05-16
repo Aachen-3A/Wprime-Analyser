@@ -108,103 +108,38 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 
     initEvent( event );
 
-    HistClass::Fill("Tau_num_Gen",TauListGen->size(),weight);
+    taumu_mass_gen = Calc_gen_MuTau_mass();
 
-    HistClass::Fill("Muon_num_Gen",MuonListGen->size(),weight);
+		if(tail_selector(taumu_mass_gen,event)) return;
 
-    for(uint i = 0; i < S3ListGen->size(); i++){
-        if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 13){
-            HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
-            HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),weight);
-            HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }else if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 15){
-            HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),weight);
-            HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),weight);
-            HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }
-    }
+		Fill_Gen_Controll_histo(taumu_mass_gen,weight);
 
-    taumu_mass_gen = 0.;
-    for(uint i = 0; i < S3ListGen->size(); i++){
-      if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 15){
-        for(uint j = 0; j < S3ListGen->size(); j++){
-          if(TMath::Abs(S3ListGen->at(j)->findUserRecord< int >("id")) == 13){
-            pxl::Particle* dummy_taumu = ( pxl::Particle* ) S3ListGen->at(j)->clone();
-            dummy_taumu->addP4(S3ListGen->at(i));
-            if (dummy_taumu->getMass() > taumu_mass_gen){
-              taumu_mass_gen = dummy_taumu->getMass();
-              sel_taumu_gen = ( pxl::Particle* ) dummy_taumu->clone();
-              sel_muon_gen = ( pxl::Particle* ) S3ListGen->at(j)->clone();
-              sel_tau_gen = ( pxl::Particle* ) S3ListGen->at(i)->clone();
-            }
-          }
-        }
-      }
-    }
-
-		/// W tail fitting
-    //for(uint i = 0; i < S3ListGen->size(); i++){
-      //if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 23){
-				//if(S3ListGen->at(i)->getPt() > 50)return;
-      //}
-    //}
-
-		/// Diboson tail fitting
-    for(uint i = 0; i < S3ListGen->size(); i++){
-			int part_id = TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id"));
-      if(part_id == 23 || part_id == 22){
-				if(S3ListGen->at(i)->getPt() > 500)return;
-      }
-    }
-
-    HistClass::Fill("MC_LLE_Gen",m_GenEvtView->findUserRecord< double >( "MC_LLE" ,0.),weight);
-    HistClass::Fill("MC_LQD_Gen",m_GenEvtView->findUserRecord< double >( "MC_LQD" ,0.),weight);
-    HistClass::Fill("MC_MSnl_Gen",m_GenEvtView->findUserRecord< double >( "MC_MSnl" ,0.),weight);
-    
-    //if(!(taumu_mass_gen > 1250. && taumu_mass_gen < 1350.))return;
-    
-    if(taumu_mass_gen > 0.){
-      HistClass::Fill("TauMu_mass_Gen",sel_taumu_gen->getMass(),weight);
-      HistClass::Fill("TauMu_DeltaPhi_Gen",DeltaPhi(sel_tau_gen->getPhi(),sel_muon_gen->getPhi()),weight);
-      HistClass::Fill("TauMu_tauomuratio_Gen",sel_tau_gen->getPt()/sel_muon_gen->getPt(),weight);
-      HistClass::Fill("TauMu_chargeproduct_Gen",(sel_tau_gen->findUserRecord< int >("id") * sel_muon_gen->findUserRecord< int >("id"))/(13.*15.),weight);
-    }
-		
 //     TODO: Configuration of 'accepted' has to be updated
     if ( ! m_RecEvtView->findUserRecord< bool >( "accepted" ) )return;
 
-    HistClass::Fill("Tau_nums",numTau,1);
-    HistClass::Fill("Muon_num",numMuon,1);
+		taumu_mass = Calc_MuTau_mass();
 
-    for(uint i = 0; i < TauList->size(); i++){
-			  Fill_Tau_Controll_histo(0, TauList->at(i),weight);
-			  HistClass::Fill("Tau_eta_phi",TauList->at(i)->getEta(),TauList->at(i)->getPhi(),weight);
-    }
+    Fill_stage_0_histos(taumu_mass,weight);
 
-    for(uint i = 0; i < MuonList->size(); i++){
-				Fill_Muo_Controll_histo(0, MuonList->at(i), weight);
-    }
+		taumu_mass = Make_MET_recalculation(taumu_mass);
 
-    taumu_mass = 0.;
-    for(uint i = 0; i < TauList->size(); i++){
-      for(uint j = 0; j < MuonList->size(); j++){
-          pxl::Particle* dummy_taumu = ( pxl::Particle* ) MuonList->at(j)->clone();
-          dummy_taumu->addP4(TauList->at(i));
-          if (dummy_taumu->getMass() > taumu_mass){
-            taumu_mass = dummy_taumu->getMass();
-            sel_taumu = ( pxl::Particle* ) dummy_taumu->clone();
-            sel_muon = ( pxl::Particle* ) MuonList->at(j)->clone();
-            sel_tau = ( pxl::Particle* ) TauList->at(i)->clone();
-          }
-      }
-    }
-    if(taumu_mass > 0.){
-			Fill_TauMu_Controll_histo(0,sel_taumu,sel_tau,sel_muon,weight);
-    }
+		Make_zeta_stuff(found,metmatched);
 
-    taumu_mass = 0.;
-    bool found = false;
-    bool metmatched = false;
+		Fill_stage_1_histos(found,weight);
+
+		Fill_kinematic_tree(found,weight);
+
+		Fill_resolution(taumu_mass_gen,found);
+
+		Fill_stage_2_histos(found,metmatched,weight);
+
+    endEvent( event );
+}
+
+double specialAna::Make_MET_recalculation(double taumu_mass) {
+    double mass = 0.;
+    found = false;
+    metmatched = false;
     for(uint i = 0; i < TauList->size(); i++){
       for(uint j = 0; j < MuonList->size(); j++){
 				bool tau_ID = TauList->at(i)->findUserRecord< float >("decayModeFindingNewDMs") >= 1 ? true : false;
@@ -251,9 +186,9 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 
 						metmatched = true;
 					}
-          if (dummy_taumu->getMass() > taumu_mass){
+          if (dummy_taumu->getMass() > mass){
 						found = true;
-            taumu_mass = dummy_taumu->getMass();
+            mass = dummy_taumu->getMass();
             sel_taumu_corr = ( pxl::Particle* ) dummy_taumu->clone();
             sel_taumu = ( pxl::Particle* ) dummy_taumu_uncorr->clone();
             sel_muon = ( pxl::Particle* ) MuonList->at(j)->clone();
@@ -264,33 +199,87 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 				}
       }
     }
-
-		double p_zeta_vis = 0;
-		double p_zeta = 0;
-
-		if(found && metmatched){
-			TVector3* vec_mu = new TVector3();
-			TVector3* vec_tau = new TVector3();
-			double mu_norm = sqrt( pow(sel_muon->getPx(),2) + pow(sel_muon->getPy(),2) + pow(sel_muon->getPz(),2) );
-			vec_mu -> SetXYZ(sel_muon->getPx()/mu_norm,sel_muon->getPy()/mu_norm,sel_muon->getPz()/mu_norm);
-			double tau_norm = sqrt( pow(sel_tau->getPx(),2) + pow(sel_tau->getPy(),2) + pow(sel_tau->getPz(),2) );
-			vec_tau -> SetXYZ(sel_tau->getPx()/tau_norm,sel_tau->getPy()/tau_norm,sel_tau->getPz()/tau_norm);
-
-			TVector3 bisec = *vec_mu + *vec_tau;
-			TVector3 bisec_norm = bisec.Unit();
-			
-			p_zeta_vis = (sel_tau->getPx() * bisec_norm.X() + sel_tau->getPy() * bisec_norm.Y() + sel_tau->getPz() * bisec_norm.Z()) + (sel_muon->getPx() * bisec_norm.X() + sel_muon->getPy() * bisec_norm.Y() + sel_muon->getPz() * bisec_norm.Z());
-			p_zeta = p_zeta_vis + (METList->at(0)->getPx() * bisec_norm.X() + METList->at(0)->getPy() * bisec_norm.Y() + METList->at(0)->getPz() * bisec_norm.Z());
-			HistClass::Fill("TauMu_zeta_zeta_vis",p_zeta,p_zeta_vis,weight);
-			delete vec_mu;
-			delete vec_tau;
+    
+    if(found){
+			return mass;
 		}
+		
+		return taumu_mass;
+}
 
-		double bla[23];
+void specialAna::Fill_resolution(double taumu_mass_gen, bool found) {
+		if(taumu_mass_gen > 0. && found){
+			HistClass::Fill("TauMu_resolution",taumu_mass_gen,(bla[18]-taumu_mass_gen)/taumu_mass_gen,weight);
+		}
+}
+
+double specialAna::Calc_MuTau_mass() {
+    double mass = 0.;
+    for(uint i = 0; i < TauList->size(); i++){
+      for(uint j = 0; j < MuonList->size(); j++){
+          pxl::Particle* dummy_taumu = ( pxl::Particle* ) MuonList->at(j)->clone();
+          dummy_taumu->addP4(TauList->at(i));
+          if (dummy_taumu->getMass() > mass){
+            mass = dummy_taumu->getMass();
+            sel_taumu = ( pxl::Particle* ) dummy_taumu->clone();
+            sel_muon = ( pxl::Particle* ) MuonList->at(j)->clone();
+            sel_tau = ( pxl::Particle* ) TauList->at(i)->clone();
+          }
+      }
+    }
+    return mass;
+}
+
+void specialAna::Fill_stage_0_histos(double taumu_mass, double weight) {
+    HistClass::Fill("Tau_nums",numTau,1);
+    HistClass::Fill("Muon_num",numMuon,1);
+
+    for(uint i = 0; i < TauList->size(); i++){
+			  Fill_Tau_Controll_histo(0, TauList->at(i),weight);
+			  HistClass::Fill("Tau_eta_phi",TauList->at(i)->getEta(),TauList->at(i)->getPhi(),weight);
+    }
+
+    for(uint i = 0; i < MuonList->size(); i++){
+				Fill_Muo_Controll_histo(0, MuonList->at(i), weight);
+    }
+    
+    if(taumu_mass > 0.){
+			Fill_TauMu_Controll_histo(0,sel_taumu,sel_tau,sel_muon,weight);
+    }
+}
+
+void specialAna::Fill_stage_1_histos(bool found, double weight) {
     if(found){
 			Fill_Tau_Controll_histo(1, sel_tau, weight);
 			Fill_Muo_Controll_histo(1, sel_muon, weight);
 			Fill_TauMu_Controll_histo(1,sel_taumu_corr,sel_tau,sel_muon,weight);
+		}
+}
+
+void specialAna::Fill_stage_2_histos(bool found, bool metmatched, double weight) {
+    if(metmatched && found && DeltaPhi(sel_tau->getPhi(),METList->at(0)->getPhi()) < 1.0 && TMath::Abs(sel_tau->getEta()) < 2.3){
+			Fill_Tau_Controll_histo(2, sel_tau, weight);
+			Fill_Muo_Controll_histo(2, sel_muon, weight);
+			Fill_TauMu_Controll_histo(2,sel_taumu_corr,sel_tau,sel_muon,weight);
+			if(sel_taumu->getMass() > 1000.){
+				///"Run","LumiSection","Event","M_mu_tau","weight"
+				double bla[] = {temp_run,temp_ls,temp_event,sel_taumu_corr->getMass(),weight};
+				HistClass::FillTree("EventNumbers", bla);
+			}
+    }
+}
+
+void specialAna::Fill_kinematic_tree(bool found, double weight) {
+		/// muo_pt:muo_phi:muo_eta
+		/// met_et:met_phi
+		/// tau_pt:tau_phi:tau_eta
+		/// tau_corr_pt:tau_corr_phi:tau_corr_eta
+		/// taumu_pt:taumu_eta:taumu_phi:taumu_mass
+		/// taumu_corr_pt:taumu_corr_eta:taumu_corr_phi:taumu_corr_mass
+		/// charge_product
+		/// p_zeta:p_zeta_vis
+		/// weight
+    if(found){
 			if(METList->size()>0){
 				bla[0] = sel_muon->getPt();
 				bla[1] = sel_muon->getPhi();
@@ -340,33 +329,113 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 				bla[21] = p_zeta_vis;
 				bla[22] = weight;
 			}
-			/// muo_pt:muo_phi:muo_eta
-			/// met_et:met_phi
-			/// tau_pt:tau_phi:tau_eta
-			/// tau_corr_pt:tau_corr_phi:tau_corr_eta
-			/// taumu_pt:taumu_eta:taumu_phi:taumu_mass
-			/// taumu_corr_pt:taumu_corr_eta:taumu_corr_phi:taumu_corr_mass
-			/// charge_product
-			/// p_zeta:p_zeta_vis
-			/// weight
 			HistClass::FillTree("Kinematics",bla);
     }
+}
 
-		if(taumu_mass_gen > 0. && found){
-			HistClass::Fill("TauMu_resolution",taumu_mass_gen,(bla[18]-taumu_mass_gen)/taumu_mass_gen,weight);
+void specialAna::Make_zeta_stuff(bool found, bool metmatched) {
+		p_zeta_vis = 0;
+		p_zeta = 0;
+
+		if(found && metmatched){
+			TVector3* vec_mu = new TVector3();
+			TVector3* vec_tau = new TVector3();
+			double mu_norm = sqrt( pow(sel_muon->getPx(),2) + pow(sel_muon->getPy(),2) + pow(sel_muon->getPz(),2) );
+			vec_mu -> SetXYZ(sel_muon->getPx()/mu_norm,sel_muon->getPy()/mu_norm,sel_muon->getPz()/mu_norm);
+			double tau_norm = sqrt( pow(sel_tau->getPx(),2) + pow(sel_tau->getPy(),2) + pow(sel_tau->getPz(),2) );
+			vec_tau -> SetXYZ(sel_tau->getPx()/tau_norm,sel_tau->getPy()/tau_norm,sel_tau->getPz()/tau_norm);
+
+			TVector3 bisec = *vec_mu + *vec_tau;
+			TVector3 bisec_norm = bisec.Unit();
+			
+			p_zeta_vis = (sel_tau->getPx() * bisec_norm.X() + sel_tau->getPy() * bisec_norm.Y() + sel_tau->getPz() * bisec_norm.Z()) + (sel_muon->getPx() * bisec_norm.X() + sel_muon->getPy() * bisec_norm.Y() + sel_muon->getPz() * bisec_norm.Z());
+			p_zeta = p_zeta_vis + (METList->at(0)->getPx() * bisec_norm.X() + METList->at(0)->getPy() * bisec_norm.Y() + METList->at(0)->getPz() * bisec_norm.Z());
+			HistClass::Fill("TauMu_zeta_zeta_vis",p_zeta,p_zeta_vis,weight);
+			delete vec_mu;
+			delete vec_tau;
+		}
+}
+
+bool specialAna::tail_selector(double taumu_mass_gen, const pxl::Event &event) {
+		std::string datastream = event.findUserRecord< std::string >( "Dataset" );
+		TString Datastream = datastream;
+
+		/// W tail fitting		
+		if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
+	    for(uint i = 0; i < S3ListGen->size(); i++){
+	      if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 23){
+					if(S3ListGen->at(i)->getPt() > 50)return true;
+	      }
+	    }
 		}
 
-    if(metmatched && found && DeltaPhi(sel_tau->getPhi(),METList->at(0)->getPhi()) < 1.0 && TMath::Abs(sel_tau->getEta()) < 2.3){
-			Fill_Tau_Controll_histo(2, sel_tau, weight);
-			Fill_Muo_Controll_histo(2, sel_muon, weight);
-			Fill_TauMu_Controll_histo(2,sel_taumu_corr,sel_tau,sel_muon,weight);
-			if(sel_taumu->getMass() > 1000.){
-				///"Run","LumiSection","Event","M_mu_tau","weight"
-				double bla[] = {temp_run,temp_ls,temp_event,sel_taumu_corr->getMass(),weight};
-				HistClass::FillTree("EventNumbers", bla);
-			}
+		/// Diboson tail fitting
+		if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
+	    for(uint i = 0; i < S3ListGen->size(); i++){
+				int part_id = TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id"));
+	      if(part_id == 23 || part_id == 22){
+					if(S3ListGen->at(i)->getPt() > 500)return true;
+	      }
+	    }
+		}
+
+		/// Signal parameter selection
+    HistClass::Fill("MC_LLE_Gen",m_GenEvtView->findUserRecord< double >( "MC_LLE" ,0.),weight);
+    HistClass::Fill("MC_LQD_Gen",m_GenEvtView->findUserRecord< double >( "MC_LQD" ,0.),weight);
+    HistClass::Fill("MC_MSnl_Gen",m_GenEvtView->findUserRecord< double >( "MC_MSnl" ,0.),weight);
+    
+    if(Datastream.Contains("RPVresonantToMuTau")){
+	    if(!(taumu_mass_gen > 1250. && taumu_mass_gen < 1350.))return true;
     }
-    endEvent( event );
+    
+    return false;
+}
+
+double specialAna::Calc_gen_MuTau_mass() {
+	double mass = 0;
+	for(uint i = 0; i < S3ListGen->size(); i++){
+		if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 15){
+			for(uint j = 0; j < S3ListGen->size(); j++){
+				if(TMath::Abs(S3ListGen->at(j)->findUserRecord< int >("id")) == 13){
+					pxl::Particle* dummy_taumu = ( pxl::Particle* ) S3ListGen->at(j)->clone();
+					dummy_taumu->addP4(S3ListGen->at(i));
+					if (dummy_taumu->getMass() > mass){
+						mass = dummy_taumu->getMass();
+						sel_taumu_gen = ( pxl::Particle* ) dummy_taumu->clone();
+						sel_muon_gen = ( pxl::Particle* ) S3ListGen->at(j)->clone();
+						sel_tau_gen = ( pxl::Particle* ) S3ListGen->at(i)->clone();
+					}
+					delete dummy_taumu;
+				}
+			}
+		}
+	}
+	return mass;
+}
+
+void specialAna::Fill_Gen_Controll_histo(double taumu_mass_gen, double weight) {
+    HistClass::Fill("Tau_num_Gen",TauListGen->size(),weight);
+
+    HistClass::Fill("Muon_num_Gen",MuonListGen->size(),weight);
+
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 13){
+            HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
+            HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),weight);
+            HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+        }else if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 15){
+            HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),weight);
+            HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),weight);
+            HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+        }
+    }
+    
+    if(taumu_mass_gen > 0.){
+      HistClass::Fill("TauMu_mass_Gen",sel_taumu_gen->getMass(),weight);
+      HistClass::Fill("TauMu_DeltaPhi_Gen",DeltaPhi(sel_tau_gen->getPhi(),sel_muon_gen->getPhi()),weight);
+      HistClass::Fill("TauMu_tauomuratio_Gen",sel_tau_gen->getPt()/sel_muon_gen->getPt(),weight);
+      HistClass::Fill("TauMu_chargeproduct_Gen",(sel_tau_gen->findUserRecord< int >("id") * sel_muon_gen->findUserRecord< int >("id"))/(13.*15.),weight);
+    }
 }
 
 void specialAna::Fill_Muo_Controll_histo(int hist_number, pxl::Particle* muon, double weight) {

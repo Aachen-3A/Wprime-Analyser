@@ -24,19 +24,42 @@ public:
 
 	 TFile* file1;
 
+	void Fill_stage_0_histos(double taumu_mass, double weight);
+	void Fill_stage_1_histos(bool found, double weight);
+	void Fill_stage_2_histos(bool found, bool metmatched, double weight);
+	
+	void Fill_kinematic_tree(bool found, double weight);
+
+	void Fill_Gen_Controll_histo(double taumu_mass_gen, double weight);
 	void Fill_Muo_Controll_histo(int hist_number, pxl::Particle* muon, double weight);
 	void Fill_Tau_Controll_histo(int hist_number, pxl::Particle* tau, double weight);
 	void Fill_TauMu_Controll_histo(int hist_number, pxl::Particle* sel_taumu, pxl::Particle* sel_tau, pxl::Particle* sel_muon, double weight);
+	void Fill_resolution(double taumu_mass_gen, bool found);
 
    void initEvent( const pxl::Event &event );
    void endEvent( const pxl::Event &event );
 
-   double DeltaPhi(double a, double b);
+	void Make_zeta_stuff(bool found, bool metmatched);
+
+	bool tail_selector(double taumu_mass_gen, const pxl::Event &event);
+	double Calc_gen_MuTau_mass();
+	double Calc_MuTau_mass();
+  double DeltaPhi(double a, double b);
+  
+  double Make_MET_recalculation(double taumu_mass);
 
    pxl::EventView *m_RecEvtView;
    pxl::EventView *m_GenEvtView;
    std::string const m_JetAlgo, m_BJets_algo, m_METType;
    bool runOnData;
+
+	bool found;
+	bool metmatched;
+
+	double p_zeta_vis;
+	double p_zeta;
+
+	double bla[23];
 
 	 double temp_run;
 	 double temp_ls;

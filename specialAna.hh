@@ -25,8 +25,8 @@ public:
     specialAna( const Tools::MConfig &config );
     virtual ~specialAna();
 
-    virtual void endJob(const pxl::ObjectOwner* input = 0);
-    virtual void analyseEvent( const pxl::Event &event );
+    virtual void endJob(const Serializable*);
+    virtual void analyseEvent( const pxl::Event* event );
 
     TFile* file1;
 
@@ -44,8 +44,8 @@ public:
     void Fill_Tree();
 
 
-    void initEvent( const pxl::Event &event );
-    void endEvent( const pxl::Event &event );
+    void initEvent( const pxl::Event* event );
+    void endEvent( const pxl::Event* event );
     void SetEvents(int e);
 
     bool Check_Muo_ID(pxl::Particle* muon);
@@ -55,7 +55,7 @@ public:
 
     void KinematicsSelector();
     bool TriggerSelector();
-    bool tail_selector(const pxl::Event &event);
+    bool tail_selector(const pxl::Event* event);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);

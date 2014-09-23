@@ -229,7 +229,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 specialAna::~specialAna() {
 }
 
-void specialAna::analyseEvent( const pxl::Event &event ) {
+void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
     if(tail_selector(event)) return;
 
@@ -436,8 +436,8 @@ void specialAna::Fill_stage_0_histos() {
 
 
 
-bool specialAna::tail_selector( const pxl::Event &event) {
-    string datastream = event.getUserRecord( "Dataset" );
+bool specialAna::tail_selector( const pxl::Event* event) {
+    string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
     /// W tail fitting
@@ -708,7 +708,7 @@ double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
     return sqrt(mm);
 }
 
-void specialAna::endJob( const pxl::ObjectOwner* input ) {
+void specialAna::endJob( const Serializable* ) {
 
     for(unordered_set< string >::iterator it=triggers.begin();it!=triggers.end();it++)
     {
@@ -738,15 +738,15 @@ void specialAna::endJob( const pxl::ObjectOwner* input ) {
     delete file1;
 }
 
-void specialAna::initEvent( const pxl::Event &event ){
+void specialAna::initEvent( const pxl::Event* event ){
 
     weight = 1;
-    m_RecEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Rec" );
-    m_GenEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Gen" );
+    m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
+    m_GenEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Gen" );
 
-    temp_run = event.getUserRecord( "Run" );
-    temp_ls = event.getUserRecord( "LumiSection" );
-    temp_event = event.getUserRecord( "EventNum" );
+    temp_run = event->getUserRecord( "Run" );
+    temp_ls = event->getUserRecord( "LumiSection" );
+    temp_event = event->getUserRecord( "EventNum" );
 
     numMuon  = m_RecEvtView->getUserRecord( "NumMuon" );
     numEle   = m_RecEvtView->getUserRecord( "NumEle" );
@@ -754,7 +754,7 @@ void specialAna::initEvent( const pxl::Event &event ){
     numTau   = m_RecEvtView->getUserRecord( "Num" + m_TauType );
     numMET   = m_RecEvtView->getUserRecord( "Num" + m_METType );
     numJet   = m_RecEvtView->getUserRecord( "Num" + m_JetAlgo );
-    numBJet  = m_RecEvtView->getUserRecord( "Num" + m_BJets_algo );
+    numBJet  = m_RecEvtView->getUserRecord_def( "Num" + m_BJets_algo,-1 );
 
     // h1_num_Taus.Fill(numTau);
 
@@ -782,6 +782,10 @@ void specialAna::initEvent( const pxl::Event &event ){
         else if( Name == m_METType ) METList->push_back( part );
         else if( Name == m_JetAlgo ) JetList->push_back( part );
     }
+    //cout<<"-----"<<endl;
+    //cout<<MuonList->size()<<endl;
+    //cout<<EleList->size()<<endl;
+    //cout<<TauList->size()<<endl;
     if(METList->size()>0){
         sel_met=METList->at(0);
     }else{
@@ -801,8 +805,8 @@ void specialAna::initEvent( const pxl::Event &event ){
     if( not runOnData ){
 
         double event_weight = m_GenEvtView->getUserRecord( "Weight" );
-        double varKfactor_weight = m_GenEvtView->getUserRecord( "kfacWeight" );
-        double pileup_weight = m_GenEvtView->getUserRecord( "PUWeight");
+        double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
+        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
 
         weight = event_weight * varKfactor_weight * pileup_weight;
 
@@ -826,7 +830,7 @@ void specialAna::initEvent( const pxl::Event &event ){
     }
 }
 
-void specialAna::endEvent( const pxl::Event &event ){
+void specialAna::endEvent( const pxl::Event* event ){
 
    delete EleList;
    delete MuonList;

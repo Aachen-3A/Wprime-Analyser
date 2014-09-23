@@ -39,6 +39,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Ele_DeltaPhi","Ele_DeltaPhi", 40, 0, 3.2,"#Delta#phi(e,E_{T}^{miss})");
     HistClass::CreateHisto(4,"Ele_mt","Ele_mt", 5000, 0, 5000,"M_{T}_{e} (GeV)");
     HistClass::CreateHisto(4,"Ele_charge","Ele_charge", 3, -1, 1, "q_{e}");
+    HistClass::CreateHisto(4,"Ele_met","Ele_met", 5000, 0, 5000,"E^{miss}_{T} (GeV)");
+    HistClass::CreateHisto(4,"Ele_met_phi","Ele_met_phi",40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
 
 
     HistClass::CreateHisto("Tau_num","num_Tau", 40, 0, 39, "N_{#taus}");
@@ -48,6 +50,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Tau_charge","Tau_charge", 3, -1, 1, "q_{#tau}");
     HistClass::CreateHisto(4,"Tau_DeltaPhi","Tau_DeltaPhi", 40, 0, 3.2,"#Delta#phi(#tau,E_{T}^{miss})");
     HistClass::CreateHisto(4,"Tau_mt","Tau_mt", 5000, 0, 5000,"M_{T}_{#tau} (GeV)");
+    HistClass::CreateHisto(4,"Tau_met","Tau_met", 5000, 0, 5000,"E^{miss}_{T} (GeV)");
+    HistClass::CreateHisto(4,"Tau_met_phi","Tau_met_phi",40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
 
     HistClass::CreateHisto(4,"Tau_decayMode","Tau_decayMode", 100, 0, 10, "#N_{decay mode}^{#tau}");
     HistClass::CreateHisto(4,"Tau_Vtx_X","Tau_Vtx_X", 100, -1, 1, "Vtx_{x}^{#tau} (cm)");
@@ -87,6 +91,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_charge","Muon_charge", 3, -1, 1, "q_{#mu}");
     HistClass::CreateHisto(4,"Muon_DeltaPhi","Muon_DeltaPhi", 40, 0, 3.2,"#Delta#phi(#mu,E_{T}^{miss})");
     HistClass::CreateHisto(4,"Muon_mt","Muon_mt", 5000, 0, 5000,"M_{T}_{#mu} (GeV)");
+    HistClass::CreateHisto(4,"Muon_met","Muon_met", 5000, 0, 5000,"E^{miss}_{T} (GeV)");
+    HistClass::CreateHisto(4,"Muon_met_phi","Muon_met_phi",40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
 
 
     HistClass::CreateHisto(4,"Muon_Vtx_X","Muon_Vtx_X", 100, -1, 1,"Vtx_{x}^{#mu} (cm)");
@@ -230,7 +236,7 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
     //Fill_Gen_Controll_histo();
     KinematicsSelector();
 //     TODO: Configuration of 'accepted' has to be updated
-    //if ( ! m_RecEvtView->findUserRecord< bool >( "accepted" ) )return;
+    //if ( ! m_RecEvtView->getUserRecord( "accepted" ) )return;
 
     //if (!TriggerSelector()) return;
 
@@ -239,13 +245,13 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 
     if(sel_lepton && sel_met){
         Fill_Tree();
-        if(sel_lepton->findUserRecord< bool >("passedDeltaPhi")){
+        if(sel_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Controll_histo(1, sel_lepton);
         }
-        if(sel_lepton->findUserRecord< bool >("passedPtMet")){
+        if(sel_lepton->getUserRecord("passedPtMet")){
             Fill_Controll_histo(2, sel_lepton);
         }
-        if(sel_lepton->findUserRecord< bool >("passed")){
+        if(sel_lepton->getUserRecord("passed")){
             Fill_Controll_histo(3, sel_lepton);
         }
     }
@@ -257,17 +263,17 @@ void specialAna::analyseEvent( const pxl::Event &event ) {
 
 bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
     bool passed = false;
-    bool tau_ID = tau->findUserRecord< float >("decayModeFindingNewDMs") >= 1 ? true : false;
-    bool tau_ISO = tau->findUserRecord< float >("byTightIsolationMVA3newDMwLT") >= 1 ? true : false;
-    bool tau_ELE = tau->findUserRecord< float >("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/) >= 1 ? true : false;
-    bool tau_MUO = tau->findUserRecord< float >("againstMuonMedium2"/*"againstMuonTightMVA"*/) >= 1 ? true : false;
+    bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").asBool();
+    bool tau_ISO = tau->getUserRecord("byTightIsolationMVA3newDMwLT").asBool();
+    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).asBool();
+    bool tau_MUO = tau->getUserRecord("againstMuonMedium2"/*"againstMuonTightMVA"*/).asBool();
     if (tau_ID && tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
 }
 
 bool specialAna::Check_Muo_ID(pxl::Particle* muon) {
 	bool passed = false;
-	muon->findUserRecord< bool >("isHighPtMuon") ? passed = true : passed = false;
+	muon->getUserRecord("isHighPtMuon").asBool() ? passed = true : passed = false;
 	return passed;
 }
 
@@ -328,14 +334,14 @@ bool specialAna::TriggerSelector(){
 
     for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
         try{
-            m_RecEvtView->findUserRecord<bool>(*it);
+            m_RecEvtView->getUserRecord(*it);
             triggered=true;
         } catch( std::runtime_error &exc ) {
             continue;
         }
 
-        //pxl::UserRecord::const_iterator us = m_RecEvtView->getUserRecord().begin();
-        //for( ; us != m_RecEvtView->getUserRecord().end(); ++us ) {
+        //pxl::UserRecords::const_iterator us = m_RecEvtView->getUserRecords().begin();
+        //for( ; us != m_RecEvtView->getUserRecords().end(); ++us ) {
             //if ( string::npos != (*us).first.find( *it )){
                 //triggers.insert(us->first);
             //}
@@ -392,16 +398,16 @@ void specialAna::Fill_Tree(){
     //PDF
     if( not runOnData ){
 
-        mLeptonTree["id1"]=m_GenEvtView->findUserRecord< int >("f1");
-        mLeptonTree["id2"]=m_GenEvtView->findUserRecord< int >("f2");
-        mLeptonTree["x1"]=m_GenEvtView->findUserRecord< double >("x1");
-        mLeptonTree["x2"]=m_GenEvtView->findUserRecord< double >("x2");
-        mLeptonTree["qscale"]=m_GenEvtView->findUserRecord< double >("Q");
+        mLeptonTree["id1"]=m_GenEvtView->getUserRecord("f1");
+        mLeptonTree["id2"]=m_GenEvtView->getUserRecord("f2");
+        mLeptonTree["x1"]=m_GenEvtView->getUserRecord("x1");
+        mLeptonTree["x2"]=m_GenEvtView->getUserRecord("x2");
+        mLeptonTree["qscale"]=m_GenEvtView->getUserRecord("Q");
     }
 
     //general
     mLeptonTree["ThisWeight"]=weight;
-    mLeptonTree["lepton_type"]=sel_lepton->findUserRecord<int>("id");
+    mLeptonTree["lepton_type"]=sel_lepton->getUserRecord("id");
 
     HistClass::FillTree("slimtree");
 
@@ -431,13 +437,13 @@ void specialAna::Fill_stage_0_histos() {
 
 
 bool specialAna::tail_selector( const pxl::Event &event) {
-    string datastream = event.findUserRecord< string >( "Dataset" );
+    string datastream = event.getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
     /// W tail fitting
     if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
         for(uint i = 0; i < S3ListGen->size(); i++){
-          if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 23){
+          if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23){
                     if(S3ListGen->at(i)->getPt() > 50)return true;
           }
         }
@@ -446,7 +452,7 @@ bool specialAna::tail_selector( const pxl::Event &event) {
     /// Diboson tail fitting
     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
         for(uint i = 0; i < S3ListGen->size(); i++){
-                int part_id = TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id"));
+                int part_id = TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
           if(part_id == 23 || part_id == 22){
                     if(S3ListGen->at(i)->getPt() > 500)return true;
           }
@@ -466,15 +472,15 @@ void specialAna::Fill_Gen_Controll_histo() {
     HistClass::Fill("Ele_num_Gen",EleListGen->size(),weight);
 
     for(uint i = 0; i < S3ListGen->size(); i++){
-        if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 13){
+        if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 13){
             HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }else if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 15){
+        }else if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 15){
             HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }else if(TMath::Abs(S3ListGen->at(i)->findUserRecord< int >("id")) == 11){
+        }else if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 11){
             HistClass::Fill("Ele_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Ele_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Ele_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
@@ -487,136 +493,136 @@ void specialAna::Fill_Gen_Controll_histo() {
 
 void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
-    HistClass::Fill(hist_number,"Muon_Vtx_X",lepton->findUserRecord< double >("Vtx_X"),weight);
-    HistClass::Fill(hist_number,"Muon_Vtx_Y",lepton->findUserRecord< double >("Vtx_Y"),weight);
-    HistClass::Fill(hist_number,"Muon_Vtx_Z",lepton->findUserRecord< double >("Vtx_Z"),weight);
+    HistClass::Fill(hist_number,"Muon_Vtx_X",lepton->getUserRecord("Vtx_X"),weight);
+    HistClass::Fill(hist_number,"Muon_Vtx_Y",lepton->getUserRecord("Vtx_Y"),weight);
+    HistClass::Fill(hist_number,"Muon_Vtx_Z",lepton->getUserRecord("Vtx_Z"),weight);
     for(uint j = 0; j < 6; j++) {
-        if(lepton->findUserRecord< bool >( (string)d_mydiscmu[j] ))
+        if(lepton->getUserRecord( (string)d_mydiscmu[j] ))
             HistClass::Fill(hist_number,"Muon_ID",j+1,weight);
     }
-    HistClass::Fill(hist_number,"Muon_Chi2",lepton->findUserRecord< double >("chi2"),weight);
-    HistClass::Fill(hist_number,"Muon_Ndof",lepton->findUserRecord< double >("ndof"),weight);
-    HistClass::Fill(hist_number,"Muon_LHits",lepton->findUserRecord< int >("LHits"),weight);
-    HistClass::Fill(hist_number,"Muon_VHits",lepton->findUserRecord< int >("VHits"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsPixel",lepton->findUserRecord< int >("VHitsPixel"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsTracker",lepton->findUserRecord< int >("VHitsTracker"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsMuonSys",lepton->findUserRecord< int >("VHitsMuonSys"),weight);
-    HistClass::Fill(hist_number,"Muon_TrackerLayersWithMeas",lepton->findUserRecord< int >("TrackerLayersWithMeas"),weight);
-    HistClass::Fill(hist_number,"Muon_PixelLayersWithMeas",lepton->findUserRecord< int >("PixelLayersWithMeas"),weight);
-    HistClass::Fill(hist_number,"Muon_NMatchedStations",lepton->findUserRecord< int >("NMatchedStations"),weight);
-    HistClass::Fill(hist_number,"Muon_qoverp",lepton->findUserRecord< double >("qoverp"),weight);
-    HistClass::Fill(hist_number,"Muon_qoverpError",lepton->findUserRecord< double >("qoverpError"),weight);
-    HistClass::Fill(hist_number,"Muon_ptError",lepton->findUserRecord< double >("ptError"),weight);
-    if(lepton->findUserRecord< bool >("validCocktail")){
+    HistClass::Fill(hist_number,"Muon_Chi2",lepton->getUserRecord("chi2"),weight);
+    HistClass::Fill(hist_number,"Muon_Ndof",lepton->getUserRecord("ndof"),weight);
+    HistClass::Fill(hist_number,"Muon_LHits",lepton->getUserRecord("LHits"),weight);
+    HistClass::Fill(hist_number,"Muon_VHits",lepton->getUserRecord("VHits"),weight);
+    HistClass::Fill(hist_number,"Muon_VHitsPixel",lepton->getUserRecord("VHitsPixel"),weight);
+    HistClass::Fill(hist_number,"Muon_VHitsTracker",lepton->getUserRecord("VHitsTracker"),weight);
+    HistClass::Fill(hist_number,"Muon_VHitsMuonSys",lepton->getUserRecord("VHitsMuonSys"),weight);
+    HistClass::Fill(hist_number,"Muon_TrackerLayersWithMeas",lepton->getUserRecord("TrackerLayersWithMeas"),weight);
+    HistClass::Fill(hist_number,"Muon_PixelLayersWithMeas",lepton->getUserRecord("PixelLayersWithMeas"),weight);
+    HistClass::Fill(hist_number,"Muon_NMatchedStations",lepton->getUserRecord("NMatchedStations"),weight);
+    HistClass::Fill(hist_number,"Muon_qoverp",lepton->getUserRecord("qoverp"),weight);
+    HistClass::Fill(hist_number,"Muon_qoverpError",lepton->getUserRecord("qoverpError"),weight);
+    HistClass::Fill(hist_number,"Muon_ptError",lepton->getUserRecord("ptError"),weight);
+    if(lepton->getUserRecord("validCocktail")){
         TLorentzVector* cocktailMuon = new TLorentzVector();
-        cocktailMuon->SetXYZM(lepton->findUserRecord< double >("pxCocktail"),lepton->findUserRecord< double >("pyCocktail"),lepton->findUserRecord< double >("pzCocktail"),0.105);
+        cocktailMuon->SetXYZM(lepton->getUserRecord("pxCocktail"),lepton->getUserRecord("pyCocktail"),lepton->getUserRecord("pzCocktail"),0.105);
         HistClass::Fill(hist_number,"Muon_Cocktail_pt",cocktailMuon->Pt(),weight);
         HistClass::Fill(hist_number,"Muon_Cocktail_eta",cocktailMuon->Eta(),weight);
         HistClass::Fill(hist_number,"Muon_Cocktail_phi",cocktailMuon->Phi(),weight);
         delete cocktailMuon;
     }
-    HistClass::Fill(hist_number,"Muon_CaloIso",lepton->findUserRecord< float >("CaloIso"),weight);
-    HistClass::Fill(hist_number,"Muon_TrkIso",lepton->findUserRecord< float >("TrkIso"),weight);
-    HistClass::Fill(hist_number,"Muon_ECALIso",lepton->findUserRecord< float >("ECALIso"),weight);
-    HistClass::Fill(hist_number,"Muon_HCALIso",lepton->findUserRecord< float >("HCALIso"),weight);
+    HistClass::Fill(hist_number,"Muon_CaloIso",lepton->getUserRecord("CaloIso"),weight);
+    HistClass::Fill(hist_number,"Muon_TrkIso",lepton->getUserRecord("TrkIso"),weight);
+    HistClass::Fill(hist_number,"Muon_ECALIso",lepton->getUserRecord("ECALIso"),weight);
+    HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso"),weight);
 }
 void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
 
-    HistClass::Fill(hist_number,"Ele_CaloIso",lepton->findUserRecord< float > ("CaloIso"),weight);
-    //HistClass::Fill(hist_number,"Ele_ChargeMatch",lepton->findUserRecord< int > ("ChargeMatch"),weight);
-    HistClass::Fill(hist_number,"Ele_Class",lepton->findUserRecord< int > ("Class"),weight);
-    HistClass::Fill(hist_number,"Ele_DEtaSCCalo",lepton->findUserRecord< float > ("DEtaSCCalo"),weight);
-    HistClass::Fill(hist_number,"Ele_DEtaSCVtx",lepton->findUserRecord< float > ("DEtaSCVtx"),weight);
-    HistClass::Fill(hist_number,"Ele_DEtaSeedTrk",lepton->findUserRecord< float > ("DEtaSeedTrk"),weight);
-    HistClass::Fill(hist_number,"Ele_DPhiSCVtx",lepton->findUserRecord< float > ("DPhiSCVtx"),weight);
-    HistClass::Fill(hist_number,"Ele_DPhiSeedTrk",lepton->findUserRecord< float > ("DPhiSeedTrk"),weight);
-    HistClass::Fill(hist_number,"Ele_Dsz",lepton->findUserRecord< double > ("Dsz"),weight);
-    HistClass::Fill(hist_number,"Ele_DszBS",lepton->findUserRecord< double > ("DszBS"),weight);
-    HistClass::Fill(hist_number,"Ele_Dxy",lepton->findUserRecord< double > ("Dxy"),weight);
-    HistClass::Fill(hist_number,"Ele_DxyBS",lepton->findUserRecord< double > ("DxyBS"),weight);
-    HistClass::Fill(hist_number,"Ele_Dz",lepton->findUserRecord< double > ("Dz"),weight);
-    HistClass::Fill(hist_number,"Ele_DzBS",lepton->findUserRecord< double > ("DzBS"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso",lepton->findUserRecord< float > ("ECALIso"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso03",lepton->findUserRecord< float > ("ECALIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso04",lepton->findUserRecord< float > ("ECALIso04"),weight);
-    HistClass::Fill(hist_number,"Ele_ESCOverPout",lepton->findUserRecord< float > ("ESCOverPout"),weight);
-    HistClass::Fill(hist_number,"Ele_ESCSeedOverP",lepton->findUserRecord< float > ("ESCSeedOverP"),weight);
-    HistClass::Fill(hist_number,"Ele_ESCSeedPout",lepton->findUserRecord< float > ("ESCSeedPout"),weight);
-    HistClass::Fill(hist_number,"Ele_EoP",lepton->findUserRecord< float > ("EoP"),weight);
-    HistClass::Fill(hist_number,"Ele_GSFNormChi2",lepton->findUserRecord< double > ("GSFNormChi2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso",lepton->findUserRecord< float > ("HCALIso"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso03",lepton->findUserRecord< float > ("HCALIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso03d1",lepton->findUserRecord< float > ("HCALIso03d1"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso03d2",lepton->findUserRecord< float > ("HCALIso03d2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04",lepton->findUserRecord< float > ("HCALIso04"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04d1",lepton->findUserRecord< float > ("HCALIso04d1"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04d2",lepton->findUserRecord< float > ("HCALIso04d2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR03_2012",lepton->findUserRecord< float > ("HCALIsoConeDR03_2012"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR04_2012",lepton->findUserRecord< float > ("HCALIsoConeDR04_2012"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALOverECALd1",lepton->findUserRecord< float > ("HCALOverECALd1"),weight);
-    HistClass::Fill(hist_number,"Ele_HoEm",lepton->findUserRecord< double > ("HoEm"),weight);
-    HistClass::Fill(hist_number,"Ele_HoverE2012",lepton->findUserRecord< float > ("HoverE2012"),weight);
-    HistClass::Fill(hist_number,"Ele_Match",lepton->findUserRecord< int > ("Match"),weight);
-    HistClass::Fill(hist_number,"Ele_NinnerLayerLostHits",lepton->findUserRecord< int > ("NinnerLayerLostHits"),weight);
-    HistClass::Fill(hist_number,"Ele_NumBrems",lepton->findUserRecord< int > ("NumBrems"),weight);
-    HistClass::Fill(hist_number,"Ele_PErr",lepton->findUserRecord< float > ("PErr"),weight);
-    HistClass::Fill(hist_number,"Ele_SCE",lepton->findUserRecord< double > ("SCE"),weight);
-    HistClass::Fill(hist_number,"Ele_SCEErr",lepton->findUserRecord< float > ("SCEErr"),weight);
-    HistClass::Fill(hist_number,"Ele_SCEt",lepton->findUserRecord< double > ("SCEt"),weight);
-    HistClass::Fill(hist_number,"Ele_SCeta",lepton->findUserRecord< double > ("SCeta"),weight);
-    HistClass::Fill(hist_number,"Ele_TrackerP",lepton->findUserRecord< double > ("TrackerP"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso",lepton->findUserRecord< float > ("TrkIso"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso03",lepton->findUserRecord< float > ("TrkIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso04",lepton->findUserRecord< float > ("TrkIso04"),weight);
-    HistClass::Fill(hist_number,"Ele_Vtx_X",lepton->findUserRecord< double > ("Vtx_X"),weight);
-    HistClass::Fill(hist_number,"Ele_Vtx_Y",lepton->findUserRecord< double > ("Vtx_Y"),weight);
-    HistClass::Fill(hist_number,"Ele_Vtx_Z",lepton->findUserRecord< double > ("Vtx_Z"),weight);
-    HistClass::Fill(hist_number,"Ele_chargedHadronIso",lepton->findUserRecord< float > ("chargedHadronIso"),weight);
-    HistClass::Fill(hist_number,"Ele_convDcot",lepton->findUserRecord< float > ("convDcot"),weight);
-    HistClass::Fill(hist_number,"Ele_convDist",lepton->findUserRecord< float > ("convDist"),weight);
-    HistClass::Fill(hist_number,"Ele_convRadius",lepton->findUserRecord< float > ("convRadius"),weight);
-    HistClass::Fill(hist_number,"Ele_e1x5",lepton->findUserRecord< float > ("e1x5"),weight);
-    HistClass::Fill(hist_number,"Ele_e2x5",lepton->findUserRecord< float > ("e2x5"),weight);
-    HistClass::Fill(hist_number,"Ele_e5x5",lepton->findUserRecord< float > ("e5x5"),weight);
-    //HistClass::Fill(hist_number,"Ele_eidLoose",lepton->findUserRecord< float > ("eidLoose"),weight);
-    //HistClass::Fill(hist_number,"Ele_eidRobustHighEnergy",lepton->findUserRecord< float > ("eidRobustHighEnergy"),weight);
-    //HistClass::Fill(hist_number,"Ele_eidRobustLoose",lepton->findUserRecord< float > ("eidRobustLoose"),weight);
-    //HistClass::Fill(hist_number,"Ele_eidRobustTight",lepton->findUserRecord< float > ("eidRobustTight"),weight);
-    //HistClass::Fill(hist_number,"Ele_eidTight",lepton->findUserRecord< float > ("eidTight"),weight);
-    //HistClass::Fill(hist_number,"Ele_fbrem",lepton->findUserRecord< float > ("fbrem"),weight);
-    //HistClass::Fill(hist_number,"Ele_id",lepton->findUserRecord< int > ("id"),weight);
-    HistClass::Fill(hist_number,"Ele_neutralHadronIso",lepton->findUserRecord< float > ("neutralHadronIso"),weight);
-    HistClass::Fill(hist_number,"Ele_photonIso",lepton->findUserRecord< float > ("photonIso"),weight);
-    HistClass::Fill(hist_number,"Ele_pin",lepton->findUserRecord< float > ("pin"),weight);
-    HistClass::Fill(hist_number,"Ele_pout",lepton->findUserRecord< float > ("pout"),weight);
-    HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->findUserRecord< float > ("puChargedHadronIso"),weight);
-    HistClass::Fill(hist_number,"Ele_sigmaIetaIeta",lepton->findUserRecord< float > ("sigmaIetaIeta"),weight);
+    HistClass::Fill(hist_number,"Ele_CaloIso",lepton->getUserRecord ("CaloIso"),weight);
+    //HistClass::Fill(hist_number,"Ele_ChargeMatch",lepton->getUserRecord ("ChargeMatch"),weight);
+    HistClass::Fill(hist_number,"Ele_Class",lepton->getUserRecord ("Class"),weight);
+    HistClass::Fill(hist_number,"Ele_DEtaSCCalo",lepton->getUserRecord ("DEtaSCCalo"),weight);
+    HistClass::Fill(hist_number,"Ele_DEtaSCVtx",lepton->getUserRecord ("DEtaSCVtx"),weight);
+    HistClass::Fill(hist_number,"Ele_DEtaSeedTrk",lepton->getUserRecord ("DEtaSeedTrk"),weight);
+    HistClass::Fill(hist_number,"Ele_DPhiSCVtx",lepton->getUserRecord ("DPhiSCVtx"),weight);
+    HistClass::Fill(hist_number,"Ele_DPhiSeedTrk",lepton->getUserRecord ("DPhiSeedTrk"),weight);
+    HistClass::Fill(hist_number,"Ele_Dsz",lepton->getUserRecord ("Dsz"),weight);
+    HistClass::Fill(hist_number,"Ele_DszBS",lepton->getUserRecord ("DszBS"),weight);
+    HistClass::Fill(hist_number,"Ele_Dxy",lepton->getUserRecord ("Dxy"),weight);
+    HistClass::Fill(hist_number,"Ele_DxyBS",lepton->getUserRecord ("DxyBS"),weight);
+    HistClass::Fill(hist_number,"Ele_Dz",lepton->getUserRecord ("Dz"),weight);
+    HistClass::Fill(hist_number,"Ele_DzBS",lepton->getUserRecord ("DzBS"),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso",lepton->getUserRecord ("ECALIso"),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso03",lepton->getUserRecord ("ECALIso03"),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso04",lepton->getUserRecord ("ECALIso04"),weight);
+    HistClass::Fill(hist_number,"Ele_ESCOverPout",lepton->getUserRecord ("ESCOverPout"),weight);
+    HistClass::Fill(hist_number,"Ele_ESCSeedOverP",lepton->getUserRecord ("ESCSeedOverP"),weight);
+    HistClass::Fill(hist_number,"Ele_ESCSeedPout",lepton->getUserRecord ("ESCSeedPout"),weight);
+    HistClass::Fill(hist_number,"Ele_EoP",lepton->getUserRecord ("EoP"),weight);
+    HistClass::Fill(hist_number,"Ele_GSFNormChi2",lepton->getUserRecord ("GSFNormChi2"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso",lepton->getUserRecord ("HCALIso"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso03",lepton->getUserRecord ("HCALIso03"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso03d1",lepton->getUserRecord ("HCALIso03d1"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso03d2",lepton->getUserRecord ("HCALIso03d2"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04",lepton->getUserRecord ("HCALIso04"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04d1",lepton->getUserRecord ("HCALIso04d1"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04d2",lepton->getUserRecord ("HCALIso04d2"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR03_2012",lepton->getUserRecord ("HCALIsoConeDR03_2012"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR04_2012",lepton->getUserRecord ("HCALIsoConeDR04_2012"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALOverECALd1",lepton->getUserRecord ("HCALOverECALd1"),weight);
+    HistClass::Fill(hist_number,"Ele_HoEm",lepton->getUserRecord ("HoEm"),weight);
+    HistClass::Fill(hist_number,"Ele_HoverE2012",lepton->getUserRecord ("HoverE2012"),weight);
+    HistClass::Fill(hist_number,"Ele_Match",lepton->getUserRecord ("Match"),weight);
+    HistClass::Fill(hist_number,"Ele_NinnerLayerLostHits",lepton->getUserRecord ("NinnerLayerLostHits"),weight);
+    HistClass::Fill(hist_number,"Ele_NumBrems",lepton->getUserRecord ("NumBrems"),weight);
+    HistClass::Fill(hist_number,"Ele_PErr",lepton->getUserRecord ("PErr"),weight);
+    HistClass::Fill(hist_number,"Ele_SCE",lepton->getUserRecord ("SCE"),weight);
+    HistClass::Fill(hist_number,"Ele_SCEErr",lepton->getUserRecord ("SCEErr"),weight);
+    HistClass::Fill(hist_number,"Ele_SCEt",lepton->getUserRecord ("SCEt"),weight);
+    HistClass::Fill(hist_number,"Ele_SCeta",lepton->getUserRecord ("SCeta"),weight);
+    HistClass::Fill(hist_number,"Ele_TrackerP",lepton->getUserRecord ("TrackerP"),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso",lepton->getUserRecord ("TrkIso"),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso03",lepton->getUserRecord ("TrkIso03"),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso04",lepton->getUserRecord ("TrkIso04"),weight);
+    HistClass::Fill(hist_number,"Ele_Vtx_X",lepton->getUserRecord ("Vtx_X"),weight);
+    HistClass::Fill(hist_number,"Ele_Vtx_Y",lepton->getUserRecord ("Vtx_Y"),weight);
+    HistClass::Fill(hist_number,"Ele_Vtx_Z",lepton->getUserRecord ("Vtx_Z"),weight);
+    HistClass::Fill(hist_number,"Ele_chargedHadronIso",lepton->getUserRecord ("chargedHadronIso"),weight);
+    HistClass::Fill(hist_number,"Ele_convDcot",lepton->getUserRecord ("convDcot"),weight);
+    HistClass::Fill(hist_number,"Ele_convDist",lepton->getUserRecord ("convDist"),weight);
+    HistClass::Fill(hist_number,"Ele_convRadius",lepton->getUserRecord ("convRadius"),weight);
+    HistClass::Fill(hist_number,"Ele_e1x5",lepton->getUserRecord ("e1x5"),weight);
+    HistClass::Fill(hist_number,"Ele_e2x5",lepton->getUserRecord ("e2x5"),weight);
+    HistClass::Fill(hist_number,"Ele_e5x5",lepton->getUserRecord ("e5x5"),weight);
+    //HistClass::Fill(hist_number,"Ele_eidLoose",lepton->getUserRecord ("eidLoose"),weight);
+    //HistClass::Fill(hist_number,"Ele_eidRobustHighEnergy",lepton->getUserRecord ("eidRobustHighEnergy"),weight);
+    //HistClass::Fill(hist_number,"Ele_eidRobustLoose",lepton->getUserRecord ("eidRobustLoose"),weight);
+    //HistClass::Fill(hist_number,"Ele_eidRobustTight",lepton->getUserRecord ("eidRobustTight"),weight);
+    //HistClass::Fill(hist_number,"Ele_eidTight",lepton->getUserRecord ("eidTight"),weight);
+    //HistClass::Fill(hist_number,"Ele_fbrem",lepton->getUserRecord ("fbrem"),weight);
+    //HistClass::Fill(hist_number,"Ele_id",lepton->getUserRecord ("id"),weight);
+    HistClass::Fill(hist_number,"Ele_neutralHadronIso",lepton->getUserRecord ("neutralHadronIso"),weight);
+    HistClass::Fill(hist_number,"Ele_photonIso",lepton->getUserRecord ("photonIso"),weight);
+    HistClass::Fill(hist_number,"Ele_pin",lepton->getUserRecord ("pin"),weight);
+    HistClass::Fill(hist_number,"Ele_pout",lepton->getUserRecord ("pout"),weight);
+    HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso"),weight);
+    HistClass::Fill(hist_number,"Ele_sigmaIetaIeta",lepton->getUserRecord ("sigmaIetaIeta"),weight);
 
 
 
 
-    //HistClass::Fill(hist_number,"Ele_decayMode",lepton->findUserRecord< int >("decayMode"),weight);
+    //HistClass::Fill(hist_number,"Ele_decayMode",lepton->getUserRecord("decayMode"),weight);
 
     //cout<<"-----------------------------------------"<<endl;
     //pxl::UserRecord::const_iterator us = lepton->getUserRecord().begin();
     //for( ; us != lepton->getUserRecord().end(); ++us ) {
         //try{
-            //lepton->findUserRecord< int >(us->first);
-            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->findUserRecord< int > (\""<<us->first<<"\"),weight);"<<endl;
+            //lepton->getUserRecord(us->first);
+            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
             ////HistClass::CreateHisto(4,"Muon_VHits","Muon_VHits", 100, 0, 100,"N_{valid hits}^{#mu}");
             //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
         //try{
-            //lepton->findUserRecord< double >(us->first);
-            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->findUserRecord< double > (\""<<us->first<<"\"),weight);"<<endl;
+            //lepton->getUserRecord(us->first);
+            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
             //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
         //try{
-            //lepton->findUserRecord< float >(us->first);
-            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->findUserRecord< float > (\""<<us->first<<"\"),weight);"<<endl;
+            //lepton->getUserRecord(us->first);
+            ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
             //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
@@ -626,25 +632,25 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
 void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton) {
     Fill_Particle_hisos(hist_number,lepton);
     //for(uint j = 0; j < 67; j++) {
-        //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->findUserRecord< float >( (string)d_mydisc[j] ));
+        //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->getUserRecord( (string)d_mydisc[j] ));
     //}
-    HistClass::Fill(hist_number,"Tau_decayMode",lepton->findUserRecord< int >("decayMode"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_X",lepton->findUserRecord< double >("Vtx_X"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_Y",lepton->findUserRecord< double >("Vtx_Y"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_Z",lepton->findUserRecord< double >("Vtx_Z"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFChargedHadrCands",lepton->findUserRecord< unsigned long >("NumPFChargedHadrCands"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFGammaCands",lepton->findUserRecord< unsigned long >("NumPFGammaCands"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFNeutralHadrCands",lepton->findUserRecord< unsigned long >("NumPFNeutralHadrCands"),weight);
-    HistClass::Fill(hist_number,"Tau_LeadingHadronPt",lepton->findUserRecord< float >("LeadingHadronPt"),weight);
+    HistClass::Fill(hist_number,"Tau_decayMode",lepton->getUserRecord("decayMode"),weight);
+    HistClass::Fill(hist_number,"Tau_Vtx_X",lepton->getUserRecord("Vtx_X"),weight);
+    HistClass::Fill(hist_number,"Tau_Vtx_Y",lepton->getUserRecord("Vtx_Y"),weight);
+    HistClass::Fill(hist_number,"Tau_Vtx_Z",lepton->getUserRecord("Vtx_Z"),weight);
+    HistClass::Fill(hist_number,"Tau_NumPFChargedHadrCands",lepton->getUserRecord("NumPFChargedHadrCands"),weight);
+    HistClass::Fill(hist_number,"Tau_NumPFGammaCands",lepton->getUserRecord("NumPFGammaCands"),weight);
+    HistClass::Fill(hist_number,"Tau_NumPFNeutralHadrCands",lepton->getUserRecord("NumPFNeutralHadrCands"),weight);
+    HistClass::Fill(hist_number,"Tau_LeadingHadronPt",lepton->getUserRecord("LeadingHadronPt"),weight);
     //TLorentzVector* jet = new TLorentzVector();
-    //jet->SetPxPyPzE(lepton->findUserRecord< double >("tauJetpx"),lepton->findUserRecord< double >("tauJetpy"),lepton->findUserRecord< double >("tauJetpz"),lepton->findUserRecord< double >("tauJetE"));
+    //jet->SetPxPyPzE(lepton->getUserRecord("tauJetpx"),lepton->getUserRecord("tauJetpy"),lepton->getUserRecord("tauJetpz"),lepton->getUserRecord("tauJetE"));
     //HistClass::Fill(hist_number,"Tau_Jet_pt",jet->Pt(),weight);
     //HistClass::Fill(hist_number,"Tau_Jet_eta",jet->Eta(),weight);
     //HistClass::Fill(hist_number,"Tau_Jet_phi",jet->Phi(),weight);
     //delete jet;
-    HistClass::Fill(hist_number,"Tau_dxy",lepton->findUserRecord< double >("dxy"),weight);
-    HistClass::Fill(hist_number,"Tau_dxy_error",lepton->findUserRecord< double >("dxy_error"),weight);
-    HistClass::Fill(hist_number,"Tau_dxy_Sig",lepton->findUserRecord< double >("dxy_Sig"),weight);
+    HistClass::Fill(hist_number,"Tau_dxy",lepton->getUserRecord("dxy"),weight);
+    HistClass::Fill(hist_number,"Tau_dxy_error",lepton->getUserRecord("dxy_error"),weight);
+    HistClass::Fill(hist_number,"Tau_dxy_Sig",lepton->getUserRecord("dxy_Sig"),weight);
 }
 
 void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton){
@@ -659,18 +665,20 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton){
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_mt")%name ),MT(lepton,sel_met),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi")%name ),DeltaPhi(lepton,sel_met),weight);
+        HistClass::Fill(hist_number,str(boost::format("%s_met")%name ),sel_met->getPt(),weight);
+        HistClass::Fill(hist_number,str(boost::format("%s_met_phi")%name ),sel_met->getPhi(),weight);
     }
 }
 
 void specialAna::Fill_Controll_histo(int hist_number, pxl::Particle* lepton) {
 
-    if(lepton->findUserRecord<int>("id")==11){
+    if(lepton->getUserRecord("id").toInt32()==11){
         Fill_Controll_Ele_histo(hist_number, lepton);
     }
-    if(lepton->findUserRecord<int>("id")==13){
+    if(lepton->getUserRecord("id").toInt32()==13){
         Fill_Controll_Muon_histo(hist_number, lepton);
     }
-    if(lepton->findUserRecord<int>("id")==15){
+    if(lepton->getUserRecord("id").toInt32()==15){
         Fill_Controll_Tau_histo(hist_number, lepton);
     }
 }
@@ -736,17 +744,17 @@ void specialAna::initEvent( const pxl::Event &event ){
     m_RecEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Rec" );
     m_GenEvtView = event.getObjectOwner().findObject< pxl::EventView >( "Gen" );
 
-    temp_run = event.findUserRecord< uint >( "Run" );
-    temp_ls = event.findUserRecord< uint >( "LumiSection" );
-    temp_event = event.findUserRecord< uint >( "EventNum" );
+    temp_run = event.getUserRecord( "Run" );
+    temp_ls = event.getUserRecord( "LumiSection" );
+    temp_event = event.getUserRecord( "EventNum" );
 
-    numMuon  = m_RecEvtView->findUserRecord< int >( "NumMuon" );
-    numEle   = m_RecEvtView->findUserRecord< int >( "NumEle" );
-    numGamma = m_RecEvtView->findUserRecord< int >( "NumGamma" );
-    numTau   = m_RecEvtView->findUserRecord< int >( "Num" + m_TauType );
-    numMET   = m_RecEvtView->findUserRecord< int >( "Num" + m_METType );
-    numJet   = m_RecEvtView->findUserRecord< int >( "Num" + m_JetAlgo );
-    numBJet  = m_RecEvtView->findUserRecord< int >( "Num" + m_BJets_algo );
+    numMuon  = m_RecEvtView->getUserRecord( "NumMuon" );
+    numEle   = m_RecEvtView->getUserRecord( "NumEle" );
+    numGamma = m_RecEvtView->getUserRecord( "NumGamma" );
+    numTau   = m_RecEvtView->getUserRecord( "Num" + m_TauType );
+    numMET   = m_RecEvtView->getUserRecord( "Num" + m_METType );
+    numJet   = m_RecEvtView->getUserRecord( "Num" + m_JetAlgo );
+    numBJet  = m_RecEvtView->getUserRecord( "Num" + m_BJets_algo );
 
     // h1_num_Taus.Fill(numTau);
 
@@ -792,9 +800,9 @@ void specialAna::initEvent( const pxl::Event &event ){
 
     if( not runOnData ){
 
-        double event_weight = m_GenEvtView->findUserRecord< double >( "Weight" );
-        double varKfactor_weight = m_GenEvtView->findUserRecord< double >( "kfacWeight", 1.0 );
-        double pileup_weight = m_GenEvtView->findUserRecord< double >( "PUWeight", 1.0 );
+        double event_weight = m_GenEvtView->getUserRecord( "Weight" );
+        double varKfactor_weight = m_GenEvtView->getUserRecord( "kfacWeight" );
+        double pileup_weight = m_GenEvtView->getUserRecord( "PUWeight");
 
         weight = event_weight * varKfactor_weight * pileup_weight;
 

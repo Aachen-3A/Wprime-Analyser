@@ -4,7 +4,10 @@
 #include <iostream>
 #include <string>
 #include <unordered_set>
-#include "Tools/PXL/PXL.hh"
+
+///clean up the header!!!
+#include "Pxl/Pxl/interface/pxl/core.hh"
+#include "Pxl/Pxl/interface/pxl/hep.hh"
 #include "Tools/PXL/Sort.hh"
 //#include "Tools/Tools.hh"
 #include "Tools/MConfig.hh"

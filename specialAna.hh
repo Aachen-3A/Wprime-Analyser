@@ -98,6 +98,7 @@ public:
     unsigned int numBJet;
 
     int events_;
+    unsigned int n_lepton;
 
     vector< pxl::Particle* > * EleList;
     vector< pxl::Particle* > * MuonList;

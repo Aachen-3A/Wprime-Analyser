@@ -106,12 +106,11 @@ namespace HistClass {
     //     std::string dummy = Form("h1_%s", name);
     //     histo[dummy]->Write();
     //   }
-    /*
     static TH1D* ReturnHist(const char * name)
     {
-    std::string dummy = Form("h1_%s", name);
-    return histo[dummy];*/
-    //   }
+        std::string dummy = Form("h1_%s", name);
+        return histo[dummy];
+    }
 
     //static void NameBins(const char * name, const uint n_bins, TString* d_mydisc)
     //{

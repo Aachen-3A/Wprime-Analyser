@@ -31,8 +31,12 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     string safeFileName = "SpecialHistos.root";
     file1 = new TFile(safeFileName.c_str(), "RECREATE");
+    n_lepton = 0; // counting leptons passing the selection
 
-    HistClass::CreateHisto("Ele_num","num_Ele", 40, 0, 39, "N_{#taus}");
+    // number of events, saved in a histogram
+    HistClass::CreateHisto("h_counters", "h_counters", 10, 0, 11, "N_{events}");
+
+    HistClass::CreateHisto("Ele_num","num_Ele", 40, 0, 39, "N_{e}");
     HistClass::CreateHisto(4,"Ele_pt","Ele_pt", 5000, 0, 5000,"p_{T}^{e} (GeV)");
     HistClass::CreateHisto(4,"Ele_eta","Ele_eta", 80, -4, 4,"#eta_{e}");
     HistClass::CreateHisto(4,"Ele_phi","Ele_phi", 40, -3.2, 3.2,"#phi_{e} (rad)");
@@ -118,7 +122,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_TrkIso","Muon_TrkIso", 100, 0, 100,"ISO_{Trk}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_ECALIso","Muon_ECALIso", 100, 0, 100,"ISO_{ECAL}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_HCALIso","Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
-    HistClass::CreateHisto(4,"Muon_ID","Muon_ID", 6, 0, 6,"ID_{#tau}");
+    HistClass::CreateHisto(4,"Muon_ID","Muon_ID", 6, 0, 6,"ID_{#mu}");
     HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
     HistClass::CreateHisto("Muon_num_Gen","Muon_num_Gen", 40, 0, 39, "N_{#mu}^{gen}");
     HistClass::CreateHisto("Muon_pt_Gen","Muon_pt_Gen", 5000, 0, 5000, "p_{T}^{gen #mu} (GeV)");
@@ -253,6 +257,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
         if(sel_lepton->getUserRecord("passed")){
             Fill_Controll_histo(3, sel_lepton);
+            n_lepton++;
         }
     }
 
@@ -493,6 +498,7 @@ void specialAna::Fill_Gen_Controll_histo() {
 
 void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
+
     HistClass::Fill(hist_number,"Muon_Vtx_X",lepton->getUserRecord("Vtx_X"),weight);
     HistClass::Fill(hist_number,"Muon_Vtx_Y",lepton->getUserRecord("Vtx_Y"),weight);
     HistClass::Fill(hist_number,"Muon_Vtx_Z",lepton->getUserRecord("Vtx_Z"),weight);
@@ -714,6 +720,7 @@ void specialAna::endJob( const Serializable* ) {
     {
         cout<<*it<<endl;
     }
+    cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
     file1->mkdir("MC");
     file1->cd("MC/");
     HistClass::WriteAll("MC_");
@@ -739,6 +746,7 @@ void specialAna::endJob( const Serializable* ) {
 }
 
 void specialAna::initEvent( const pxl::Event* event ){
+    HistClass::Fill("h_counters", 1, 1); // increment number of events
 
     weight = 1;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );

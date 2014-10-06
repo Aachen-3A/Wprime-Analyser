@@ -7,6 +7,7 @@
 #include "TH2F.h"
 #include "TString.h"
 #include "TNtupleD.h"
+#include "boost/format.hpp"
 
 namespace HistClass {
     static std::map<std::string, TH1D * > histo;
@@ -89,6 +90,11 @@ namespace HistClass {
         tmphist->Sumw2();
         histo[Form("h1_%s", name)] = tmphist;
     }
+    
+    const static void CreateHisto(boost::basic_format<char> name, boost::basic_format<char> title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
+    {
+        CreateHisto(str(name).c_str(), str(title).c_str(), nbinsx, xlow, xup, xtitle);
+    }
 
     static void Fill(const char * name, double value,double weight)
     {
@@ -106,12 +112,11 @@ namespace HistClass {
     //     std::string dummy = Form("h1_%s", name);
     //     histo[dummy]->Write();
     //   }
-    /*
-    static TH1D* ReturnHist(const char * name)
-    {
-    std::string dummy = Form("h1_%s", name);
-    return histo[dummy];*/
-    //   }
+    
+    static TH1D* ReturnHist(const char * name) {
+      std::string dummy = Form("h1_%s", name);
+      return histo[dummy];
+    }
 
     //static void NameBins(const char * name, const uint n_bins, TString* d_mydisc)
     //{

@@ -17,8 +17,12 @@
 #include "TLorentzVector.h"
 #include <TFile.h>
 
+#include "Main/Systematics.hh"
+
 //----------------------------------------------------------------------
 using namespace std;
+
+//class Systematics;
 
 class specialAna : public pxl::AnalysisProcess  {
 public:
@@ -39,10 +43,12 @@ public:
     void Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton);
     void Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton);
     void Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton);
-    void Fill_Particle_hisos(int hist_number, pxl::Particle* lepton);
+    void Fill_Particle_hisos(int hist_number, pxl::Particle* lepton, string syst="");
     void Fill_resolution( bool found);
     void Fill_Tree();
 
+    void FillSystematics(const pxl::Event* event, std::string const particleName);
+    void FillSystematicsUpDown(const pxl::Event* event, std::string const particleName, std::string const updown, std::string const shiftType);
 
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
@@ -64,11 +70,18 @@ public:
 
     pxl::EventView *m_RecEvtView;
     pxl::EventView *m_GenEvtView;
+    
     bool runOnData;
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 
     const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau;
+    
+    const std::string particles[3] = {"Ele", "Muon", "Tau"};
+    const std::string particleSymbols[3] = {"e", "#mu", "#tau"};
+    const std::string shifted[5]   = {"Ele", "Muon", "Tau", "met", "Jet"};
+    const std::string type[2]      = {"Scale", "Resolution"};
+    const std::string updown[2]    = {"Up", "Down"};
 
     const vector< string >  m_trigger_string;
     TString d_mydisc[66];
@@ -98,6 +111,7 @@ public:
     unsigned int numBJet;
 
     int events_;
+    unsigned int n_lepton;
 
     vector< pxl::Particle* > * EleList;
     vector< pxl::Particle* > * MuonList;
@@ -105,6 +119,9 @@ public:
     vector< pxl::Particle* > * GammaList;
     vector< pxl::Particle* > * METList;
     vector< pxl::Particle* > * JetList;
+    
+    vector< pxl::Particle* > * RememberPart;
+    vector< pxl::Particle* > * RememberMET;
 
     vector< pxl::Particle* > * EleListGen;
     vector< pxl::Particle* > * MuonListGen;

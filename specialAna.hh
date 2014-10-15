@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_set>
+#include <fstream>
 
 ///clean up the header!!!
 #include "Pxl/Pxl/interface/pxl/core.hh"
@@ -33,6 +34,8 @@ public:
     virtual void analyseEvent( const pxl::Event* event );
 
     TFile* file1;
+    ofstream eventDisplayFile;
+    std::stringstream eventsAfterCuts;
 
     void Fill_stage_0_histos( );
 
@@ -70,20 +73,21 @@ public:
 
     pxl::EventView *m_RecEvtView;
     pxl::EventView *m_GenEvtView;
-    
+    pxl::EventView *m_TrigEvtView;
+
     bool runOnData;
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 
     const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau;
-    
+
     const std::string particles[3] = {"Ele", "Muon", "Tau"};
     const std::string particleSymbols[3] = {"e", "#mu", "#tau"};
     const std::string shifted[5]   = {"Ele", "Muon", "Tau", "met", "Jet"};
     const std::string type[2]      = {"Scale", "Resolution"};
     const std::string updown[2]    = {"Up", "Down"};
 
-    const vector< string >  m_trigger_string;
+    
     TString d_mydisc[66];
     TString d_mydiscmu[6];
     const Tools::MConfig config_;
@@ -95,6 +99,10 @@ public:
     double m_pt_met_min_cut;
     double m_pt_met_max_cut;
     double m_delta_phi_cut;
+    double m_pt_cut;
+    double m_m_cut;
+    const std::string m_cutdatafile;
+    const vector< string >  m_trigger_string;
 
     double temp_run;
     double temp_ls;
@@ -119,7 +127,7 @@ public:
     vector< pxl::Particle* > * GammaList;
     vector< pxl::Particle* > * METList;
     vector< pxl::Particle* > * JetList;
-    
+
     vector< pxl::Particle* > * RememberPart;
     vector< pxl::Particle* > * RememberMET;
 

@@ -4,6 +4,7 @@
 #include "boost/format.hpp"
 
 
+
 specialAna::specialAna( const Tools::MConfig &cfg ) :
    runOnData(       cfg.GetItem< bool >( "General.RunOnData" ) ),
    m_JetAlgo(       cfg.GetItem< string >( "Jet.Type.Rec" ) ),
@@ -24,6 +25,10 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_pt_met_max_cut_tau(    cfg.GetItem< double >( "Tau.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_tau(     cfg.GetItem< double >( "Tau.wprime.delta_phi_cut" ) ),
 
+   m_pt_cut(                cfg.GetItem< double >( "wprime.pt_cut" ) ),
+   m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
+   m_cutdatafile(      cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
+
    m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
    d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
    config_(cfg)
@@ -31,22 +36,34 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     string safeFileName = "SpecialHistos.root";
     file1 = new TFile(safeFileName.c_str(), "RECREATE");
+    eventDisplayFile.open(m_cutdatafile.c_str(), std::fstream::out);
+    events_ = 0;
+    
     n_lepton = 0; // counting leptons passing the selection
 
     // number of events, saved in a histogram
-    HistClass::CreateHisto("h_counters", "h_counters", 10, 0, 11, "N_{events}");
+    HistClass::CreateHistoUnchangedName("h_counters", "h_counters", 10, 0, 11, "N_{events}");
+
+    HistClass::CreateHisto("MC_W_m_Gen","MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
+    HistClass::CreateHisto("MC_W_pt_Gen","MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
 
     HistClass::CreateHisto("Ele_num","num_Ele", 40, 0, 39, "N_{e}");
     HistClass::CreateHisto(4,"Ele_pt","Ele_pt", 5000, 0, 5000,"p_{T}^{e} (GeV)");
     HistClass::CreateHisto(4,"Ele_eta","Ele_eta", 80, -4, 4,"#eta_{e}");
     HistClass::CreateHisto(4,"Ele_phi","Ele_phi", 40, -3.2, 3.2,"#phi_{e} (rad)");
+    
     HistClass::CreateHisto(4,"Ele_DeltaPhi","Ele_DeltaPhi", 40, 0, 3.2,"#Delta#phi(e,E_{T}^{miss})");
     HistClass::CreateHisto(4,"Ele_mt","Ele_mt", 5000, 0, 5000,"M_{T}_{e} (GeV)");
     HistClass::CreateHisto(4,"Ele_charge","Ele_charge", 3, -1, 1, "q_{e}");
     HistClass::CreateHisto(4,"Ele_met","Ele_met", 5000, 0, 5000,"E^{miss}_{T} (GeV)");
     HistClass::CreateHisto(4,"Ele_met_phi","Ele_met_phi",40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
     HistClass::CreateHisto(4,"Ele_ET_MET","Ele_ET_MET",50, 0, 6,"p^{e}_{T}/E^{miss}_{T}");
-
+    
+    HistClass::CreateHisto("Ele_num_Gen","Ele_num_Gen", 40, 0, 39, "N_{e}");
+    HistClass::CreateHisto("Ele_pt_Gen","Ele_pt_Gen", 5000, 0, 5000,"p_{T}^{e} (GeV)");
+    HistClass::CreateHisto("Ele_eta_Gen","Ele_eta_Gen", 80, -4, 4,"#eta_{e}");
+    HistClass::CreateHisto("Ele_phi_Gen","Ele_phi_Gen", 40, -3.2, 3.2,"#phi_{e} (rad)");
+    
 
     HistClass::CreateHisto("Tau_num","num_Tau", 40, 0, 39, "N_{#taus}");
     HistClass::CreateHisto(4,"Tau_pt","Tau_pt", 5000, 0, 5000, "p_{T}^{#tau} (GeV)");
@@ -317,14 +334,14 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
     if(tail_selector(event)) return;
 
-    //Fill_Gen_Controll_histo();
-    KinematicsSelector();
-//     TODO: Configuration of 'accepted' has to be updated
-    //if ( ! m_RecEvtView->getUserRecord( "accepted" ) )return;
 
-    //if (!TriggerSelector()) return;
+    Fill_Gen_Controll_histo();
+    KinematicsSelector();
+
+    if (!TriggerSelector()) return;
 
     Fill_stage_0_histos();
+
 
 
     if(sel_lepton && sel_met){
@@ -339,9 +356,16 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             Fill_Controll_histo(3, sel_lepton);
             n_lepton++;
         }
+        
+        if((sel_lepton->getPt() > m_pt_cut) && (sel_lepton->getMass() > m_m_cut)) {
+            // save event information (after cuts) to stringstream which is written to disk in endJob()
+            // for event display generation:
+            eventsAfterCuts << event->getUserRecord("Dataset") << ":"
+                            << event->getUserRecord("Run") << ":"
+                            << event->getUserRecord("LumiSection") << ":"
+                            << event->getUserRecord("EventNum") << "\n";
+        }
     }
-
-    // TODO: do systematic shifts and fill those in histograms
 
     // plan as follows:
     // (in music:)
@@ -354,12 +378,13 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     // (in specialAna:)
     // - check for newly created EventViews (did they fail?)
     // - fill (systematically shifted) particles into histograms
-
-    FillSystematics(event, "Muon");
-    FillSystematics(event, "Ele");
-    FillSystematics(event, "Tau");
-    // FillSystematics(event, "Jet");
-    // FillSystematics(event, "met");
+    if(!runOnData){
+        FillSystematics(event, "Muon");
+        FillSystematics(event, "Ele");
+        FillSystematics(event, "Tau");
+        // FillSystematics(event, "Jet");
+        // FillSystematics(event, "met");
+    }
 
     endEvent( event );
 }
@@ -376,9 +401,13 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 
     // extract one EventView
     // make sure the object key is the same as in Systematics.cc specified
-    tempEventView = event->getObjectOwner().findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+//     tempEventView = event->getObjectOwner().findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+    tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+
+
+
     if(tempEventView == 0){
-        return;
+        throw std::runtime_error("specialAna.cc: no EventView '" + particleName + "_syst" + shiftType + updown + "' found!");
     }
     // get all particles
     std::vector< pxl::Particle* > shiftedParticles;
@@ -405,7 +434,17 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
             if(      Name == "Ele"     ) EleList->push_back( part );
             else if( Name == m_METType ) METList->push_back( part );
         }
-    }//else if(particleName=="Tau")
+    }else if(particleName=="Tau"){
+        RememberPart=TauList;
+        TauList = new vector< pxl::Particle* >;
+        for( vector< pxl::Particle* >::const_iterator part_it = shiftedParticles.begin(); part_it != shiftedParticles.end(); ++part_it ) {
+            pxl::Particle *part = *part_it;
+            string Name = part->getName();
+            if(      Name == m_TauType ) TauList->push_back( part );
+            else if( Name == m_METType ) METList->push_back( part );
+        }
+    }//else if(particleName=="JET"){
+    //}else if(particleName==m_METType){}
 
     // reset the chosen MET and lepton
     if(METList->size()>0){
@@ -440,25 +479,12 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
     }else if(particleName=="Ele"){
         delete EleList;
         EleList = RememberPart;
-    }//else if(particleName=="Tau")
+    }else if(particleName=="Tau"){
+        delete TauList;
+        TauList = RememberPart;
+    }//else if(particleName=="JET"){
+    //}else if(particleName==m_METType){}
 
-
-
-
-
-
-
-
-    //for(std::vector< pxl::Particle* >::iterator part_it = shiftedParticles.begin(); part_it != shiftedParticles.end(); ++part_it) {
-        //pxl::Particle *part = *part_it;
-        //std::string Name = part->getName();
-        //// ignore particles that are not of the corresponding type
-        //if(Name != particleName)
-            //continue;
-        //HistClass::Fill((particleName + "_pt"  + "_syst" + shiftType + updown).c_str(), part->getPt(),  1.);
-        //HistClass::Fill((particleName + "_eta" + "_syst" + shiftType + updown).c_str(), part->getEta(), 1.);
-        //HistClass::Fill((particleName + "_phi" + "_syst" + shiftType + updown).c_str(), part->getPhi(), 1.);
-    //}
 }
 
 bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
@@ -507,7 +533,7 @@ void specialAna::KinematicsSelector() {
         sel_id=15;
     }
 
-
+    
     if(sel_met && sel_lepton){
         if(sel_lepton->getPt()/sel_met->getPt()>m_pt_met_min_cut && sel_lepton->getPt()/sel_met->getPt()<m_pt_met_max_cut){
             passedPtMet=true;
@@ -524,7 +550,7 @@ void specialAna::KinematicsSelector() {
         sel_lepton->setUserRecord("passedPtMet",passedPtMet);
         sel_lepton->setUserRecord("passedDeltaPhi",passedDeltaPhi);
         sel_lepton->setUserRecord("passed",passed);
-        sel_lepton->setUserRecord("id",sel_id);
+        sel_lepton->setPdgNumber(sel_id);
     }
 }
 
@@ -534,18 +560,19 @@ bool specialAna::TriggerSelector(){
 
     for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
         try{
-            m_RecEvtView->getUserRecord(*it);
+            m_TrigEvtView->getUserRecord(*it);
             triggered=true;
+            break;
         } catch( std::runtime_error &exc ) {
             continue;
         }
 
-        //pxl::UserRecords::const_iterator us = m_RecEvtView->getUserRecords().begin();
-        //for( ; us != m_RecEvtView->getUserRecords().end(); ++us ) {
-            //if ( string::npos != (*us).first.find( *it )){
-                //triggers.insert(us->first);
-            //}
-        //}
+//         pxl::UserRecords::const_iterator us = m_RecEvtView->getUserRecords().begin();
+//         for( ; us != m_RecEvtView->getUserRecords().end(); ++us ) {
+//             if ( string::npos == (*us).first.find( *it )){
+//                 triggers.insert(us->first);
+//             }
+//         }
 
     }
 
@@ -571,6 +598,7 @@ bool specialAna::TriggerSelector(){
 
 
 
+//     return (triggered && tiggerKinematics);
     return (triggered);
 
 }
@@ -607,7 +635,8 @@ void specialAna::Fill_Tree(){
 
     //general
     mLeptonTree["ThisWeight"]=weight;
-    mLeptonTree["lepton_type"]=sel_lepton->getUserRecord("id");
+    //mLeptonTree["lepton_type"]=sel_lepton->getUserRecord("id");
+    mLeptonTree["lepton_type"]=sel_lepton->getPdgNumber();
 
     HistClass::FillTree("slimtree");
 
@@ -641,23 +670,27 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     TString Datastream = datastream;
 
     /// W tail fitting
-    if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
-        for(uint i = 0; i < S3ListGen->size(); i++){
-          if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23){
-                    if(S3ListGen->at(i)->getPt() > 50)return true;
-          }
-        }
-    }
+    //if(Datastream.Contains("WToENu_M_200_")) {
+        //for(uint i = 0; i < S3ListGen->size(); i++){
+            ////if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 11){ //electron
+            //if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 11){ //electron
+                //if(S3ListGen->at(i)->getPt() > 580) {
+                    //std::cout << "Event über 580 Pt=" << S3ListGen->at(i)->getPt() << "\n";
+                    //return true;
+                //}
+            //}
+        //}
+    //}
 
     /// Diboson tail fitting
-    if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
-        for(uint i = 0; i < S3ListGen->size(); i++){
-                int part_id = TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
-          if(part_id == 23 || part_id == 22){
-                    if(S3ListGen->at(i)->getPt() > 500)return true;
-          }
-        }
-    }
+//     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
+//         for(uint i = 0; i < S3ListGen->size(); i++){
+//                 int part_id = TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
+//           if(part_id == 23 || part_id == 22){
+//                     if(S3ListGen->at(i)->getPt() > 500)return true;
+//           }
+//         }
+//     }
 
 
     return false;
@@ -667,25 +700,38 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
 void specialAna::Fill_Gen_Controll_histo() {
 
-    HistClass::Fill("Tau_num_Gen",TauListGen->size(),weight);
-    HistClass::Fill("Muon_num_Gen",MuonListGen->size(),weight);
-    HistClass::Fill("Ele_num_Gen",EleListGen->size(),weight);
-
+    
+    int muon_gen_num=0;
+    int ele_gen_num=0;
+    int tau_gen_num=0;
     for(uint i = 0; i < S3ListGen->size(); i++){
-        if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 13){
+        if (S3ListGen->at(i)->getPt()<10){
+            continue;
+        }
+        if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 13){
+            muon_gen_num++;
             HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }else if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 15){
+        }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 15){
+            tau_gen_num++;
             HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
-        }else if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 11){
+        }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 11){
+            ele_gen_num++;
             HistClass::Fill("Ele_pt_Gen",S3ListGen->at(i)->getPt(),weight);
             HistClass::Fill("Ele_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Ele_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+        }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+            HistClass::Fill("MC_W_m_Gen",S3ListGen->at(i)->getMass(),weight);
+            HistClass::Fill("MC_W_pt_Gen",S3ListGen->at(i)->getPt(),weight);
         }
+
     }
+    HistClass::Fill("Tau_num_Gen",tau_gen_num,weight);
+    HistClass::Fill("Muon_num_Gen",muon_gen_num,weight);
+    HistClass::Fill("Ele_num_Gen",ele_gen_num,weight);
 
 }
 
@@ -879,13 +925,14 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
 
 void specialAna::Fill_Controll_histo(int hist_number, pxl::Particle* lepton) {
 
-    if(lepton->getUserRecord("id").toInt32()==11){
+    //if(lepton->getUserRecord("id").toInt32()==11){
+    if(lepton->getPdgNumber()==11){
         Fill_Controll_Ele_histo(hist_number, lepton);
     }
-    if(lepton->getUserRecord("id").toInt32()==13){
+    if(lepton->getPdgNumber()==13){
         Fill_Controll_Muon_histo(hist_number, lepton);
     }
-    if(lepton->getUserRecord("id").toInt32()==15){
+    if(lepton->getPdgNumber()==15){
         Fill_Controll_Tau_histo(hist_number, lepton);
     }
 }
@@ -921,10 +968,15 @@ void specialAna::endJob( const Serializable* ) {
     {
         cout<<*it<<endl;
     }
+    cout << "n_lepton:   " << n_lepton << endl;
+    cout << "h_counters: " << HistClass::ReturnHist("h_counters")->GetBinContent(1) << endl;
     cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
+    file1->cd();
+    HistClass::WriteAll("counters");
     file1->mkdir("MC");
     file1->cd("MC/");
-    HistClass::WriteAll("MC_");
+    //HistClass::WriteAll("MC_");
+    HistClass::WriteAll("_Gen");
     file1->cd();
     file1->mkdir("Taus");
     file1->cd("Taus/");
@@ -943,15 +995,21 @@ void specialAna::endJob( const Serializable* ) {
     file1->cd("Trees/");
     HistClass::WriteAllTrees();
     file1->Close();
+
+    std::string outputstring = eventsAfterCuts.str();
+    eventDisplayFile << outputstring;
+    eventDisplayFile.close();
     delete file1;
 }
 
 void specialAna::initEvent( const pxl::Event* event ){
     HistClass::Fill("h_counters", 1, 1); // increment number of events
+    events_++;
 
     weight = 1;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
     m_GenEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Gen" );
+    m_TrigEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Trig" );
 
     temp_run = event->getUserRecord( "Run" );
     temp_ls = event->getUserRecord( "LumiSection" );
@@ -998,6 +1056,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     if(METList->size()>0){
         sel_met=METList->at(0);
     }else{
+        throw std::runtime_error("specialAna.cc: no MET '" + m_METType +"' found!");
         sel_met=0;
     }
     sel_lepton=0;
@@ -1032,9 +1091,10 @@ void specialAna::initEvent( const pxl::Event* event ){
             else if( Name == "Ele"     ) EleListGen->push_back( part );
             else if( Name == "Gamma"   ) GammaListGen->push_back( part );
             else if( Name == "Tau"     ) TauListGen->push_back( part );
-            else if( Name == m_METType ) METListGen->push_back( part );
+            else if( Name == (m_METType+"_gen") ) METListGen->push_back( part );
             else if( Name == m_JetAlgo ) JetListGen->push_back( part );
             else if( Name == "gen"      ) S3ListGen->push_back( part );
+            
         }
     }
 }

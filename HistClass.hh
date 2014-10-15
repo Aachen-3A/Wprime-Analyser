@@ -9,6 +9,8 @@
 #include "TNtupleD.h"
 #include "boost/format.hpp"
 
+// Note that we need a special treating for h_counters as it mustn't have a standard name like h1_* to comply with other tools as SirPlotAlot.
+
 namespace HistClass {
     static std::map<std::string, TH1D * > histo;
     static std::map<std::string, TH2D * > histo2;
@@ -22,6 +24,13 @@ namespace HistClass {
             tmphist->Sumw2();
             histo[Form("h1_%d_%s", i, name)] = tmphist;
         }
+    }
+
+    static void CreateHistoUnchangedName(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = ""){
+            TH1D * tmphist = new TH1D(Form("%s", name), xtitle, nbinsx, xlow, xup);
+            tmphist->SetXTitle(xtitle);
+            tmphist->Sumw2();
+            histo[Form("%s", name)] = tmphist;
     }
 
     static void Fill(Int_t n_histo,const char * name, double value,double weight)
@@ -90,7 +99,7 @@ namespace HistClass {
         tmphist->Sumw2();
         histo[Form("h1_%s", name)] = tmphist;
     }
-    
+
     const static void CreateHisto(boost::basic_format<char> name, boost::basic_format<char> title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
     {
         CreateHisto(str(name).c_str(), str(title).c_str(), nbinsx, xlow, xup, xtitle);
@@ -99,7 +108,14 @@ namespace HistClass {
     static void Fill(const char * name, double value,double weight)
     {
         //std::map<string, TH1D * >::iterator it =histo.find(Form("h1_%d_%s", nhist, name));
-        std::map<string, TH1D * >::iterator it =histo.find(Form("h1_%s", name));
+        std::map<string, TH1D * >::iterator it;
+        if (name == "h_counters") {
+                it =histo.find(Form("%s", name));
+        }
+        else {
+                it =histo.find(Form("h1_%s", name));
+        }
+
         if(it!=histo.end()){
             it->second->Fill(value,weight);
         }else{
@@ -113,9 +129,19 @@ namespace HistClass {
     //     histo[dummy]->Write();
     //   }
 <<<<<<< HEAD
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> specialAna.cc: writing file for event display
     static TH1D* ReturnHist(const char * name) {
-      std::string dummy = Form("h1_%s", name);
+      std::string dummy="";
+      if (name == "h_counters") {
+         dummy = Form("%s", name);
+      } else {
+         dummy = Form("h1_%s", name);
+      }
+      
       return histo[dummy];
 =======
     static TH1D* ReturnHist(const char * name)

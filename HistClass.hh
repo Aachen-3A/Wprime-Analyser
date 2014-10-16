@@ -5,24 +5,36 @@
 #include <map>
 #include "TH1F.h"
 #include "TH2F.h"
+#include "THnSparse.h"
 #include "TString.h"
 #include "TNtupleD.h"
 #include "boost/format.hpp"
+#include <stdarg.h>
 
 // Note that we need a special treating for h_counters as it mustn't have a standard name like h1_* to comply with other tools as SirPlotAlot.
 
 namespace HistClass {
     static std::map<std::string, TH1D * > histo;
     static std::map<std::string, TH2D * > histo2;
+    static std::map<std::string, THnSparseD * > histon;
     static std::map<std::string, TNtupleD * > ttupple;
     static std::map<std::string, TTree * > trees;
 
-    static void CreateHisto(Int_t n_histos,const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = ""){
+    static void CreateHisto(Int_t n_histos,const char* name, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = ""){
         for(int i = 0; i < n_histos; i++){
             TH1D * tmphist = new TH1D(Form("h1_%d_%s", i, name), xtitle, nbinsx, xlow, xup);
             tmphist->SetXTitle(xtitle);
             tmphist->Sumw2();
             histo[Form("h1_%d_%s", i, name)] = tmphist;
+        }
+    }
+
+    static void CreateHisto(Int_t n_histos,const char* name,const char* particle, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = ""){
+        for(int i = 0; i < n_histos; i++){
+            TH1D * tmphist = new TH1D(Form("h1_%d_%s_%s", i,particle, name), xtitle, nbinsx, xlow, xup);
+            tmphist->SetXTitle(xtitle);
+            tmphist->Sumw2();
+            histo[Form("h1_%d_%s_%s", i,particle, name)] = tmphist;
         }
     }
 
@@ -92,7 +104,8 @@ namespace HistClass {
     //     }
     //   }
 
-    const static void CreateHisto(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
+    //const static void CreateHisto(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
+    const static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
     {
         TH1D * tmphist = new TH1D(Form("h1_%s", name), xtitle, nbinsx, xlow, xup);
         tmphist->SetXTitle(xtitle);
@@ -100,16 +113,24 @@ namespace HistClass {
         histo[Form("h1_%s", name)] = tmphist;
     }
 
-    const static void CreateHisto(boost::basic_format<char> name, boost::basic_format<char> title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
+    const static void CreateHisto(const char* name,const char* particle, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
     {
-        CreateHisto(str(name).c_str(), str(title).c_str(), nbinsx, xlow, xup, xtitle);
+        TH1D * tmphist = new TH1D(Form("h1_%s_%s", particle,name), xtitle, nbinsx, xlow, xup);
+        tmphist->SetXTitle(xtitle);
+        tmphist->Sumw2();
+        histo[Form("h1_%s_%s", particle,name)] = tmphist;
+    }
+
+    const static void CreateHisto(boost::basic_format<char> name, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
+    {
+        CreateHisto(str(name).c_str(), nbinsx, xlow, xup, xtitle);
     }
 
     static void Fill(const char * name, double value,double weight)
     {
         //std::map<string, TH1D * >::iterator it =histo.find(Form("h1_%d_%s", nhist, name));
         std::map<string, TH1D * >::iterator it;
-        if (name == "h_counters") {
+        if (strcmp( name, "h_counters")==0) {
                 it =histo.find(Form("%s", name));
         }
         else {
@@ -136,7 +157,7 @@ namespace HistClass {
 >>>>>>> specialAna.cc: writing file for event display
     static TH1D* ReturnHist(const char * name) {
       std::string dummy="";
-      if (name == "h_counters") {
+      if (strcmp( name, "h_counters")==0) {
          dummy = Form("%s", name);
       } else {
          dummy = Form("h1_%s", name);
@@ -205,14 +226,61 @@ namespace HistClass {
         }
     }
 
-    static void CreateHisto(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, TString xtitle,TString ytitle)
+    static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, TString xtitle,TString ytitle)
     {
         std::string dummy = Form("h2_%s", name);
-        histo2[dummy] = new TH2D(Form("h2_%s", name), title, nbinsx, xlow, xup, nbinsy, ylow, yup);
+        histo2[dummy] = new TH2D(Form("h2_%s", name), Form("h2_%s", name), nbinsx, xlow, xup, nbinsy, ylow, yup);
         histo2[dummy] -> Sumw2();
         histo2[dummy] -> GetXaxis() -> SetTitle(xtitle);
         histo2[dummy] -> GetYaxis() -> SetTitle(ytitle);
     }
+
+
+    static void CreateNSparse(const char* name, int dimension, int* bins, double* xmin, double* xmax, string axisTitle[])
+    {
+        std::string dummy = Form("hn_%s", name);
+        histon[dummy] = new THnSparseD(Form("hn_%s", name), Form("hn_%s", name), dimension,bins, xmin, xmax );
+        histon[dummy] -> Sumw2();
+        for(int i=0;i<dimension;i++){
+            histon[dummy]->GetAxis(i)->SetTitle(axisTitle[i].c_str());
+        }
+    }
+
+    static void WriteN(const char * name = "")
+    {
+        std::map<std::string, THnSparseD * >::iterator it;
+        for (std::map<std::string, THnSparseD * >::iterator it=histon.begin(); it!=histon.end(); ++it){
+            if(strcmp( name, "") != 0 && std::string::npos!=it->first.find(name)){
+                it->second -> Write();
+            }else if(strcmp( name, "") == 0){
+                it->second -> Write();
+            }
+        }
+    }
+
+    static void FillSparse(const char * name, int n, ...){
+
+        std::map<string, THnSparseD * >::iterator it =histon.find(Form("hn_%s", name));
+
+        if(it!=histon.end()){
+            vector <double> v;
+            va_list vl;
+            va_start(vl,n);
+            for (int i=0;i<n;i++){
+                v.push_back(va_arg(vl,double));
+            }
+            va_end(vl);
+
+            //it->second->Fill(&v[0]);
+        }else{
+            cout<<"(Fill) No hist: "<<name<<" in map "<<endl;
+        }
+
+
+
+
+    }
+
 
     //static void Fill(const char * name, double valuex,double valuey,double weight)
     //{
@@ -225,6 +293,8 @@ namespace HistClass {
         //std::string dummy = Form("h2_%s", name);
         //histo2[dummy]->Write();
     //}
+
+
 }
 
 #endif

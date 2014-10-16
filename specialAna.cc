@@ -669,7 +669,6 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
-    /// W tail fitting
     //if(Datastream.Contains("WToENu_M_200_")) {
         //for(uint i = 0; i < S3ListGen->size(); i++){
             ////if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 11){ //electron
@@ -681,6 +680,35 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             //}
         //}
     //}
+    /// W tail fitting
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
+        for(uint i = 0; i < S3ListGen->size(); i++){
+            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
+                if(S3ListGen->at(i)->getMass() > 200) return true;
+            }
+        }
+    }
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200_13TeV")) {
+        for(uint i = 0; i < S3ListGen->size(); i++){
+            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                if(S3ListGen->at(i)->getMass() > 500) return true;
+            }
+        }
+    }
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500_13TeV")) {
+        for(uint i = 0; i < S3ListGen->size(); i++){
+            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                if(S3ListGen->at(i)->getMass() > 1000) return true;
+            }
+        }
+    }
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
+        for(uint i = 0; i < S3ListGen->size(); i++){
+            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                if(S3ListGen->at(i)->getMass() > 4000) return true;
+            }
+        }
+    }
 
     /// Diboson tail fitting
 //     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {

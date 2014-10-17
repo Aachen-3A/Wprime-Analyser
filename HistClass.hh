@@ -51,7 +51,7 @@ namespace HistClass {
         if(it!=histo.end()){
             it->second->Fill(value,weight);
         }else{
-            cout<<"(Fill) No hist: "<<name<<" in map "<<n_histo<<endl;
+            cout<<"(Fill) No hist: "<<Form("h1_%d_%s", n_histo, name)<<" in map "<<n_histo<<endl;
         }
 
     }
@@ -140,7 +140,7 @@ namespace HistClass {
         if(it!=histo.end()){
             it->second->Fill(value,weight);
         }else{
-            cout<<"(Fill) No hist: "<<name<<" in map "<<endl;
+            cout<<"(Fill) No hist: "<<Form("h1_%s", name)<<" in map "<<endl;
         }
     }
 

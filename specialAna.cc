@@ -44,8 +44,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     // number of events, saved in a histogram
     HistClass::CreateHistoUnchangedName("h_counters", "h_counters", 10, 0, 11, "N_{events}");
 
-    HistClass::CreateHisto("MC_W_m_Gen","MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
-    HistClass::CreateHisto("MC_W_pt_Gen","MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
+    HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
+    HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
 
 
     string particleName[3]  =  {"Ele","Tau","Muon"};
@@ -619,17 +619,7 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
-    //if(Datastream.Contains("WToENu_M_200_")) {
-        //for(uint i = 0; i < S3ListGen->size(); i++){
-            ////if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 11){ //electron
-            //if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 11){ //electron
-                //if(S3ListGen->at(i)->getPt() > 580) {
-                    //std::cout << "Event über 580 Pt=" << S3ListGen->at(i)->getPt() << "\n";
-                    //return true;
-                //}
-            //}
-        //}
-    //}
+
     /// W tail fitting
     if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
         for(uint i = 0; i < S3ListGen->size(); i++){

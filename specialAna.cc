@@ -511,8 +511,7 @@ bool specialAna::TriggerSelector(){
 
     for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
         try{
-            m_TrigEvtView->getUserRecord(*it);
-            triggered=true;
+            triggered=m_TrigEvtView->getUserRecord(*it);
             break;
         } catch( std::runtime_error &exc ) {
             continue;
@@ -676,6 +675,11 @@ void specialAna::Fill_Gen_Controll_histo() {
         if (S3ListGen->at(i)->getPt()<10){
             continue;
         }
+        if(S3ListGen->at(i)->getPdgNumber()==0){
+            if(S3ListGen->at(i)->hasUserRecord("id")){
+                S3ListGen->at(i)->setPdgNumber(S3ListGen->at(i)->getUserRecord("id"));
+            }
+        }
         if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 13){
             muon_gen_num++;
             HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
@@ -692,8 +696,10 @@ void specialAna::Fill_Gen_Controll_histo() {
             HistClass::Fill("Ele_eta_Gen",S3ListGen->at(i)->getEta(),weight);
             HistClass::Fill("Ele_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
         }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-            if(TMath::Abs( (( pxl::Particle*)  S3ListGen->at(i)->getMother())->getPdgNumber()) == 15){
-                continue;
+            if( (( pxl::Particle*)  S3ListGen->at(i)->getMother())!=0){
+                if(TMath::Abs( (( pxl::Particle*)  S3ListGen->at(i)->getMother())->getPdgNumber()) == 15){
+                    continue;
+                }
             }
             HistClass::Fill("MC_W_m_Gen",S3ListGen->at(i)->getMass(),weight);
             HistClass::Fill("MC_W_pt_Gen",S3ListGen->at(i)->getPt(),weight);
@@ -1034,7 +1040,14 @@ void specialAna::initEvent( const pxl::Event* event ){
     weight = 1;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
     m_GenEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Gen" );
-    m_TrigEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Trig" );
+    if(event->getObjectOwner().findObject< pxl::EventView >( "Trig" )){
+        m_TrigEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Trig" );
+    }else{
+        m_TrigEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
+    }
+
+
+
 
     temp_run = event->getUserRecord( "Run" );
     temp_ls = event->getUserRecord( "LumiSection" );

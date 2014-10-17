@@ -47,7 +47,7 @@ public:
     void Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton);
     void Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton);
     void Fill_Particle_hisos(int hist_number, pxl::Particle* lepton, string syst="");
-    void Fill_resolution( bool found);
+    void Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoPart);
     void Fill_Tree();
 
     void FillSystematics(const pxl::Event* event, std::string const particleName);
@@ -68,7 +68,7 @@ public:
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
-
+    int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
 
     pxl::EventView *m_RecEvtView;
@@ -87,11 +87,8 @@ public:
     const std::string type[2]      = {"Scale", "Resolution"};
     const std::string updown[2]    = {"Up", "Down"};
 
-    
-    TString d_mydisc[66];
-    TString d_mydiscmu[6];
-    const Tools::MConfig config_;
 
+    TString d_mydisc[66];
 
     bool found;
     bool metmatched;
@@ -103,6 +100,8 @@ public:
     double m_m_cut;
     const std::string m_cutdatafile;
     const vector< string >  m_trigger_string;
+    TString d_mydiscmu[6];
+    const Tools::MConfig config_;
 
     double temp_run;
     double temp_ls;

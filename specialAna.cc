@@ -1127,8 +1127,6 @@ void specialAna::initEvent( const pxl::Event* event ){
         double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
         double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
 
-        cout<<"pueight: "<<pileup_weight<<endl;
-
         weight = event_weight * varKfactor_weight * pileup_weight;
 
         // get all particles

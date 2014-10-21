@@ -90,8 +90,7 @@ public:
 
     TString d_mydisc[66];
 
-    bool found;
-    bool metmatched;
+    bool isOldPXLFile;
 
     double m_pt_met_min_cut;
     double m_pt_met_max_cut;

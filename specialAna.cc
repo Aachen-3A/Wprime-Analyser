@@ -514,10 +514,17 @@ bool specialAna::TriggerSelector(){
     for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
         try{
             triggered=m_TrigEvtView->getUserRecord(*it);
-            break;
+            if(triggered){
+                break;
+            }
         } catch( std::runtime_error &exc ) {
             continue;
         }
+    }
+
+    //I dont understand the 8TeV triggers at the moment!!
+    if(m_TrigEvtView->getName()=="Rec"){
+        triggered=true;
     }
 
     //pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
@@ -551,8 +558,7 @@ bool specialAna::TriggerSelector(){
 
       //std::cout<<triggered <<"   "<< tiggerKinematics<<std::endl;
 
-     //return (triggered && tiggerKinematics);
-     return (true && tiggerKinematics);
+     return (triggered && tiggerKinematics);
 
 }
 

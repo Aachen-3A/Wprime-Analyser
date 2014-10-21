@@ -44,40 +44,40 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     // number of events, saved in a histogram
     HistClass::CreateHistoUnchangedName("h_counters", "h_counters", 10, 0, 11, "N_{events}");
 
-    HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
-    HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
 
+    if(not runOnData){
+        HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
+        HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
+    }
 
-    string particleName[3]  =  {"Ele","Tau","Muon"};
-    string particleLatex[3] =  {"e","#tau","#mu"};
 
     for(unsigned int i=0;i<3;i++){
         //str(boost::format("N_{%s}")%particleLatex[i] )
-        HistClass::CreateHisto("num",particleName[i].c_str(), 40, 0, 39,            TString::Format("N_{%s}", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"pt",particleName[i].c_str(), 5000, 0, 5000,       TString::Format("p_{T}^{%s} (GeV)", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"eta",particleName[i].c_str(), 80, -4, 4,          TString::Format("#eta_{%s}", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"phi",particleName[i].c_str(), 40, -3.2, 3.2,      TString::Format("#phi_{%s} (rad)", particleLatex[i].c_str()) );
+        HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,            TString::Format("N_{%s}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"pt",particles[i].c_str(), 5000, 0, 5000,       TString::Format("p_{T}^{%s} (GeV)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"eta",particles[i].c_str(), 80, -4, 4,          TString::Format("#eta_{%s}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"phi",particles[i].c_str(), 40, -3.2, 3.2,      TString::Format("#phi_{%s} (rad)", particleSymbols[i].c_str()) );
 
-        HistClass::CreateHisto(4,"DeltaPhi",particleName[i].c_str(), 40, 0, 3.2,    TString::Format("#Delta#phi(%s,E_{T}^{miss})", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"mt",particleName[i].c_str(), 5000, 0, 5000,       TString::Format("M_{T}_{%s} (GeV)", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"charge",particleName[i].c_str(), 3, -1, 1,        TString::Format("q_{%s}", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"met",particleName[i].c_str(), 5000, 0, 5000,      "E^{miss}_{T} (GeV)" );
-        HistClass::CreateHisto(4,"met_phi",particleName[i].c_str(),40, -3.2, 3.2,   "#phi_{E^{miss}_{T}} (rad)" );
-        HistClass::CreateHisto(4,"ET_MET",particleName[i].c_str(),50, 0, 6,         TString::Format("p^{%s}_{T}/E^{miss}_{T}", particleLatex[i].c_str()) );
+        HistClass::CreateHisto(4,"DeltaPhi",particles[i].c_str(), 40, 0, 3.2,    TString::Format("#Delta#phi(%s,E_{T}^{miss})", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"mt",particles[i].c_str(), 5000, 0, 5000,       TString::Format("M_{T}_{%s} (GeV)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"charge",particles[i].c_str(), 3, -1, 1,        TString::Format("q_{%s}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"met",particles[i].c_str(), 5000, 0, 5000,      "E^{miss}_{T} (GeV)" );
+        HistClass::CreateHisto(4,"met_phi",particles[i].c_str(),40, -3.2, 3.2,   "#phi_{E^{miss}_{T}} (rad)" );
+        HistClass::CreateHisto(4,"ET_MET",particles[i].c_str(),50, 0, 6,         TString::Format("p^{%s}_{T}/E^{miss}_{T}", particleSymbols[i].c_str()) );
 
-        HistClass::CreateHisto("num_Gen",particleName[i].c_str(), 40, 0, 39,        TString::Format("N_{%s}", particleLatex[i].c_str()) );
-        HistClass::CreateHisto("pt_Gen",particleName[i].c_str(), 5000, 0, 5000,     TString::Format("p_{T}^{%s} (GeV)", particleLatex[i].c_str()) );
-        HistClass::CreateHisto("eta_Gen",particleName[i].c_str(), 80, -4, 4,        TString::Format("#eta_{%s}", particleLatex[i].c_str()) );
-        HistClass::CreateHisto("phi_Gen",particleName[i].c_str(), 40, -3.2, 3.2,    TString::Format("#phi_{%s} (rad)", particleLatex[i].c_str()) );
-
-        HistClass::CreateHisto(4,"jet_1_pt",particleName[i].c_str(), 5000, 0, 5000, "p_{T}^{jet} (GeV)" );
-        HistClass::CreateHisto(4,"jet_1_eta",particleName[i].c_str(), 80, -4, 4,    "#eta_{jet}" );
-        HistClass::CreateHisto(4,"jet_1_phi",particleName[i].c_str(), 40, -3.2, 3.2,"#phi_{jet} (rad)" );
-        HistClass::CreateHisto(4,"jet_1_DeltaPhi",particleName[i].c_str(), 40, 0, 3.2,TString::Format("#Delta#phi(%s,jet)", particleLatex[i].c_str()) );
-        HistClass::CreateHisto(4,"jet_1_DeltaPhiMET",particleName[i].c_str(), 40, 0, 3.2, "#Delta#phi(E_{T}^{miss},jet)");
-
-        HistClass::CreateHisto("recoMgen_pt",particleName[i].c_str(), 400, -100, 100, "p_{T}^{reco}-p_{T}^{gen} (GeV)" );
-        HistClass::CreateHisto("recoMgen_pt_rel",particleName[i].c_str(), 400, -10, 10, "#frac{p_{T}^{reco}-p_{T}^{gen}}{p_{T}^{gen}}" );
+        HistClass::CreateHisto(4,"jet_1_pt",particles[i].c_str(), 5000, 0, 5000, "p_{T}^{jet} (GeV)" );
+        HistClass::CreateHisto(4,"jet_1_eta",particles[i].c_str(), 80, -4, 4,    "#eta_{jet}" );
+        HistClass::CreateHisto(4,"jet_1_phi",particles[i].c_str(), 40, -3.2, 3.2,"#phi_{jet} (rad)" );
+        HistClass::CreateHisto(4,"jet_1_DeltaPhi",particles[i].c_str(), 40, 0, 3.2,TString::Format("#Delta#phi(%s,jet)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"jet_1_DeltaPhiMET",particles[i].c_str(), 40, 0, 3.2, "#Delta#phi(E_{T}^{miss},jet)");
+        if(not runOnData){
+            HistClass::CreateHisto("recoMgen_pt",particles[i].c_str(), 400, -100, 100, "p_{T}^{reco}-p_{T}^{gen} (GeV)" );
+            HistClass::CreateHisto("recoMgen_pt_rel",particles[i].c_str(), 400, -10, 10, "#frac{p_{T}^{reco}-p_{T}^{gen}}{p_{T}^{gen}}" );
+            HistClass::CreateHisto("num_Gen",particles[i].c_str(), 40, 0, 39,        TString::Format("N_{%s}", particleSymbols[i].c_str()) );
+            HistClass::CreateHisto("pt_Gen",particles[i].c_str(), 5000, 0, 5000,     TString::Format("p_{T}^{%s} (GeV)", particleSymbols[i].c_str()) );
+            HistClass::CreateHisto("eta_Gen",particles[i].c_str(), 80, -4, 4,        TString::Format("#eta_{%s}", particleSymbols[i].c_str()) );
+            HistClass::CreateHisto("phi_Gen",particles[i].c_str(), 40, -3.2, 3.2,    TString::Format("#phi_{%s} (rad)", particleSymbols[i].c_str()) );
+        }
 
     }
 
@@ -200,44 +200,47 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Ele_puChargedHadronIso", 100, 0, 100,"puChargedHadronIso");
     HistClass::CreateHisto(4,"Ele_sigmaIetaIeta", 100, 0, 10,"sigmaIetaIeta");
 
-    // 4 for loops to create 480 histograms
-    for(unsigned char pi=0; pi<3; pi++){ // loop over particles
-        for(unsigned char si=0; si<5; si++){ // loop over shifted particles
-            for(unsigned char ti=0; ti<2; ti++){ // loop over type
-                for(unsigned char ui=0; ui<2; ui++){ // loop over updown
-                    HistClass::CreateHisto(boost::format("3_%s_pt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           5000, 0, 5000,
-                                           std::string("p_{T}^{") + particleSymbols[pi] + "} (GeV)");
-                    HistClass::CreateHisto(boost::format("3_%s_eta_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           5000, 0, 5000,
-                                           std::string("#eta_{") + particleSymbols[pi] + "}");
-                    HistClass::CreateHisto(boost::format("3_%s_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           40, -3.2, 3.2,
-                                           std::string("#phi_{") + particleSymbols[pi] + "} (rad)");
-                    HistClass::CreateHisto(boost::format("3_%s_DeltaPhi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           40, 0, 3.2,
-                                           std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
-                    HistClass::CreateHisto(boost::format("3_%s_mt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           5000, 0, 5000,
-                                           std::string("M_{T}_{") + particleSymbols[pi] + "} (GeV)");
-                    HistClass::CreateHisto(boost::format("3_%s_ET_MET_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           50, 0, 6,
-                                           std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
-                    HistClass::CreateHisto(boost::format("3_%s_met_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           5000, 0, 5000,
-                                           "E^{miss}_{T} (GeV)");
-                    HistClass::CreateHisto(boost::format("3_%s_met_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                           40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
+
+    if(not runOnData){
+        // 4 for loops to create 480 histograms
+        for(unsigned char pi=0; pi<3; pi++){ // loop over particles
+            for(unsigned char si=0; si<5; si++){ // loop over shifted particles
+                for(unsigned char ti=0; ti<2; ti++){ // loop over type
+                    for(unsigned char ui=0; ui<2; ui++){ // loop over updown
+                        HistClass::CreateHisto(boost::format("3_%s_pt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               5000, 0, 5000,
+                                               std::string("p_{T}^{") + particleSymbols[pi] + "} (GeV)");
+                        HistClass::CreateHisto(boost::format("3_%s_eta_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               5000, 0, 5000,
+                                               std::string("#eta_{") + particleSymbols[pi] + "}");
+                        HistClass::CreateHisto(boost::format("3_%s_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               40, -3.2, 3.2,
+                                               std::string("#phi_{") + particleSymbols[pi] + "} (rad)");
+                        HistClass::CreateHisto(boost::format("3_%s_DeltaPhi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               40, 0, 3.2,
+                                               std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
+                        HistClass::CreateHisto(boost::format("3_%s_mt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               5000, 0, 5000,
+                                               std::string("M_{T}_{") + particleSymbols[pi] + "} (GeV)");
+                        HistClass::CreateHisto(boost::format("3_%s_ET_MET_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               50, 0, 6,
+                                               std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
+                        HistClass::CreateHisto(boost::format("3_%s_met_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               5000, 0, 5000,
+                                               "E^{miss}_{T} (GeV)");
+                        HistClass::CreateHisto(boost::format("3_%s_met_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                               40, -3.2, 3.2,"#phi_{E^{miss}_{T}} (rad)");
+                    }
                 }
             }
         }
-    }
 
-    int bins []={100,5000};
-    double xmin []={-10,0};
-    double xmax []={10,5000};
-    string xtitle []= {"res","p_{T}"};
-    HistClass::CreateNSparse("Muon_Res",2,bins,xmin ,xmax ,xtitle  );
+        int bins []={100,5000};
+        double xmin []={-10,0};
+        double xmax []={10,5000};
+        string xtitle []= {"res","p_{T}"};
+        HistClass::CreateNSparse("Muon_Res",2,bins,xmin ,xmax ,xtitle  );
+    }
 
 
     //Kinematics
@@ -275,9 +278,9 @@ specialAna::~specialAna() {
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
     if(tail_selector(event)) return;
-
-
-    Fill_Gen_Controll_histo();
+    if(not runOnData){
+        Fill_Gen_Controll_histo();
+    }
     KinematicsSelector();
 
     if (!TriggerSelector()) return;
@@ -516,15 +519,16 @@ bool specialAna::TriggerSelector(){
         } catch( std::runtime_error &exc ) {
             continue;
         }
-
-//         pxl::UserRecords::const_iterator us = m_RecEvtView->getUserRecords().begin();
-//         for( ; us != m_RecEvtView->getUserRecords().end(); ++us ) {
-//             if ( string::npos == (*us).first.find( *it )){
-//                 triggers.insert(us->first);
-//             }
-//         }
-
     }
+
+    //pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
+    //for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
+        ////if ( string::npos == (*us).first.find( *it )){
+        //if ( string::npos != (*us).first.find( "HLT_HLT")){
+            //triggers.insert(us->first);
+            ////std::cout<<us->first <<std::endl;
+        //}
+    //}
 
     if(sel_lepton && sel_met){
         if(sel_lepton->getName()==m_TauType){
@@ -546,9 +550,10 @@ bool specialAna::TriggerSelector(){
 
     }
 
+      //std::cout<<triggered <<"   "<< tiggerKinematics<<std::endl;
 
-
-     return (triggered && tiggerKinematics);
+     //return (triggered && tiggerKinematics);
+     return (true && tiggerKinematics);
 
 }
 
@@ -798,7 +803,6 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     HistClass::Fill(hist_number,"Ele_HCALOverECALd1",lepton->getUserRecord ("HCALOverECALd1"),weight);
     HistClass::Fill(hist_number,"Ele_HoEm",lepton->getUserRecord ("HoEm"),weight);
     HistClass::Fill(hist_number,"Ele_HoverE2012",lepton->getUserRecord ("HoverE2012"),weight);
-    HistClass::Fill(hist_number,"Ele_Match",lepton->getUserRecord ("Match"),weight);
     HistClass::Fill(hist_number,"Ele_NinnerLayerLostHits",lepton->getUserRecord ("NinnerLayerLostHits"),weight);
     HistClass::Fill(hist_number,"Ele_NumBrems",lepton->getUserRecord ("NumBrems"),weight);
     HistClass::Fill(hist_number,"Ele_PErr",lepton->getUserRecord ("PErr"),weight);
@@ -831,13 +835,15 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     HistClass::Fill(hist_number,"Ele_photonIso",lepton->getUserRecord ("photonIso"),weight);
     HistClass::Fill(hist_number,"Ele_pin",lepton->getUserRecord ("pin"),weight);
     HistClass::Fill(hist_number,"Ele_pout",lepton->getUserRecord ("pout"),weight);
-    HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso"),weight);
+    if(lepton->hasUserRecord("puChargedHadronIso")){
+        HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso"),weight);
+        HistClass::Fill(hist_number,"Ele_Match",lepton->getUserRecord ("Match"),weight);
+    }
     HistClass::Fill(hist_number,"Ele_sigmaIetaIeta",lepton->getUserRecord ("sigmaIetaIeta"),weight);
 
 
 
 
-    //HistClass::Fill(hist_number,"Ele_decayMode",lepton->getUserRecord("decayMode"),weight);
 
     //cout<<"-----------------------------------------"<<endl;
     //pxl::UserRecord::const_iterator us = lepton->getUserRecord().begin();
@@ -912,7 +918,7 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi%s")%name %syst ),DeltaPhi(lepton,sel_met),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_mt%s")%name %syst ),MT(lepton,sel_met),weight);
-        HistClass::Fill(hist_number,str(boost::format("%s_ET_MET%s")%name %syst ),sel_lepton->getPt()/sel_met->getPt(),weight);
+        HistClass::Fill(hist_number,str(boost::format("%s_ET_MET%s")%name %syst ),lepton->getPt()/sel_met->getPt(),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_met%s")%name %syst ),sel_met->getPt(),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_met_phi%s")%name %syst ),sel_met->getPhi(),weight);
         if(syst==""){
@@ -1000,10 +1006,11 @@ void specialAna::endJob( const Serializable* ) {
     cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
     file1->cd();
     HistClass::WriteAll("counters");
-    file1->mkdir("MC");
-    file1->cd("MC/");
-    //HistClass::WriteAll("MC_");
-    HistClass::WriteAll("_Gen");
+    if(not runOnData){
+        file1->mkdir("MC");
+        file1->cd("MC/");
+        HistClass::WriteAll("_Gen");
+    }
     file1->cd();
     file1->mkdir("Taus");
     file1->cd("Taus/");
@@ -1124,6 +1131,10 @@ void specialAna::initEvent( const pxl::Event* event ){
         m_GenEvtView->getObjectsOfType< pxl::Particle >( AllParticlesGen );
         pxl::sortParticles( AllParticlesGen );
         // push them into the corresponding vectors
+        string genCollection="gen";
+        if(isOldPXLFile){
+            genCollection="S3";
+        }
         for( vector< pxl::Particle* >::const_iterator part_it = AllParticlesGen.begin(); part_it != AllParticlesGen.end(); ++part_it ) {
             pxl::Particle *part = *part_it;
             string Name = part->getName();
@@ -1134,7 +1145,7 @@ void specialAna::initEvent( const pxl::Event* event ){
             else if( Name == "Tau"     ) TauListGen->push_back( part );
             else if( Name == (m_METType+"_gen") ) METListGen->push_back( part );
             else if( Name == m_JetAlgo ) JetListGen->push_back( part );
-            else if( Name == "gen"      ) S3ListGen->push_back( part );
+            else if( Name == genCollection) S3ListGen->push_back( part );
 
         }
     }

@@ -545,6 +545,7 @@ bool specialAna::TriggerSelector(){
         if(sel_lepton->getName()=="Ele"){
             if(sel_lepton->getPt()>30){
                 tiggerKinematics=true;
+                //TODO: m_T(e)>300GeV for W->e (m<200)?
             }
         }
 
@@ -1122,7 +1123,8 @@ void specialAna::initEvent( const pxl::Event* event ){
 
         double event_weight = m_GenEvtView->getUserRecord( "Weight" );
         double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
-        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
+//        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
+        double pileup_weight = 1.;
 
         weight = event_weight * varKfactor_weight * pileup_weight;
 

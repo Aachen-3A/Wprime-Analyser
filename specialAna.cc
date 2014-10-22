@@ -552,6 +552,7 @@ bool specialAna::TriggerSelector(){
         if(sel_lepton->getName()=="Ele"){
             if(sel_lepton->getPt()>30){
                 tiggerKinematics=true;
+                //TODO: m_T(e)>300GeV for W->e (m<200)?
             }
         }
 
@@ -938,13 +939,13 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
 void specialAna::Fill_Controll_histo(int hist_number, pxl::Particle* lepton) {
 
     //if(lepton->getUserRecord("id").toInt32()==11){
-    if(lepton->getPdgNumber()==11){
+    if(TMath::Abs(lepton->getPdgNumber())==11){
         Fill_Controll_Ele_histo(hist_number, lepton);
     }
-    if(lepton->getPdgNumber()==13){
+    if(TMath::Abs(lepton->getPdgNumber())==13){
         Fill_Controll_Muon_histo(hist_number, lepton);
     }
-    if(lepton->getPdgNumber()==15){
+    if(TMath::Abs(lepton->getPdgNumber())==15){
         Fill_Controll_Tau_histo(hist_number, lepton);
     }
 }

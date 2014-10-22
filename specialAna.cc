@@ -538,22 +538,26 @@ bool specialAna::TriggerSelector(){
     //}
 
     if(sel_lepton && sel_met){
-        if(sel_lepton->getName()==m_TauType){
-            if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
-                tiggerKinematics=true;
-            }
+        //if(sel_lepton->getName()==m_TauType){
+            //if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
+                //tiggerKinematics=true;
+            //}
 
-        }
-        if(sel_lepton->getName()=="Muon"){
-            if(sel_lepton->getPt()>25){
-                tiggerKinematics=true;
-            }
-        }
+        //}
+        //if(sel_lepton->getName()=="Muon"){
+            //if(sel_lepton->getPt()>25){
+                //tiggerKinematics=true;
+            //}
+        //}
         if(sel_lepton->getName()=="Ele"){
-            if(sel_lepton->getPt()>30){
+            //ONLY TEMPORARY:
+            //m_T>300GeV for W->e (m<200)?
+            if(MT(sel_lepton, sel_met)>300){
                 tiggerKinematics=true;
-                //TODO: m_T(e)>300GeV for W->e (m<200)?
             }
+            //if(sel_lepton->getPt()>30){
+                //tiggerKinematics=true;
+            //}
         }
 
     }

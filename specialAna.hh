@@ -63,7 +63,7 @@ public:
 
 
     void KinematicsSelector();
-    bool TriggerSelector();
+    bool TriggerSelector(const pxl::Event* event);
     bool tail_selector(const pxl::Event* event);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);

@@ -283,7 +283,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     }
     KinematicsSelector();
 
-    if (!TriggerSelector()) return;
+    if (!TriggerSelector(event)) return;
 
     Fill_stage_0_histos();
 
@@ -508,7 +508,7 @@ void specialAna::KinematicsSelector() {
     }
 }
 
-bool specialAna::TriggerSelector(){
+bool specialAna::TriggerSelector(const pxl::Event* event){
     bool triggered=false;
     bool tiggerKinematics=false;
 
@@ -524,7 +524,7 @@ bool specialAna::TriggerSelector(){
     }
 
     //I dont understand the 8TeV triggers at the moment!!
-    if(m_TrigEvtView->getName()=="Rec"){
+    if( string::npos != event->getUserRecord( "Dataset" ).toString ().find("8TeV")){
         triggered=true;
     }
 
@@ -683,7 +683,7 @@ void specialAna::Fill_Gen_Controll_histo() {
     int ele_gen_num=0;
     int tau_gen_num=0;
     for(uint i = 0; i < S3ListGen->size(); i++){
-        if (S3ListGen->at(i)->getPt()<10){
+        if (S3ListGen->at(i)->getPt()<10 && not (TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24)   ){
             continue;
         }
         if(S3ListGen->at(i)->getPdgNumber()==0){
@@ -955,9 +955,11 @@ void specialAna::Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoP
         if(recoPart->getName()==m_TauType){
             name="Tau";
         }
-        HistClass::Fill( (boost::format("%s_recoMgen_pt")%name).str().c_str() ,recoPart->getPt()-genPart->getPt(),weight);
-        HistClass::Fill( (boost::format("%s_recoMgen_pt_rel")%name ).str().c_str(),(recoPart->getPt()-genPart->getPt())/genPart->getPt(),weight);
-        HistClass::FillSparse( "Muon_Res",(recoPart->getPt()-genPart->getPt())/genPart->getPt(),genPart->getPt());
+        if( not ( genPart->getPt()==0 ) ){
+            HistClass::Fill( (boost::format("%s_recoMgen_pt")%name).str().c_str() ,recoPart->getPt()-genPart->getPt(),weight);
+            HistClass::Fill( (boost::format("%s_recoMgen_pt_rel")%name ).str().c_str(),(recoPart->getPt()-genPart->getPt())/genPart->getPt(),weight);
+            HistClass::FillSparse( "Muon_Res",2,(recoPart->getPt()-genPart->getPt())/genPart->getPt(),genPart->getPt());
+        }
 
 }
 
@@ -1152,8 +1154,8 @@ void specialAna::initEvent( const pxl::Event* event ){
             else if( Name == (m_METType+"_gen") ) METListGen->push_back( part );
             else if( Name == m_JetAlgo ) JetListGen->push_back( part );
             else if( Name == genCollection) S3ListGen->push_back( part );
-
         }
+
     }
 }
 

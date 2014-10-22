@@ -457,7 +457,7 @@ void specialAna::KinematicsSelector() {
 
     //make veto numbers
     //we don't need vectors, do we?
-    double m_leptonVetoPt=30;
+    double m_leptonVetoPt=20;
     int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
     int numVetoTau=vetoNumber(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
@@ -1131,7 +1131,13 @@ void specialAna::initEvent( const pxl::Event* event ){
 
         double event_weight = m_GenEvtView->getUserRecord( "Weight" );
         double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
-        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
+
+        //check if we have a 13 TeV sample and if so, change the weight to one:
+        double pileup_weight = 1;
+        string datastream = event->getUserRecord( "Dataset" );
+        TString Datastream = datastream;
+        if(Datastream.Contains("13TeV"))
+		    pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
 
         weight = event_weight * varKfactor_weight * pileup_weight;
 
@@ -1194,7 +1200,13 @@ void specialAna::endEvent( const pxl::Event* event ){
    }
 }
 
+<<<<<<< HEAD
 //void specialAna::SetEvents(int e){
     //events_=e;
 //}
+=======
+//~ void specialAna::SetEvents(int e){
+    //~ events_=e;
+//~ }
+>>>>>>> specialAna: Missing semicolon
 

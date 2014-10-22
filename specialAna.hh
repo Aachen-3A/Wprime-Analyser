@@ -55,7 +55,11 @@ public:
 
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
+<<<<<<< HEAD
     //void SetEvents(int e);
+=======
+    //~ void SetEvents(int e);
+>>>>>>> specialAna: Missing semicolon
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);

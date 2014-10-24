@@ -57,6 +57,7 @@ public:
     void endEvent( const pxl::Event* event );
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     //void SetEvents(int e);
 =======
     //~ void SetEvents(int e);
@@ -65,6 +66,9 @@ public:
     void SetEvents(int e);
     void applyKfactor(const pxl::Event* event);
 >>>>>>> added k-faktor and some gen plots
+=======
+    void applyKfactor(const pxl::Event* event, int mode);
+>>>>>>> fix k-factor
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);

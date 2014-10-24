@@ -291,7 +291,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         Fill_Gen_Controll_histo();
     }
 
-    applyKfactor(event);
+    applyKfactor(event,0);
 
     KinematicsSelector();
 
@@ -1375,7 +1375,7 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     }
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
-    double wmass=0.
+    double wmass=0.;
     //additive
     //p0                        =      1.18304   +/-   0.00128801
     //p1                        = -2.66112e-05   +/-   2.5832e-06
@@ -1393,8 +1393,8 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     if( m_dataPeriod=="13TeV" ){
         if(Datastream.Contains("WTo") ) {
             for(uint i = 0; i < S3ListGen->size(); i++){
-                S3ListGen->at(i)->getPdgNumber()) == 24){
-                    wmass=S3ListGen->at(i).getMass();
+                if(S3ListGen->at(i)->getPdgNumber() == 24){
+                    wmass=S3ListGen->at(i)->getMass();
                 }
             }
             weight*=(par[0]+wmass*par[1]+wmass*wmass*par[2]);

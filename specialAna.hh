@@ -56,6 +56,7 @@ public:
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
     void SetEvents(int e);
+    void applyKfactor(const pxl::Event* event);
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);

@@ -49,6 +49,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     if(not runOnData){
         HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
         HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
+        HistClass::CreateHisto("MC_W_pt_controll_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
     }
 
 
@@ -127,6 +128,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
     HistClass::CreateHisto(4,"Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
     HistClass::CreateHisto(4,"Muon_ptError", 1000, 0, 1000,"#sigma(p_{T}^{#mu}) (GeV)");
+    HistClass::CreateHisto(4,"Muon_ptErroroverpt", 1000, 0, 1000,"#sigma(p_{T}^{#mu})/p_{T}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_Cocktail_pt", 5000, 0, 5000,"p_{T}^{cocktail #mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
     HistClass::CreateHisto(4,"Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} (rad)");
@@ -239,8 +241,15 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         int bins []={100,5000};
         double xmin []={-10,0};
         double xmax []={10,5000};
-        string xtitle []= {"res","p_{T}"};
+        string xtitle []= {"res","p_{T} (GeV)"};
         HistClass::CreateNSparse("Muon_Res",2,bins,xmin ,xmax ,xtitle  );
+
+        bins [0]=5000;
+        xmin [0]=0;
+        xmax [0]=0;
+        xtitle [0]= "p_{T} (GeV)";
+        xtitle [1]= "M (GeV)";
+        HistClass::CreateNSparse("W_pt_m_Gen",2,bins,xmin ,xmax ,xtitle  );
     }
 
 
@@ -282,6 +291,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     if(not runOnData){
         Fill_Gen_Controll_histo();
     }
+
+    applyKfactor(event);
+
     KinematicsSelector();
 
     if (!TriggerSelector(event)) return;
@@ -799,32 +811,54 @@ void specialAna::Fill_Gen_Controll_histo() {
         }
         if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 13){
             muon_gen_num++;
-            HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),weight);
-            HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),weight);
-            HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+            HistClass::Fill("Muon_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Muon_eta_Gen",S3ListGen->at(i)->getEta(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Muon_phi_Gen",S3ListGen->at(i)->getPhi(),m_GenEvtView->getUserRecord( "Weight" ));
         }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 15){
             tau_gen_num++;
-            HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),weight);
-            HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),weight);
-            HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+            HistClass::Fill("Tau_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Tau_eta_Gen",S3ListGen->at(i)->getEta(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Tau_phi_Gen",S3ListGen->at(i)->getPhi(),m_GenEvtView->getUserRecord( "Weight" ));
         }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 11){
             ele_gen_num++;
-            HistClass::Fill("Ele_pt_Gen",S3ListGen->at(i)->getPt(),weight);
-            HistClass::Fill("Ele_eta_Gen",S3ListGen->at(i)->getEta(),weight);
-            HistClass::Fill("Ele_phi_Gen",S3ListGen->at(i)->getPhi(),weight);
+            HistClass::Fill("Ele_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Ele_eta_Gen",S3ListGen->at(i)->getEta(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("Ele_phi_Gen",S3ListGen->at(i)->getPhi(),m_GenEvtView->getUserRecord( "Weight" ));
         }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
             if( (( pxl::Particle*)  S3ListGen->at(i)->getMother())!=0){
                 if(TMath::Abs( (( pxl::Particle*)  S3ListGen->at(i)->getMother())->getPdgNumber()) == 15){
                     continue;
                 }
             }
-            HistClass::Fill("MC_W_m_Gen",S3ListGen->at(i)->getMass(),weight);
-            HistClass::Fill("MC_W_pt_Gen",S3ListGen->at(i)->getPt(),weight);
+            HistClass::Fill("MC_W_m_Gen",S3ListGen->at(i)->getMass(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill("MC_W_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+
+
+            HistClass::FillSparse( "W_pt_m_Gen",2,S3ListGen->at(i)->getPt(),S3ListGen->at(i)->getMass());
+            HistClass::FillSparse( "W_pt_m_Gen",2,S3ListGen->at(i)->getPt(),S3ListGen->at(i)->getMass());
+
         }
+        int tmpid= TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
+
+        if(tmpid == 11) l=i;
+        if(tmpid == 13) l=i;
+        if(tmpid == 15) l=i;
+
+        if(tmpid == 12) nu=i;
+        if(tmpid == 14) nu=i;
+        if(tmpid == 16) nu=i;
+
+
+
     }
-    HistClass::Fill("Tau_num_Gen",tau_gen_num,weight);
-    HistClass::Fill("Muon_num_Gen",muon_gen_num,weight);
-    HistClass::Fill("Ele_num_Gen",ele_gen_num,weight);
+    if(nu>=0 && l>=0){
+        HistClass::Fill("MC_W_pt_controll_Gen",(S3ListGen->at(l)->getVector()+S3ListGen->at(nu)->getVector()).getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+    }
+
+
+    HistClass::Fill("Tau_num_Gen",tau_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
+    HistClass::Fill("Muon_num_Gen",muon_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
+    HistClass::Fill("Ele_num_Gen",ele_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
 
 
 
@@ -865,6 +899,7 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
     HistClass::Fill(hist_number,"Muon_qoverp",lepton->getUserRecord("qoverp"),weight);
     HistClass::Fill(hist_number,"Muon_qoverpError",lepton->getUserRecord("qoverpError"),weight);
     HistClass::Fill(hist_number,"Muon_ptError",lepton->getUserRecord("ptError"),weight);
+    HistClass::Fill(hist_number,"Muon_ptErroroverpt",lepton->getUserRecord("ptError").toDouble()/lepton->getPt(),weight);
     if(lepton->getUserRecord("validCocktail")){
         TLorentzVector* cocktailMuon = new TLorentzVector();
         cocktailMuon->SetXYZM(lepton->getUserRecord("pxCocktail"),lepton->getUserRecord("pyCocktail"),lepton->getUserRecord("pzCocktail"),0.105);
@@ -1062,8 +1097,8 @@ void specialAna::Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoP
             name="Tau";
         }
         if( not ( genPart->getPt()==0 ) ){
-            HistClass::Fill( (boost::format("%s_recoMgen_pt")%name).str().c_str() ,recoPart->getPt()-genPart->getPt(),weight);
-            HistClass::Fill( (boost::format("%s_recoMgen_pt_rel")%name ).str().c_str(),(recoPart->getPt()-genPart->getPt())/genPart->getPt(),weight);
+            HistClass::Fill( (boost::format("%s_recoMgen_pt")%name).str().c_str() ,recoPart->getPt()-genPart->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
+            HistClass::Fill( (boost::format("%s_recoMgen_pt_rel")%name ).str().c_str(),(recoPart->getPt()-genPart->getPt())/genPart->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
             HistClass::FillSparse( "Muon_Res",2,(recoPart->getPt()-genPart->getPt())/genPart->getPt(),genPart->getPt());
         }
 
@@ -1272,6 +1307,42 @@ void specialAna::initEvent( const pxl::Event* event ){
         }
 
     }
+}
+
+
+void specialAna::applyKfactor(const pxl::Event* event , int mode){
+    if( not (mode==1 || mode==0) ){
+        throw std::runtime_error("specialAna.cc: The k-faktor must be additive (mode=0) or multiplicative (mode=1) yours is "+std::to_string(mode));
+    }
+    string datastream = event->getUserRecord( "Dataset" );
+    TString Datastream = datastream;
+    double wmass=0.
+    //additive
+    //p0                        =      1.18304   +/-   0.00128801
+    //p1                        = -2.66112e-05   +/-   2.5832e-06
+    //p2                        = -2.82645e-08   +/-   1.00043e-09
+    double par []={1.18304,-2.66112e-05,-2.82645e-08};
+    //multiply
+    //p0                        =      1.17943   +/-   0.00136125
+    //p1                        = -1.79983e-05   +/-   2.61106e-06
+    //p2                        = -2.94026e-08   +/-   9.2078e-10
+    if(mode==1){
+        par[0]= 1.17943;
+        par[1]= -1.79983e-05;
+        par[2]= -2.94026e-08;
+    }
+    if( m_dataPeriod=="13TeV" ){
+        if(Datastream.Contains("WTo") ) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                S3ListGen->at(i)->getPdgNumber()) == 24){
+                    wmass=S3ListGen->at(i).getMass();
+                }
+            }
+            weight*=(par[0]+wmass*par[1]+wmass*wmass*par[2]);
+
+        }
+    }
+
 }
 
 void specialAna::endEvent( const pxl::Event* event ){

@@ -27,10 +27,11 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
    m_pt_cut(                cfg.GetItem< double >( "wprime.pt_cut" ) ),
    m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
-   m_cutdatafile(      cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
+   m_cutdatafile(           cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
 
    m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
    d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
+   m_dataPeriod(            cfg.GetItem< string >( "General.DataPeriod" ) ),
    config_(cfg)
 {
 
@@ -511,21 +512,41 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
     bool triggered=false;
     bool tiggerKinematics=false;
 
-    for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
-        try{
-            triggered=m_TrigEvtView->getUserRecord(*it);
-            if(triggered){
-                break;
-            }
-        } catch( std::runtime_error &exc ) {
-            continue;
-        }
-    }
 
     //I dont understand the 8TeV triggers at the moment!!
-    if( string::npos != event->getUserRecord( "Dataset" ).toString ().find("8TeV")){
-        triggered=true;
+    if( m_dataPeriod =="13TeV"){
+        //this is 13 TeV
+        for( vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
+            try{
+                triggered=m_TrigEvtView->getUserRecord(*it);
+                if(triggered){
+                    break;
+                }
+            } catch( std::runtime_error &exc ) {
+                continue;
+            }
+        }
+    }else{
+        //this is 8TeV
+        pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
+        for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
+            if (
+                string::npos != (*us).first.find( "HLT_HLT_Ele90_CaloIdVT_GsfTrkIdT") or
+                //string::npos != (*us).first.find( "HLT_HLT_Ele27_WP80_v") or
+                string::npos != (*us).first.find( "HLT_HLT_Mu40_v") or
+                string::npos != (*us).first.find( "HLT_HLT_Mu40_eta2p1_v") or
+                //string::npos != (*us).first.find( "HLT_HLT_IsoMu30_v") or
+                string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
+            ){
+                triggered=(*us).second;
+                if(triggered){
+                    break;
+                }
+            }
+        }
+
     }
+
 
     //pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
     //for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
@@ -584,7 +605,6 @@ void specialAna::Fill_Tree(){
 
     //PDF
     if( not runOnData ){
-
         mLeptonTree["id1"]=m_GenEvtView->getUserRecord("f1");
         mLeptonTree["id2"]=m_GenEvtView->getUserRecord("f2");
         mLeptonTree["x1"]=m_GenEvtView->getUserRecord("x1");
@@ -628,6 +648,7 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
+<<<<<<< HEAD
     //std::cout << datastream << std::endl;
 
     /// W tail fitting
@@ -643,8 +664,78 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         for(uint i = 0; i < S3ListGen->size(); i++){
             if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                 if(S3ListGen->at(i)->getMass() > 500) return true;
+=======
+    if( m_dataPeriod=="13TeV" ){
+        /// W tail fitting
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
+                    if(S3ListGen->at(i)->getMass() > 200) return true;
+                }
             }
         }
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200_13TeV")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                    if(S3ListGen->at(i)->getMass() > 500) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500_13TeV")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                    if(S3ListGen->at(i)->getMass() > 1000) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                    if(S3ListGen->at(i)->getMass() > 4000) return true;
+                }
+            }
+        }
+    }else if( m_dataPeriod=="8TeV" ){
+
+        /// W tail fitting
+        if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    if(S3ListGen->at(i)->getPt() > 55)return true;
+                }
+            }
+        }
+        if(Datastream.Contains("WJetsToLNu_PtW")) {
+            //int nu=-1;
+            //int l=-1;
+            //double wpt=0;
+            for(uint i = 0; i < S3ListGen->size(); i++){
+
+                //int tmpid= TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
+                //if(tmpid == 11) l=i;
+                //if(tmpid == 13) l=i;
+                //if(tmpid == 15) l=i;
+
+                //if(tmpid == 12) nu=i;
+                //if(tmpid == 14) nu=i;
+                //if(tmpid == 16) nu=i;
+
+
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    //wpt=S3ListGen->at(i)->getMass();
+                    if(S3ListGen->at(i)->getPt() <= 55)return true;
+                }
+>>>>>>> added compability to 8 TeV trigger and add dataset tag
+            }
+            //if(l>=0 && nu>=0){
+
+                //pxl::LorentzVector tmp = (S3ListGen->at(l)->getVector()+S3ListGen->at(nu)->getVector());
+                //if( fabs(tmp.getMass()  -wpt)>0.001){
+                    //cout<<"wm difference: "<<(S3ListGen->at(l)->getVector()+S3ListGen->at(nu)->getVector()).getMass()<<"   "<<wpt<<endl;
+                //}
+            //}
+        }
+<<<<<<< HEAD
     }
     if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
         for(uint i = 0; i < S3ListGen->size(); i++){
@@ -660,6 +751,53 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             //}
         //}
     //}
+=======
+        /// W mass tail fitting
+        if(Datastream.Contains("WJetsToLNu")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    if(S3ListGen->at(i)->getMass() > 300)return true;
+                }
+            }
+        }
+        if(Datastream.Contains("WTo")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    if(S3ListGen->at(i)->getMass() < 300)return true;
+                }
+            }
+        }
+
+        //int nu=-1;
+        //int l=-1;
+        //double wpt=0;
+        //for(uint i = 0; i < S3ListGen->size(); i++){
+
+            //int tmpid= TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
+            //if(tmpid == 11) l=i;
+            //if(tmpid == 13) l=i;
+            //if(tmpid == 15) l=i;
+
+            //if(tmpid == 12) nu=i;
+            //if(tmpid == 14) nu=i;
+            //if(tmpid == 16) nu=i;
+
+
+            //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                //wpt=S3ListGen->at(i)->getMass();
+                //if(S3ListGen->at(i)->getPt() <= 55)return true;
+            //}
+        //}
+        //if(l>=0 && nu>=0){
+
+            //pxl::LorentzVector tmp = (S3ListGen->at(l)->getVector()+S3ListGen->at(nu)->getVector());
+            //if( fabs(tmp.getMass()  -wpt)>0.001){
+                //cout<<"wm difference: "<<(S3ListGen->at(l)->getVector()+S3ListGen->at(nu)->getVector()).getMass()<<"   "<<wpt<<endl;
+            //}
+        //}
+
+    }
+>>>>>>> added compability to 8 TeV trigger and add dataset tag
 
     /// Diboson tail fitting
 //     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
@@ -683,6 +821,8 @@ void specialAna::Fill_Gen_Controll_histo() {
     int muon_gen_num=0;
     int ele_gen_num=0;
     int tau_gen_num=0;
+    int nu=-1;
+    int l=-1;
     for(uint i = 0; i < S3ListGen->size(); i++){
         if (S3ListGen->at(i)->getPt()<10 && not (TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24)   ){
             continue;
@@ -1134,6 +1274,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     if( not runOnData ){
 
         double event_weight = m_GenEvtView->getUserRecord( "Weight" );
+<<<<<<< HEAD
         double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
 <<<<<<< HEAD
 
@@ -1151,8 +1292,21 @@ void specialAna::initEvent( const pxl::Event* event ){
 =======
             pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
 >>>>>>> fixed names in datasets (tailselector)
+=======
+        //double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
+        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
+>>>>>>> added compability to 8 TeV trigger and add dataset tag
 
-        weight = event_weight * varKfactor_weight * pileup_weight;
+        if(m_dataPeriod=="13TeV"){
+            weight = event_weight ;
+        }else if(m_dataPeriod=="8TeV"){
+            weight = event_weight  * pileup_weight;
+        }else{
+            stringstream error;
+            error << "The data period "<<m_dataPeriod<<" is not supported by this analysis!\n";
+            throw Tools::config_error( error.str() );
+        }
+
 
         // get all particles
         vector< pxl::Particle* > AllParticlesGen;
@@ -1160,7 +1314,7 @@ void specialAna::initEvent( const pxl::Event* event ){
         pxl::sortParticles( AllParticlesGen );
         // push them into the corresponding vectors
         string genCollection="gen";
-        if(isOldPXLFile){
+        if(m_dataPeriod=="8TeV"){
             genCollection="S3";
         }
         for( vector< pxl::Particle* >::const_iterator part_it = AllParticlesGen.begin(); part_it != AllParticlesGen.end(); ++part_it ) {

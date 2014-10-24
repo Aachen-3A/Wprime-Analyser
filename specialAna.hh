@@ -104,6 +104,7 @@ public:
     const std::string m_cutdatafile;
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
+    const std::string m_dataPeriod;
     const Tools::MConfig config_;
 
     double temp_run;
@@ -151,7 +152,7 @@ public:
     unordered_set< string > triggers;
 
 
-    map< string,double > mLeptonTree;
+    map< string,float > mLeptonTree;
 
 
 };

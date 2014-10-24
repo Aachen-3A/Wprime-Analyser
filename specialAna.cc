@@ -628,9 +628,11 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
+    //std::cout << datastream << std::endl;
 
     /// W tail fitting
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
+        //std::cout << "blub\n";
         for(uint i = 0; i < S3ListGen->size(); i++){
             if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
                 if(S3ListGen->at(i)->getMass() > 200) return true;

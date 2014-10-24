@@ -637,27 +637,27 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             }
         }
     }
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200_13TeV")) {
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200")) {
         for(uint i = 0; i < S3ListGen->size(); i++){
             if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                 if(S3ListGen->at(i)->getMass() > 500) return true;
             }
         }
     }
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500_13TeV")) {
+    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
         for(uint i = 0; i < S3ListGen->size(); i++){
             if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                 if(S3ListGen->at(i)->getMass() > 1000) return true;
             }
         }
     }
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
-        for(uint i = 0; i < S3ListGen->size(); i++){
-            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                if(S3ListGen->at(i)->getMass() > 4000) return true;
-            }
-        }
-    }
+    //if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
+        //for(uint i = 0; i < S3ListGen->size(); i++){
+            //if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                //if(S3ListGen->at(i)->getMass() > 4000) return true;
+            //}
+        //}
+    //}
 
     /// Diboson tail fitting
 //     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
@@ -1140,11 +1140,15 @@ void specialAna::initEvent( const pxl::Event* event ){
         string datastream = event->getUserRecord( "Dataset" );
         TString Datastream = datastream;
         if(Datastream.Contains("13TeV"))
+<<<<<<< HEAD
 		    pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
 =======
 //        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
         double pileup_weight = 1.;
 >>>>>>> use absolute value of PdgNumber!
+=======
+            pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
+>>>>>>> fixed names in datasets (tailselector)
 
         weight = event_weight * varKfactor_weight * pileup_weight;
 

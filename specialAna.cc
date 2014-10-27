@@ -57,11 +57,14 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         //str(boost::format("N_{%s}")%particleLatex[i] )
         HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,            TString::Format("N_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"pt",particles[i].c_str(), 5000, 0, 5000,       TString::Format("p_{T}^{%s} (GeV)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"pt_reciprocal",particles[i].c_str(), 5000, 0, 1,       TString::Format("1/p_{T}^{%s} (1/GeV)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"deltapt_over_pt",particles[i].c_str(), 5000, 0, 10,       TString::Format("#frac{#Delta p_{T}}{p_{T}^{%s}}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"eta",particles[i].c_str(), 80, -4, 4,          TString::Format("#eta_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"phi",particles[i].c_str(), 40, -3.2, 3.2,      TString::Format("#phi_{%s} (rad)", particleSymbols[i].c_str()) );
 
         HistClass::CreateHisto(4,"DeltaPhi",particles[i].c_str(), 40, 0, 3.2,    TString::Format("#Delta#phi(%s,E_{T}^{miss})", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"mt",particles[i].c_str(), 5000, 0, 5000,       TString::Format("M_{T}_{%s} (GeV)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(4,"mt_reciprocal",particles[i].c_str(), 5000, 0, 1,       TString::Format("1/M_{T}_{%s} (1/GeV)", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"charge",particles[i].c_str(), 3, -1, 1,        TString::Format("q_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(4,"met",particles[i].c_str(), 5000, 0, 5000,      "E^{miss}_{T} (GeV)" );
         HistClass::CreateHisto(4,"met_phi",particles[i].c_str(),40, -3.2, 3.2,   "#phi_{E^{miss}_{T}} (rad)" );

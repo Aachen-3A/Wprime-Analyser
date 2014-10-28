@@ -66,10 +66,10 @@ namespace HistClass {
         //ttupple[dummy] = new TNtupleD(Form("tree_%s", name),name,varlist,bufsize);
     //}
 
-    static void CreateTree( std::map< std::string , double > & m, const char * name){
+    static void CreateTree( std::map< std::string , float > & m, const char * name){
 
         trees[name] = new TTree(name,name);
-        for( std::map< std::string , double >::iterator it=m.begin(); it!=m.end();it++){
+        for( std::map< std::string , float >::iterator it=m.begin(); it!=m.end();it++){
                 trees[name]->Branch(it->first.c_str(),&(it->second),Form("%s/D",it->first.c_str()));
         }
     }

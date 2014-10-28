@@ -55,7 +55,7 @@ public:
 
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
-    //~ void SetEvents(int e);
+    void applyKfactor(const pxl::Event* event, int mode);
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);
@@ -100,6 +100,7 @@ public:
     const std::string m_cutdatafile;
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
+    const std::string m_dataPeriod;
     const Tools::MConfig config_;
 
     double temp_run;
@@ -147,7 +148,7 @@ public:
     unordered_set< string > triggers;
 
 
-    map< string,double > mLeptonTree;
+    map< string,float > mLeptonTree;
 
 
 };

@@ -138,9 +138,9 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_ID", 6, 0, 6,"ID_{#mu}");
     HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
-    HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu}) (1/GeV)");
-    HistClass::CreateHisto(4,"Muon_Et_reciprocal", 5000, 0, 1,"1/E_{T}^{#mu}) (1/GeV)");
-    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma p_{T}/p_{T}^{#mu})");
+    HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu} (1/GeV)");
+    HistClass::CreateHisto(4,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#mu} (1/GeV)");
+    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma p_{T}/p_{T}^{#mu}");
 
     HistClass::CreateHisto(4,"Ele_CaloIso", 100, 0, 100,"CaloIso");
     HistClass::CreateHisto(4,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
@@ -916,8 +916,9 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
     HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso"),weight);
 
     HistClass::Fill(hist_number,"Muon_pt_reciprocal",1/lepton->getPt(),weight);
-    HistClass::Fill(hist_number,"Muon_Et_reciprocal",1/lepton->getEt(),weight);
-    HistClass::Fill(hist_number,"Muon_dpt_over_pt",(lepton->getUserRecord("ptError"))/lepton->getPt(),weight);
+    if(sel_met)
+        HistClass::Fill(hist_number,"Muon_mt_reciprocal",1/MT(lepton,sel_met),weight);
+    HistClass::Fill(hist_number,"Muon_dpt_over_pt",(lepton->getUserRecord("ptError").toDouble())/lepton->getPt(),weight);
 }
 void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);

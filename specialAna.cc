@@ -142,7 +142,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
     HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu} (1/GeV)");
     HistClass::CreateHisto(4,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#mu} (1/GeV)");
-    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma p_{T}/p_{T}^{#mu}");
+    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma_{p_{T}}/p_{T}^{#mu}");
 
     HistClass::CreateHisto(4,"Ele_CaloIso", 100, 0, 100,"CaloIso");
     HistClass::CreateHisto(4,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");

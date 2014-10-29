@@ -38,9 +38,6 @@ public:
     std::stringstream eventsAfterCuts;
 
     void Fill_stage_0_histos( );
-
-
-
     void Fill_Gen_Controll_histo( );
     void Fill_Controll_histo(int hist_number, pxl::Particle* lepton);
     void Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton);
@@ -55,12 +52,14 @@ public:
 
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
-    void SetEvents(int e);
-    void applyKfactor(const pxl::Event* event);
+    void applyKfactor(const pxl::Event* event, int mode);
+    void aplyDataMCScaleFactors();
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);
     bool Check_Ele_ID(pxl::Particle* ele);
+
+    void cleanJets();
 
 
     void KinematicsSelector();

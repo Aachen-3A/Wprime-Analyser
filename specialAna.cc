@@ -1359,6 +1359,7 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 <<<<<<< HEAD
+<<<<<<< HEAD
     double wmass=0.;
     //additive
     //p0                        =      1.18304   +/-   0.00128801
@@ -1377,6 +1378,9 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
 =======
 
 >>>>>>> fixed k-factors for 13TeV and 8 TeV and introduced data/MC sf
+=======
+
+>>>>>>> merge with stash
     if( m_dataPeriod=="13TeV" ){
         double wmass=0.;
         //additive

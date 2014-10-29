@@ -291,7 +291,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         Fill_Gen_Controll_histo();
     }
 
-    applyKfactor(event);
+    applyKfactor(event,0);
 
     KinematicsSelector();
     if(not runOnData){
@@ -474,7 +474,7 @@ void specialAna::KinematicsSelector() {
 
     //make veto numbers
     //we don't need vectors, do we?
-    double m_leptonVetoPt=30;
+    double m_leptonVetoPt=20;
     int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
     int numVetoTau=vetoNumber(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
@@ -671,21 +671,21 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
     if( m_dataPeriod=="13TeV" ){
         /// W tail fitting
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
                     if(S3ListGen->at(i)->getMass() > 200) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 500) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 1000) return true;
@@ -1020,13 +1020,13 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
 void specialAna::Fill_Controll_histo(int hist_number, pxl::Particle* lepton) {
 
     //if(lepton->getUserRecord("id").toInt32()==11){
-    if(lepton->getPdgNumber()==11){
+    if(TMath::Abs(lepton->getPdgNumber())==11){
         Fill_Controll_Ele_histo(hist_number, lepton);
     }
-    if(lepton->getPdgNumber()==13){
+    if(TMath::Abs(lepton->getPdgNumber())==13){
         Fill_Controll_Muon_histo(hist_number, lepton);
     }
-    if(lepton->getPdgNumber()==15){
+    if(TMath::Abs(lepton->getPdgNumber())==15){
         Fill_Controll_Tau_histo(hist_number, lepton);
     }
 }
@@ -1289,7 +1289,6 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     }
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
-
     if( m_dataPeriod=="13TeV" ){
         double wmass=0.;
         //additive
@@ -1493,7 +1492,7 @@ void specialAna::endEvent( const pxl::Event* event ){
    }
 }
 
-void specialAna::SetEvents(int e){
-    events_=e;
-}
+//~ void specialAna::SetEvents(int e){
+    //~ events_=e;
+//~ }
 

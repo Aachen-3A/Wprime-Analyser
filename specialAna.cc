@@ -133,10 +133,10 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_Cocktail_pt", 5000, 0, 5000,"p_{T}^{cocktail #mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
     HistClass::CreateHisto(4,"Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} (rad)");
-    HistClass::CreateHisto(4,"Muon_CaloIso", 100, 0, 100,"ISO_{Calo}^{#mu} (GeV)");
-    HistClass::CreateHisto(4,"Muon_TrkIso", 100, 0, 100,"ISO_{Trk}^{#mu} (GeV)");
-    HistClass::CreateHisto(4,"Muon_ECALIso", 100, 0, 100,"ISO_{ECAL}^{#mu} (GeV)");
-    HistClass::CreateHisto(4,"Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
+    HistClass::CreateHisto(4,"Muon_CaloIso", 100, 0, 3,"ISO_{Calo}^{#mu} (GeV)");
+    HistClass::CreateHisto(4,"Muon_TrkIso", 100, 0, 3,"ISO_{Trk}^{#mu} (GeV)");
+    HistClass::CreateHisto(4,"Muon_ECALIso", 100, 0, 3,"ISO_{ECAL}^{#mu} (GeV)");
+    HistClass::CreateHisto(4,"Muon_HCALIso", 100, 0, 3,"ISO_{HCAL}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_ID", 6, 0, 6,"ID_{#mu}");
     HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
     HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu} (1/GeV)");
@@ -484,19 +484,61 @@ void specialAna::KinematicsSelector() {
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
 
+<<<<<<< HEAD
     if( EleList->size()==1 && numVetoTau==0 && numVetoMuo==0 ){
         sel_lepton=( pxl::Particle* ) EleList->at(0);
         m_delta_phi_cut=m_delta_phi_cut_ele;
         m_pt_met_min_cut=m_pt_met_min_cut_ele;
         m_pt_met_max_cut=m_pt_met_max_cut_ele;
         sel_id=11;
+=======
+
+    if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
+        bool passedID=false;
+        for( vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
+            if( (*it)->hasUserRecord("IDpassed")){
+                if ( not passedID &&  (*it)->getUserRecord("IDpassed").toBool() ){
+                    passedID=true;
+                }else if(passedID && (*it)->getUserRecord("IDpassed").toBool()){
+                    passedID=false;
+                    break;
+                }
+            }else if (EleList->size()==1){
+                passedID=true;
+                break;
+            }
+        }
+        if(passedID){
+            sel_lepton=( pxl::Particle* ) EleList->at(0);
+            m_delta_phi_cut=m_delta_phi_cut_ele;
+            m_pt_met_min_cut=m_pt_met_min_cut_ele;
+            m_pt_met_max_cut=m_pt_met_max_cut_ele;
+            sel_id=11;
+        }
+>>>>>>> Changed isolation histograms, fixed IDpassed in KinematicsSelector
     }
-    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()==1 ){
-        sel_lepton=( pxl::Particle* ) MuonList->at(0);
-        m_delta_phi_cut=m_delta_phi_cut_muo;
-        m_pt_met_min_cut=m_pt_met_min_cut_muo;
-        m_pt_met_max_cut=m_pt_met_max_cut_muo;
-        sel_id=13;
+    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
+        bool passedID=false;
+        for( vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
+            if( (*it)->hasUserRecord("IDpassed")){
+                if ( not passedID &&  (*it)->getUserRecord("IDpassed").toBool() ){
+                    passedID=true;
+                }else if(passedID && (*it)->getUserRecord("IDpassed").toBool()){
+                    passedID=false;
+                    break;
+                }
+            }else if (MuonList->size()==1){
+                passedID=true;
+                break;
+            }
+        }
+        if(passedID){
+            sel_lepton=( pxl::Particle* ) MuonList->at(0);
+            m_delta_phi_cut=m_delta_phi_cut_muo;
+            m_pt_met_min_cut=m_pt_met_min_cut_muo;
+            m_pt_met_max_cut=m_pt_met_max_cut_muo;
+            sel_id=13;
+        }
     }
     if( numVetoEle==0 && TauList->size()==1 && numVetoMuo==0 ){
         sel_lepton=( pxl::Particle* ) TauList->at(0);
@@ -889,10 +931,10 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
         HistClass::Fill(hist_number,"Muon_Cocktail_phi",cocktailMuon->Phi(),weight);
         delete cocktailMuon;
     }
-    HistClass::Fill(hist_number,"Muon_CaloIso",lepton->getUserRecord("CaloIso"),weight);
-    HistClass::Fill(hist_number,"Muon_TrkIso",lepton->getUserRecord("TrkIso"),weight);
-    HistClass::Fill(hist_number,"Muon_ECALIso",lepton->getUserRecord("ECALIso"),weight);
-    HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso"),weight);
+    HistClass::Fill(hist_number,"Muon_CaloIso",lepton->getUserRecord("CaloIso").toDouble() / lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Muon_TrkIso",lepton->getUserRecord("TrkIso").toDouble() / lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Muon_ECALIso",lepton->getUserRecord("ECALIso").toDouble() / lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso").toDouble() / lepton->getPt(),weight);
 
     HistClass::Fill(hist_number,"Muon_pt_reciprocal",1/lepton->getPt(),weight);
     if(sel_met)
@@ -1120,9 +1162,16 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
     //make veto numbers
     //we don't need vectors, do we?
     int numVeto=0;
-
+    bool passedID=false;
     for( vector< pxl::Particle* >::const_iterator part_it = list->begin(); part_it != list->end(); ++part_it ) {
-        if((*part_it)->getPt()>ptTreshold){
+        passedID=false;
+        if((*part_it)->hasUserRecord("IDpassed")){
+            passedID=(*part_it)->getUserRecord("IDpassed");
+        }else{
+            passedID=true;
+        }
+        
+        if( (*part_it)->getPt()>ptTreshold && passedID ){
             numVeto++;
         }else{
             //Lists are Pt sorted

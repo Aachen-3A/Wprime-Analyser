@@ -1158,6 +1158,36 @@ double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
     return sqrt(mm);
 }
 
+<<<<<<< HEAD
+=======
+double specialAna::getPtHat(){
+    double pthat=0;
+    pxl::Particle* w=0;
+    pxl::Particle* lepton=0;
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+            w=S3ListGen->at(i);
+        }
+        //take the neutrio to avoid showering and so on!!
+        if((TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 12 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 14 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 16) && lepton==0){
+            lepton=S3ListGen->at(i);
+        }
+        if(w!=0 && lepton!=0){
+            break;
+        }
+    }
+
+    if(w!=0 && lepton!=0){
+        //boost in the w restframe
+        lepton->boost( -(w->getBoostVector()) );
+        pthat=lepton->getPt();
+    }else{
+        pthat=-1;
+    }
+    return pthat;
+}
+
+>>>>>>> dont delete particle pointer, they belong to the event!!
 int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
     //make veto numbers
     //we don't need vectors, do we?

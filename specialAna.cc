@@ -1140,9 +1140,6 @@ double specialAna::getPtHat(){
     }else{
         pthat=-1;
     }
-    //cleanup
-    delete w;
-    delete lepton;
     return pthat;
 }
 

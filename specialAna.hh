@@ -68,6 +68,7 @@ public:
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
+    double getPtHat();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
 

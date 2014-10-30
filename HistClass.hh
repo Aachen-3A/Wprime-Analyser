@@ -1,6 +1,8 @@
 #ifndef HistClass_hh
 #define HistClass_hh
 
+
+
 #include <iostream>
 #include <map>
 #include "TH1F.h"
@@ -11,6 +13,8 @@
 #include "boost/format.hpp"
 #include <stdarg.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 // Note that we need a special treating for h_counters as it mustn't have a standard name like h1_* to comply with other tools as SirPlotAlot.
 
 namespace HistClass {
@@ -85,24 +89,24 @@ namespace HistClass {
         trees[name]->Fill();
     }
 
-    //   static void Write(Int_t n_histo,const char * name)
-    //   {
-    //     std::string dummy = Form("h1_%d_%s", n_histo, name);
-    //     histo[dummy]->Write();
-    //   }
-    //
-    //   static void SetToZero(Int_t n_histo,const char * name)
-    //   {
-    //     std::string dummy = Form("h1_%d_%s", n_histo, name);
-    //     int Nbins2 = histo[dummy] -> GetNbinsX();
-    //     for ( int bb = 0; bb < Nbins2+1; bb++) {
-    //       double binValue = histo[dummy] -> GetBinContent(bb);
-    //       if (binValue < 0) {
-    //         //cout << "Bin " << bb << "  " << dummy << " is negative: " << binValue << "  and is being set to zero!" << endl;
-    //         histo[dummy] -> SetBinContent(bb,0.);
-    //       }
-    //     }
-    //   }
+    static void Write(Int_t n_histo,const char * name)
+    {
+        std::string dummy = Form("h1_%d_%s", n_histo, name);
+        histo[dummy]->Write();
+    }
+
+    static void SetToZero(Int_t n_histo,const char * name)
+    {
+        std::string dummy = Form("h1_%d_%s", n_histo, name);
+        int Nbins2 = histo[dummy] -> GetNbinsX();
+        for ( int bb = 0; bb < Nbins2+1; bb++) {
+            double binValue = histo[dummy] -> GetBinContent(bb);
+            if (binValue < 0) {
+                 //cout << "Bin " << bb << "  " << dummy << " is negative: " << binValue << "  and is being set to zero!" << endl;
+                 histo[dummy] -> SetBinContent(bb,0.);
+            }
+        }
+    }
 
     //const static void CreateHisto(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
     const static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
@@ -285,5 +289,5 @@ namespace HistClass {
 
 
 }
-
+#pragma GCC diagnostic pop
 #endif

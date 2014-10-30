@@ -49,6 +49,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     if(not runOnData){
         HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
         HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
+        HistClass::CreateHisto("MC_W_pthat_Gen", 8000, 0, 8000, "#hat{p}_{T}^{W} (GeV)");
     }
 
 
@@ -137,7 +138,9 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(4,"Muon_HCALIso", 100, 0, 100,"ISO_{HCAL}^{#mu} (GeV)");
     HistClass::CreateHisto(4,"Muon_ID", 6, 0, 6,"ID_{#mu}");
     HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
-
+    HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu} (1/GeV)");
+    HistClass::CreateHisto(4,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#mu} (1/GeV)");
+    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma_{p_{T}}/p_{T}^{#mu}");
 
     HistClass::CreateHisto(4,"Ele_CaloIso", 100, 0, 100,"CaloIso");
     HistClass::CreateHisto(4,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
@@ -719,16 +722,18 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         /// W mass tail fitting
         if(Datastream.Contains("WJetsToLNu")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 300)return true;
-                }
+                if (getPtHat() > 120) return true;
+                //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    //if(S3ListGen->at(i)->getMass() > 300)return true;
+                //}
             }
         }
         if(Datastream.Contains("WTo")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getMass() < 300)return true;
-                }
+                if (getPtHat() <= 120) return true;
+                //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    //if(S3ListGen->at(i)->getMass() < 300)return true;
+                //}
             }
         }
     }
@@ -796,6 +801,9 @@ void specialAna::Fill_Gen_Controll_histo() {
 
     }
 
+    HistClass::Fill("MC_W_pthat_Gen",getPtHat(),m_GenEvtView->getUserRecord( "Weight" ));
+
+
 
     HistClass::Fill(0,"Tau_num_Gen",tau_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
     HistClass::Fill(0,"Muon_num_Gen",muon_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
@@ -853,6 +861,11 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
     HistClass::Fill(hist_number,"Muon_TrkIso",lepton->getUserRecord("TrkIso"),weight);
     HistClass::Fill(hist_number,"Muon_ECALIso",lepton->getUserRecord("ECALIso"),weight);
     HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso"),weight);
+
+    HistClass::Fill(hist_number,"Muon_pt_reciprocal",1/lepton->getPt(),weight);
+    if(sel_met)
+        HistClass::Fill(hist_number,"Muon_mt_reciprocal",1/MT(lepton,sel_met),weight);
+    HistClass::Fill(hist_number,"Muon_dpt_over_pt",(lepton->getUserRecord("ptError").toDouble())/lepton->getPt(),weight);
 }
 void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
@@ -1065,6 +1078,36 @@ double specialAna::DeltaPhi(pxl::Particle* lepton, pxl::Particle* met) {
 double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
     double mm = 2 * lepton->getPt() * met->getPt() * ( 1. - cos(lepton->getPhi() - met->getPhi()) );
     return sqrt(mm);
+}
+
+double specialAna::getPtHat(){
+    double pthat=0;
+    pxl::Particle* w=0;
+    pxl::Particle* lepton=0;
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+            w=S3ListGen->at(i);
+        }
+        //take the neutrio to avoid showering and so on!!
+        if((TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 12 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 14 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 16) && lepton==0){
+            lepton=S3ListGen->at(i);
+        }
+        if(w!=0 && lepton!=0){
+            break;
+        }
+    }
+
+    if(w!=0 && lepton!=0){
+        //boost in the w restframe
+        lepton->boost( -(w->getBoostVector()) );
+        pthat=lepton->getPt();
+    }else{
+        pthat=-1;
+    }
+    //cleanup
+    delete w;
+    delete lepton;
+    return pthat;
 }
 
 int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){

@@ -739,7 +739,6 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             }
         }
     }else if( m_dataPeriod=="8TeV" ){
-
         /// W tail fitting
         if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
@@ -757,20 +756,22 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         }
         /// W mass tail fitting
         if(Datastream.Contains("WJetsToLNu")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if (getPtHat() > 120) return true;
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            if (getPtHat() > 120) {
+                return true;
+            }
                 //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
                     //if(S3ListGen->at(i)->getMass() > 300)return true;
                 //}
-            }
+            //}
         }
         if(Datastream.Contains("WTo")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if (getPtHat() <= 120) return true;
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            if (getPtHat() <= 120) return true;
                 //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
                     //if(S3ListGen->at(i)->getMass() < 300)return true;
                 //}
-            }
+            //}
         }
     }
 
@@ -801,7 +802,7 @@ void specialAna::Fill_Gen_Controll_histo() {
             continue;
         }
         if(S3ListGen->at(i)->getPdgNumber()==0){
-            if(S3ListGen->at(i)->hasUserRecord("id")){
+            if(S3ListGen->at(i)->hasUserRecord("id") && S3ListGen->at(i)->getPdgNumber()==0){
                 S3ListGen->at(i)->setPdgNumber(S3ListGen->at(i)->getUserRecord("id"));
             }
         }
@@ -836,9 +837,7 @@ void specialAna::Fill_Gen_Controll_histo() {
         }
 
     }
-
     HistClass::Fill("MC_W_pthat_Gen",getPtHat(),m_GenEvtView->getUserRecord( "Weight" ));
-
 
 
     HistClass::Fill(0,"Tau_num_Gen",tau_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
@@ -1121,11 +1120,14 @@ double specialAna::getPtHat(){
     pxl::Particle* w=0;
     pxl::Particle* lepton=0;
     for(uint i = 0; i < S3ListGen->size(); i++){
+        if(S3ListGen->at(i)->hasUserRecord("id")){
+            S3ListGen->at(i)->setPdgNumber(S3ListGen->at(i)->getUserRecord("id"));
+        }
         if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
             w=S3ListGen->at(i);
         }
         //take the neutrio to avoid showering and so on!!
-        if((TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 12 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 14 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 16) && lepton==0){
+        if((TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 11 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 13 || TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 15) && lepton==0){
             lepton=S3ListGen->at(i);
         }
         if(w!=0 && lepton!=0){
@@ -1137,6 +1139,8 @@ double specialAna::getPtHat(){
         //boost in the w restframe
         lepton->boost( -(w->getBoostVector()) );
         pthat=lepton->getPt();
+        // get the original lepton back!!
+        lepton->boost(w->getBoostVector());
     }else{
         pthat=-1;
     }

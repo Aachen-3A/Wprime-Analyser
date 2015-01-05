@@ -68,6 +68,7 @@ public:
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
+    double Mass(pxl::Particle* p1, pxl::Particle* p2);
     double getPtHat();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
@@ -102,6 +103,7 @@ public:
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
     const std::string m_dataPeriod;
+    const std::string m_kfactorFile_Config;
     const Tools::MConfig config_;
 
     double temp_run;
@@ -120,6 +122,8 @@ public:
 
     int events_;
     unsigned int n_lepton;
+    TFile* m_kfactorFile;
+    TH1D* m_kfactorHist[3];
 
     vector< pxl::Particle* > * EleList;
     vector< pxl::Particle* > * MuonList;

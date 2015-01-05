@@ -32,6 +32,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
    d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
    m_dataPeriod(            cfg.GetItem< string >( "General.DataPeriod" ) ),
+   m_kfactorFile_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.WkfactorFile"))),
    config_(cfg)
 {
 
@@ -39,6 +40,12 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     file1 = new TFile(safeFileName.c_str(), "RECREATE");
     eventDisplayFile.open(m_cutdatafile.c_str(), std::fstream::out);
     events_ = 0;
+
+    m_kfactorFile= new TFile(m_kfactorFile_Config.c_str(),"READ");
+    m_kfactorHist[0] = (TH1D*) m_kfactorFile->Get("k_fakp");
+    m_kfactorHist[1] = (TH1D*) m_kfactorFile->Get("k_fakm");
+
+    file1->cd();
 
     n_lepton = 0; // counting leptons passing the selection
 
@@ -323,6 +330,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
 
         if((sel_lepton->getPt() > m_pt_cut) && (sel_lepton->getMass() > m_m_cut)) {
+        //if(sel_lepton->getName()==m_TauType) {
             // save event information (after cuts) to stringstream which is written to disk in endJob()
             // for event display generation:
             eventsAfterCuts << event->getUserRecord("Dataset") << ":"
@@ -578,6 +586,10 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
     bool tiggerKinematics=false;
 
 
+    // Warning this disables all triggers
+    //triggered=true;
+
+
     //I dont understand the 8TeV triggers at the moment!!
     if( m_dataPeriod =="13TeV"){
         //this is 13 TeV
@@ -626,6 +638,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
 
     if(sel_lepton && sel_met){
         if(sel_lepton->getName()==m_TauType){
+            // Warning this disables all triggers
             if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
                 tiggerKinematics=true;
             }
@@ -1181,7 +1194,15 @@ double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+
+double specialAna::Mass(pxl::Particle* p1, pxl::Particle* p2) {
+    return (p1->getVector()+p2->getVector()).getMass();
+}
+
+>>>>>>> k-factor improvements
 double specialAna::getPtHat(){
     double pthat=0;
     pxl::Particle* w=0;
@@ -1517,65 +1538,85 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
 
         }
     }else if(m_dataPeriod=="8TeV"){
-        double mt=0.;
-        if(Datastream.Contains("WJets") ) {
-            //mg additive
-            double par []={1.42167 ,0.00036744,6.77295e-8};
-            //mg multiply
-            if(mode==1){
-                par[0]= 1.402;
-                par[1]= -0.000435535;
-                par[2]= 7.43225e-8;
-            }
+        double mass=0.;
+        int l=-1;
+        int nu=-1;
+        for(uint i = 0; i < S3ListGen->size(); i++){
+            int tmpid= TMath::Abs(S3ListGen->at(i)->getPdgNumber());
+            if(tmpid == 11) l=i;
+            if(tmpid == 13) l=i;
+            if(tmpid == 15) l=i;
 
-            int l=-1;
-            int nu=-1;
-
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                int tmpid= TMath::Abs(S3ListGen->at(i)->getPdgNumber());
-                if(tmpid == 11) l=i;
-                if(tmpid == 13) l=i;
-                if(tmpid == 15) l=i;
-
-                if(tmpid == 12) nu=i;
-                if(tmpid == 14) nu=i;
-                if(tmpid == 16) nu=i;
-            }
-            if(l>=0 && nu>=0){
-                mt=MT(S3ListGen->at(l), S3ListGen->at(nu));
-            }
-            if(mt!=0){
-                weight*=(par[0]+mt*par[1]+mt*mt*par[2]);
-            }
+            if(tmpid == 12) nu=i;
+            if(tmpid == 14) nu=i;
+            if(tmpid == 16) nu=i;
         }
-        if(Datastream.Contains("WTo") ) {
-            //pythia additive
-            double par []={1.42167 ,0.00036744,6.77295e-8};
-            //pythia multiply
-            if(mode==1){
-                par[0]= 1.402;
-                par[1]= -0.000435535;
-                par[2]= 7.43225e-8;
-            }
-            int l=-1;
-            int nu=-1;
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                int tmpid= TMath::Abs(S3ListGen->at(i)->getPdgNumber());
-                if(tmpid == 11) l=i;
-                if(tmpid == 13) l=i;
-                if(tmpid == 15) l=i;
-
-                if(tmpid == 12) nu=i;
-                if(tmpid == 14) nu=i;
-                if(tmpid == 16) nu=i;
-            }
-            if(l>=0 && nu>=0){
-                mt=MT(S3ListGen->at(l), S3ListGen->at(nu));
-            }
-            if(mt!=0){
-                weight*=(par[0]+mt*par[1]+mt*mt*par[2]);
-            }
+        if(l>=0 && nu>=0){
+            mass=Mass(S3ListGen->at(l), S3ListGen->at(nu));
         }
+        if(mass!=0){
+            weight*=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
+        }
+
+
+        //if(Datastream.Contains("WJets") ) {
+            ////mg additive
+            //double par []={1.42167 ,0.00036744,6.77295e-8};
+            ////mg multiply
+            //if(mode==1){
+                //par[0]= 1.402;
+                //par[1]= -0.000435535;
+                //par[2]= 7.43225e-8;
+            //}
+
+            //int l=-1;
+            //int nu=-1;
+
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+                //int tmpid= TMath::Abs(S3ListGen->at(i)->getPdgNumber());
+                //if(tmpid == 11) l=i;
+                //if(tmpid == 13) l=i;
+                //if(tmpid == 15) l=i;
+
+                //if(tmpid == 12) nu=i;
+                //if(tmpid == 14) nu=i;
+                //if(tmpid == 16) nu=i;
+            //}
+            //if(l>=0 && nu>=0){
+                //mt=MT(S3ListGen->at(l), S3ListGen->at(nu));
+            //}
+            //if(mt!=0){
+                //weight*=(par[0]+mt*par[1]+mt*mt*par[2]);
+            //}
+        //}
+        //if(Datastream.Contains("WTo") ) {
+            ////pythia additive
+            //double par []={1.42167 ,0.00036744,6.77295e-8};
+            ////pythia multiply
+            //if(mode==1){
+                //par[0]= 1.402;
+                //par[1]= -0.000435535;
+                //par[2]= 7.43225e-8;
+            //}
+            //int l=-1;
+            //int nu=-1;
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+                //int tmpid= TMath::Abs(S3ListGen->at(i)->getPdgNumber());
+                //if(tmpid == 11) l=i;
+                //if(tmpid == 13) l=i;
+                //if(tmpid == 15) l=i;
+
+                //if(tmpid == 12) nu=i;
+                //if(tmpid == 14) nu=i;
+                //if(tmpid == 16) nu=i;
+            //}
+            //if(l>=0 && nu>=0){
+                //mt=MT(S3ListGen->at(l), S3ListGen->at(nu));
+            //}
+            //if(mt!=0){
+                //weight*=(par[0]+mt*par[1]+mt*mt*par[2]);
+            //}
+        //}
     }
 }
 

@@ -85,6 +85,7 @@ namespace HistClass {
         trees[name]->Fill();
     }
 
+<<<<<<< HEAD
     //   static void Write(Int_t n_histo,const char * name)
     //   {
     //     std::string dummy = Form("h1_%d_%s", n_histo, name);
@@ -103,6 +104,26 @@ namespace HistClass {
     //       }
     //     }
     //   }
+=======
+    //static void Write(Int_t n_histo,const char * name)
+    //{
+        //std::string dummy = Form("h1_%d_%s", n_histo, name);
+        //histo[dummy]->Write();
+    //}
+
+    //static void SetToZero(Int_t n_histo,const char * name)
+    //{
+        //std::string dummy = Form("h1_%d_%s", n_histo, name);
+        //int Nbins2 = histo[dummy] -> GetNbinsX();
+        //for ( int bb = 0; bb < Nbins2+1; bb++) {
+            //double binValue = histo[dummy] -> GetBinContent(bb);
+            //if (binValue < 0) {
+                 ////cout << "Bin " << bb << "  " << dummy << " is negative: " << binValue << "  and is being set to zero!" << endl;
+                 //histo[dummy] -> SetBinContent(bb,0.);
+            //}
+        //}
+    //}
+>>>>>>> k-factor improvements
 
     //const static void CreateHisto(const char* name,const char* title, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")
     const static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup,TString xtitle = "")

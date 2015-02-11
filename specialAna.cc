@@ -1,7 +1,10 @@
 #include "specialAna.hh"
 #include "HistClass.hh"
 #include "Tools/Tools.hh"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #include "boost/format.hpp"
+#pragma GCC diagnostic pop
 
 
 
@@ -50,7 +53,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     n_lepton = 0; // counting leptons passing the selection
 
     // number of events, saved in a histogram
-    HistClass::CreateHistoUnchangedName("h_counters", "h_counters", 10, 0, 11, "N_{events}");
+    HistClass::CreateHistoUnchangedName("h_counters", 10, 0, 11, "N_{events}");
 
 
     if(not runOnData){
@@ -289,9 +292,6 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     mLeptonTree["lepton_type"]=0;
     HistClass::CreateTree( mLeptonTree, "slimtree");
 
-
-
-
 }
 
 specialAna::~specialAna() {
@@ -332,7 +332,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
 
         if((sel_lepton->getPt() > m_pt_cut) && (sel_lepton->getMass() > m_m_cut)) {
-        //if(sel_lepton->getName()==m_TauType) {
+        //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
             // save event information (after cuts) to stringstream which is written to disk in endJob()
             // for event display generation:
             eventsAfterCuts << event->getUserRecord("Dataset") << ":"
@@ -357,7 +357,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         FillSystematics(event, "Muon");
         FillSystematics(event, "Ele");
         FillSystematics(event, "Tau");
-        // FillSystematics(event, "Jet");
+        FillSystematicsUpDown(event, "Muon", "Up", "Resolution");
+        FillSystematicsUpDown(event, "Muon", "Down", "Resolution");
+         FillSystematics(event, "Jet");
         // FillSystematics(event, "met");
     }
 
@@ -376,8 +378,19 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 
     // extract one EventView
     // make sure the object key is the same as in Systematics.cc specified
-//     tempEventView = event->getObjectOwner().findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
-    tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+    // tempEventView = event->getObjectOwner().findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+    // For jets we have to use the music nameing convention
+    if(particleName=="Jet"){
+        //
+        std::string jetType="JES";
+        std::string upperUpdown= boost::to_upper_copy(updown);
+        if (shiftType=="Resolution"){
+            jetType="JER";
+        }
+        tempEventView = event->findObject< pxl::EventView >("Rec_"+jetType+ "_"+upperUpdown);
+    }else{
+        tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+    }
 
 
 
@@ -418,7 +431,16 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
             if(      Name == m_TauType ) TauList->push_back( part );
             else if( Name == m_METType ) METList->push_back( part );
         }
-    }//else if(particleName=="JET"){
+    }else if(particleName=="Jet"){
+        RememberPart=JetList;
+        JetList = new vector< pxl::Particle* >;
+        for( vector< pxl::Particle* >::const_iterator part_it = shiftedParticles.begin(); part_it != shiftedParticles.end(); ++part_it ) {
+            pxl::Particle *part = *part_it;
+            string Name = part->getName();
+            if(      Name == m_JetAlgo ) JetList->push_back( part );
+            else if( Name == m_METType ) METList->push_back( part );
+        }
+    }
     //}else if(particleName==m_METType){}
 
     // reset the chosen MET and lepton
@@ -457,7 +479,10 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
     }else if(particleName=="Tau"){
         delete TauList;
         TauList = RememberPart;
-    }//else if(particleName=="JET"){
+    }else if(particleName=="Jet"){
+        delete JetList;
+        JetList = RememberPart;
+    }
     //}else if(particleName==m_METType){}
 
 }
@@ -580,7 +605,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
 
 
     // Warning this disables all triggers
-    //triggered=true;
+    triggered=true;
 
 
     //I dont understand the 8TeV triggers at the moment!!
@@ -604,10 +629,11 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 string::npos != (*us).first.find( "HLT_HLT_Ele90_CaloIdVT_GsfTrkIdT") or
                 string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_GsfTrkIdT") or
                 string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_TrkIdT") or
-                //string::npos != (*us).first.find( "HLT_HLT_Ele27_WP80_v") or
+                string::npos != (*us).first.find( "HLT_HLT_Ele27_WP80_v") or
                 string::npos != (*us).first.find( "HLT_HLT_Mu40_v") or
                 string::npos != (*us).first.find( "HLT_HLT_Mu40_eta2p1_v") or
-                //string::npos != (*us).first.find( "HLT_HLT_IsoMu30_v") or
+                string::npos != (*us).first.find( "HLT_HLT_IsoMu24_eta") or
+                //string::npos != (*us).first.find( "HLT_HLT_Mu17_Mu8_v") or
                 string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
             ){
                 triggered=(*us).second;
@@ -632,7 +658,8 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
     if(sel_lepton && sel_met){
         if(sel_lepton->getName()==m_TauType){
             // Warning this disables all triggers
-            if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
+            //if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
+            if(sel_lepton->getPt()>50 && sel_met->getPt()>50){
                 tiggerKinematics=true;
             }
 
@@ -1024,23 +1051,25 @@ void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton)
     //for(uint j = 0; j < 67; j++) {
         //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->getUserRecord( (string)d_mydisc[j] ));
     //}
-    HistClass::Fill(hist_number,"Tau_decayMode",lepton->getUserRecord("decayMode"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_X",lepton->getUserRecord("Vtx_X"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_Y",lepton->getUserRecord("Vtx_Y"),weight);
-    HistClass::Fill(hist_number,"Tau_Vtx_Z",lepton->getUserRecord("Vtx_Z"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFChargedHadrCands",lepton->getUserRecord("NumPFChargedHadrCands"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFGammaCands",lepton->getUserRecord("NumPFGammaCands"),weight);
-    HistClass::Fill(hist_number,"Tau_NumPFNeutralHadrCands",lepton->getUserRecord("NumPFNeutralHadrCands"),weight);
-    HistClass::Fill(hist_number,"Tau_LeadingHadronPt",lepton->getUserRecord("LeadingHadronPt"),weight);
-    //TLorentzVector* jet = new TLorentzVector();
-    //jet->SetPxPyPzE(lepton->getUserRecord("tauJetpx"),lepton->getUserRecord("tauJetpy"),lepton->getUserRecord("tauJetpz"),lepton->getUserRecord("tauJetE"));
-    //HistClass::Fill(hist_number,"Tau_Jet_pt",jet->Pt(),weight);
-    //HistClass::Fill(hist_number,"Tau_Jet_eta",jet->Eta(),weight);
-    //HistClass::Fill(hist_number,"Tau_Jet_phi",jet->Phi(),weight);
-    //delete jet;
-    HistClass::Fill(hist_number,"Tau_dxy",lepton->getUserRecord("dxy"),weight);
-    HistClass::Fill(hist_number,"Tau_dxy_error",lepton->getUserRecord("dxy_error"),weight);
-    HistClass::Fill(hist_number,"Tau_dxy_Sig",lepton->getUserRecord("dxy_Sig"),weight);
+    if(lepton->hasUserRecord("decayMode")){
+        HistClass::Fill(hist_number,"Tau_decayMode",lepton->getUserRecord("decayMode"),weight);
+        HistClass::Fill(hist_number,"Tau_Vtx_X",lepton->getUserRecord("Vtx_X"),weight);
+        HistClass::Fill(hist_number,"Tau_Vtx_Y",lepton->getUserRecord("Vtx_Y"),weight);
+        HistClass::Fill(hist_number,"Tau_Vtx_Z",lepton->getUserRecord("Vtx_Z"),weight);
+        HistClass::Fill(hist_number,"Tau_NumPFChargedHadrCands",lepton->getUserRecord("NumPFChargedHadrCands"),weight);
+        HistClass::Fill(hist_number,"Tau_NumPFGammaCands",lepton->getUserRecord("NumPFGammaCands"),weight);
+        HistClass::Fill(hist_number,"Tau_NumPFNeutralHadrCands",lepton->getUserRecord("NumPFNeutralHadrCands"),weight);
+        HistClass::Fill(hist_number,"Tau_LeadingHadronPt",lepton->getUserRecord("LeadingHadronPt"),weight);
+        //TLorentzVector* jet = new TLorentzVector();
+        //jet->SetPxPyPzE(lepton->getUserRecord("tauJetpx"),lepton->getUserRecord("tauJetpy"),lepton->getUserRecord("tauJetpz"),lepton->getUserRecord("tauJetE"));
+        //HistClass::Fill(hist_number,"Tau_Jet_pt",jet->Pt(),weight);
+        //HistClass::Fill(hist_number,"Tau_Jet_eta",jet->Eta(),weight);
+        //HistClass::Fill(hist_number,"Tau_Jet_phi",jet->Phi(),weight);
+        //delete jet;
+        HistClass::Fill(hist_number,"Tau_dxy",lepton->getUserRecord("dxy"),weight);
+        HistClass::Fill(hist_number,"Tau_dxy_error",lepton->getUserRecord("dxy_error"),weight);
+        HistClass::Fill(hist_number,"Tau_dxy_Sig",lepton->getUserRecord("dxy_Sig"),weight);
+    }
 }
 
 void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , string syst){
@@ -1296,6 +1325,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     numMET   = m_RecEvtView->getUserRecord( "Num" + m_METType );
     numJet   = m_RecEvtView->getUserRecord( "Num" + m_JetAlgo );
     numBJet  = m_RecEvtView->getUserRecord_def( "Num" + m_BJets_algo,-1 );
+
 
     // h1_num_Taus.Fill(numTau);
 

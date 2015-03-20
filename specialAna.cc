@@ -56,15 +56,11 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     // number of events, saved in a histogram
     HistClass::CreateHistoUnchangedName("h_counters", 10, 0, 11, "N_{events}");
 
+
     if(not runOnData){
-<<<<<<< HEAD
-        HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} (GeV)");
-        HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} (GeV)");
-=======
         HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} [GeV]");
         HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_W_pthat_Gen", 8000, 0, 8000, "#hat{p}_{T}^{W} [GeV]");
->>>>>>> change units / syst met uncert/ trigger
     }
 
 
@@ -543,14 +539,6 @@ void specialAna::KinematicsSelector() {
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
 
-<<<<<<< HEAD
-    if( EleList->size()==1 && numVetoTau==0 && numVetoMuo==0 ){
-        sel_lepton=( pxl::Particle* ) EleList->at(0);
-        m_delta_phi_cut=m_delta_phi_cut_ele;
-        m_pt_met_min_cut=m_pt_met_min_cut_ele;
-        m_pt_met_max_cut=m_pt_met_max_cut_ele;
-        sel_id=11;
-=======
 
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         bool passedID=false;
@@ -574,7 +562,6 @@ void specialAna::KinematicsSelector() {
             m_pt_met_max_cut=m_pt_met_max_cut_ele;
             sel_id=11;
         }
->>>>>>> Changed isolation histograms, fixed IDpassed in KinematicsSelector
     }
     if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
         bool passedID=false;
@@ -847,40 +834,23 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
-<<<<<<< HEAD
-    //std::cout << datastream << std::endl;
-
-    /// W tail fitting
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
-        //std::cout << "blub\n";
-        for(uint i = 0; i < S3ListGen->size(); i++){
-            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
-                if(S3ListGen->at(i)->getMass() > 200) return true;
-            }
-        }
-    }
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200")) {
-        for(uint i = 0; i < S3ListGen->size(); i++){
-            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                if(S3ListGen->at(i)->getMass() > 500) return true;
-=======
     if( m_dataPeriod=="13TeV" ){
         /// W tail fitting
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
                     if(S3ListGen->at(i)->getMass() > 200) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 500) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500_13TeV")) {
+        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 1000) return true;
@@ -908,42 +878,10 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                 if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
                     if(S3ListGen->at(i)->getPt() <= 55)return true;
                 }
->>>>>>> added compability to 8 TeV trigger and add dataset tag
             }
         }
-<<<<<<< HEAD
-    }
-    if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
-        for(uint i = 0; i < S3ListGen->size(); i++){
-            if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                if(S3ListGen->at(i)->getMass() > 1000) return true;
-            }
-        }
-    }
-    //if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
-        //for(uint i = 0; i < S3ListGen->size(); i++){
-            //if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                //if(S3ListGen->at(i)->getMass() > 4000) return true;
-            //}
-        //}
-    //}
-=======
         /// W mass tail fitting
         if(Datastream.Contains("WJetsToLNu")) {
-<<<<<<< HEAD
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 300)return true;
-                }
-            }
-        }
-        if(Datastream.Contains("WTo")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getMass() < 300)return true;
-                }
-            }
-=======
             //for(uint i = 0; i < S3ListGen->size(); i++){
             if (getPtHat() > 120) {
                 return true;
@@ -960,10 +898,8 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                     //if(S3ListGen->at(i)->getMass() < 300)return true;
                 //}
             //}
->>>>>>> added pthat binning for 8tev W samples
         }
     }
->>>>>>> added compability to 8 TeV trigger and add dataset tag
 
     /// Diboson tail fitting
 //     if(Datastream.Contains("WW_") || Datastream.Contains("WZ_") || Datastream.Contains("ZZ_")) {
@@ -1027,10 +963,7 @@ void specialAna::Fill_Gen_Controll_histo() {
         }
 
     }
-<<<<<<< HEAD
-=======
     HistClass::Fill("MC_W_pthat_Gen",getPtHat(),m_GenEvtView->getUserRecord( "Weight" ));
->>>>>>> added pthat binning for 8tev W samples
 
 
     HistClass::Fill(0,"Tau_num_Gen",tau_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
@@ -1249,11 +1182,7 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi%s")%name %syst ),DeltaPhi(lepton,sel_met),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_mt%s")%name %syst ),MT(lepton,sel_met),weight);
-<<<<<<< HEAD
-        HistClass::Fill(hist_number,str(boost::format("%s_ET_MET%s")%name %syst ),sel_lepton->getPt()/sel_met->getPt(),weight);
-=======
         HistClass::Fill(hist_number,str(boost::format("%s_ET_MET%s")%name %syst ),lepton->getPt()/sel_met->getPt(),weight);
->>>>>>> restored 8TeV compability and data run ability
         HistClass::Fill(hist_number,str(boost::format("%s_met%s")%name %syst ),sel_met->getPt(),weight);
         HistClass::Fill(hist_number,str(boost::format("%s_met_phi%s")%name %syst ),sel_met->getPhi(),weight);
         if(syst==""){
@@ -1314,16 +1243,11 @@ double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
     return sqrt(mm);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
 
 double specialAna::Mass(pxl::Particle* p1, pxl::Particle* p2) {
     return (p1->getVector()+p2->getVector()).getMass();
 }
 
->>>>>>> k-factor improvements
 double specialAna::getPtHat(){
     double pthat=0;
     pxl::Particle* w=0;
@@ -1356,7 +1280,6 @@ double specialAna::getPtHat(){
     return pthat;
 }
 
->>>>>>> dont delete particle pointer, they belong to the event!!
 int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
     //make veto numbers
     //we don't need vectors, do we?
@@ -1369,7 +1292,7 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
         }else{
             passedID=true;
         }
-        
+
         if( (*part_it)->getPt()>ptTreshold && passedID ){
             numVeto++;
         }else{
@@ -1545,28 +1468,8 @@ void specialAna::initEvent( const pxl::Event* event ){
     if( not runOnData ){
 
         double event_weight = m_GenEvtView->getUserRecord( "Weight" );
-<<<<<<< HEAD
-        double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
-<<<<<<< HEAD
-
-        //check if we have a 13 TeV sample and if so, change the weight to one:
-        double pileup_weight = 1;
-        string datastream = event->getUserRecord( "Dataset" );
-        TString Datastream = datastream;
-        if(Datastream.Contains("13TeV"))
-<<<<<<< HEAD
-		    pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
-=======
-//        double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
-        double pileup_weight = 1.;
->>>>>>> use absolute value of PdgNumber!
-=======
-            pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
->>>>>>> fixed names in datasets (tailselector)
-=======
         //double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
         double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
->>>>>>> added compability to 8 TeV trigger and add dataset tag
 
         if(m_dataPeriod=="13TeV"){
             weight = event_weight ;
@@ -1611,29 +1514,7 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     }
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    double wmass=0.;
-    //additive
-    //p0                        =      1.18304   +/-   0.00128801
-    //p1                        = -2.66112e-05   +/-   2.5832e-06
-    //p2                        = -2.82645e-08   +/-   1.00043e-09
-    double par []={1.18304,-2.66112e-05,-2.82645e-08};
-    //multiply
-    //p0                        =      1.17943   +/-   0.00136125
-    //p1                        = -1.79983e-05   +/-   2.61106e-06
-    //p2                        = -2.94026e-08   +/-   9.2078e-10
-    if(mode==1){
-        par[0]= 1.17943;
-        par[1]= -1.79983e-05;
-        par[2]= -2.94026e-08;
-    }
-=======
 
->>>>>>> fixed k-factors for 13TeV and 8 TeV and introduced data/MC sf
-=======
-
->>>>>>> merge with stash
     if( m_dataPeriod=="13TeV" ){
         double wmass=0.;
         //additive
@@ -1654,10 +1535,7 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(S3ListGen->at(i)->getPdgNumber() == 24){
                     wmass=S3ListGen->at(i)->getMass();
-<<<<<<< HEAD
-=======
                     break;
->>>>>>> fixed k-factors for 13TeV and 8 TeV and introduced data/MC sf
                 }
             }
             weight*=(par[0]+wmass*par[1]+wmass*wmass*par[2]);
@@ -1860,13 +1738,7 @@ void specialAna::endEvent( const pxl::Event* event ){
    }
 }
 
-<<<<<<< HEAD
-//void specialAna::SetEvents(int e){
-    //events_=e;
-//}
-=======
 //~ void specialAna::SetEvents(int e){
     //~ events_=e;
 //~ }
->>>>>>> specialAna: Missing semicolon
 

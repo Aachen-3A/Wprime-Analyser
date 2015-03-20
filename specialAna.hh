@@ -52,25 +52,8 @@ public:
 
     void initEvent( const pxl::Event* event );
     void endEvent( const pxl::Event* event );
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    //void SetEvents(int e);
-=======
-    //~ void SetEvents(int e);
->>>>>>> specialAna: Missing semicolon
-=======
-    void SetEvents(int e);
-    void applyKfactor(const pxl::Event* event);
->>>>>>> added k-faktor and some gen plots
-=======
-    void applyKfactor(const pxl::Event* event, int mode);
->>>>>>> fix k-factor
-=======
     void applyKfactor(const pxl::Event* event, int mode);
     void aplyDataMCScaleFactors();
->>>>>>> fixed k-factors for 13TeV and 8 TeV and introduced data/MC sf
 
     bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);
@@ -89,11 +72,8 @@ public:
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
-<<<<<<< HEAD
-=======
     double Mass(pxl::Particle* p1, pxl::Particle* p2);
     double getPtHat();
->>>>>>> k-factor improvements
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
 

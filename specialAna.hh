@@ -64,6 +64,10 @@ public:
 
     void KinematicsSelector();
     bool TriggerSelector(const pxl::Event* event);
+    void Create_trigger_effs();
+    void TriggerAnalyser();
+
+
     bool tail_selector(const pxl::Event* event);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
@@ -104,6 +108,7 @@ public:
     TString d_mydiscmu[6];
     const std::string m_dataPeriod;
     const std::string m_kfactorFile_Config;
+    const vector< string >  m_analyse_trigger;
     const Tools::MConfig config_;
 
     double temp_run;

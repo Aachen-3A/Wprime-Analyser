@@ -69,11 +69,17 @@ public:
 
 
     bool tail_selector(const pxl::Event* event);
+
+    pxl::Particle* Get_Truth_match(std::string name, pxl::Particle* lepton);
+    pxl::Particle* Get_Truth_match_all_flavor(pxl::Particle* lepton);
+    pxl::Particle* Get_tau_truth_decay_mode(pxl::Particle* truth_tau);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
     double Mass(pxl::Particle* p1, pxl::Particle* p2);
     double getPtHat();
+    double getGenHT();
+    double getWmass();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
 

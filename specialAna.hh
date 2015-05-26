@@ -47,6 +47,12 @@ public:
     void Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoPart);
     void Fill_Tree();
 
+
+    void Create_RECO_effs();
+    void Create_RECO_object_effs(std::string object);
+    void Fill_RECO_effs();
+    void Fill_RECO_object_effs(std::string object, int id, std::vector< pxl::Particle* > part_list);
+
     void FillSystematics(const pxl::Event* event, std::string const particleName);
     void FillSystematicsUpDown(const pxl::Event* event, std::string const particleName, std::string const updown, std::string const shiftType);
 
@@ -64,6 +70,7 @@ public:
 
     void KinematicsSelector();
     bool TriggerSelector(const pxl::Event* event);
+    bool triggerKinematics();
     void Create_trigger_effs();
     void TriggerAnalyser();
 
@@ -75,6 +82,7 @@ public:
     pxl::Particle* Get_tau_truth_decay_mode(pxl::Particle* truth_tau);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
+    double DeltaR(pxl::Particle* part_j, pxl::Particle* part_i);
     double MT(pxl::Particle* lepton, pxl::Particle* met);
     double Mass(pxl::Particle* p1, pxl::Particle* p2);
     double getPtHat();
@@ -91,7 +99,7 @@ public:
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 
-    const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau;
+    const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau,m_pt_min_cut_ele,m_pt_min_cut_muo,m_pt_min_cut_tau;
 
     const std::string particles[3] = {"Ele", "Muon", "Tau"};
     const std::string particleSymbols[3] = {"e", "#mu", "#tau"};
@@ -107,6 +115,7 @@ public:
     double m_pt_met_min_cut;
     double m_pt_met_max_cut;
     double m_delta_phi_cut;
+    double m_pt_min_cut;
     double m_pt_cut;
     double m_m_cut;
     const std::string m_cutdatafile;
@@ -149,6 +158,7 @@ public:
     vector< pxl::Particle* > * EleListGen;
     vector< pxl::Particle* > * MuonListGen;
     vector< pxl::Particle* > * TauListGen;
+    vector< pxl::Particle* > * TauVisListGen;
     vector< pxl::Particle* > * GammaListGen;
     vector< pxl::Particle* > * METListGen;
     vector< pxl::Particle* > * JetListGen;
@@ -160,6 +170,8 @@ public:
 
     pxl::Particle* sel_lepton;
     pxl::Particle* sel_met;
+
+    pxl::Particle calc_stuff;
 
     unordered_set< string > triggers;
 

@@ -20,14 +20,17 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_pt_met_min_cut_ele(    cfg.GetItem< double >( "Ele.wprime.pt_met_cut_min" ) ),
    m_pt_met_max_cut_ele(    cfg.GetItem< double >( "Ele.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_ele(     cfg.GetItem< double >( "Ele.wprime.delta_phi_cut" ) ),
+   m_pt_min_cut_ele(        cfg.GetItem< double >( "Ele.wprime.pt_min" ) ),
 
    m_pt_met_min_cut_muo(    cfg.GetItem< double >( "Muo.wprime.pt_met_cut_min" ) ),
    m_pt_met_max_cut_muo(    cfg.GetItem< double >( "Muo.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_muo(     cfg.GetItem< double >( "Muo.wprime.delta_phi_cut" ) ),
+   m_pt_min_cut_muo(        cfg.GetItem< double >( "Muo.wprime.pt_min" ) ),
 
    m_pt_met_min_cut_tau(    cfg.GetItem< double >( "Tau.wprime.pt_met_cut_min" ) ),
    m_pt_met_max_cut_tau(    cfg.GetItem< double >( "Tau.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_tau(     cfg.GetItem< double >( "Tau.wprime.delta_phi_cut" ) ),
+   m_pt_min_cut_tau(        cfg.GetItem< double >( "Tau.wprime.pt_min" ) ),
 
    m_pt_cut(                cfg.GetItem< double >( "wprime.pt_cut" ) ),
    m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
@@ -71,25 +74,26 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         //str(boost::format("N_{%s}")%particleLatex[i] )
         HistClass::CreateHisto("cutflow",particles[i].c_str(), 40, 0, 39,               "stage" );
         HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,                   TString::Format("N_{%s}", particleSymbols[i].c_str()) );
-        HistClass::CreateHisto(4,"pt",particles[i].c_str(), 5000, 0, 5000,              "p_{T} [GeV]");
-        HistClass::CreateHisto(4,"pt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/p_{T} [1/GeV]" );
-        HistClass::CreateHisto(4,"deltapt_over_pt",particles[i].c_str(), 5000, 0, 10,   "#frac{#Delta p_{T}}{p_{T}}" );
-        HistClass::CreateHisto(4,"eta",particles[i].c_str(), 80, -4, 4,                 "#eta" );
-        HistClass::CreateHisto(4,"phi",particles[i].c_str(), 40, -3.2, 3.2,             "#phi [rad]" );
+        HistClass::CreateHisto(5,"pt",particles[i].c_str(), 5000, 0, 5000,              "p_{T} [GeV]");
+        HistClass::CreateHisto(5,"pt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/p_{T} [1/GeV]" );
+        HistClass::CreateHisto(5,"deltapt_over_pt",particles[i].c_str(), 5000, 0, 10,   "#frac{#Delta p_{T}}{p_{T}}" );
+        HistClass::CreateHisto(5,"eta",particles[i].c_str(), 80, -4, 4,                 "#eta" );
+        HistClass::CreateHisto(5,"phi",particles[i].c_str(), 40, -3.2, 3.2,             "#phi [rad]" );
 
-        HistClass::CreateHisto(4,"DeltaPhi",particles[i].c_str(), 40, 0, 3.2,           TString::Format("#Delta#phi(%s,E_{T}^{miss})", particleSymbols[i].c_str()) );
-        HistClass::CreateHisto(4,"mt",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
-        HistClass::CreateHisto(4,"mt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/M_{T} [1/GeV]"     );
-        HistClass::CreateHisto(4,"charge",particles[i].c_str(), 3, -1, 1,               TString::Format("q_{%s}", particleSymbols[i].c_str()) );
-        HistClass::CreateHisto(4,"met",particles[i].c_str(), 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
-        HistClass::CreateHisto(4,"met_phi",particles[i].c_str(),40, -3.2, 3.2,          "#phi_{E^{miss}_{T}} [rad]" );
-        HistClass::CreateHisto(4,"ET_MET",particles[i].c_str(),50, 0, 6,                TString::Format("p^{%s}_{T}/E^{miss}_{T}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"DeltaPhi",particles[i].c_str(), 40, 0, 3.2,           TString::Format("#Delta#phi(%s,E_{T}^{miss})", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"mt",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
+        HistClass::CreateHisto(5,"mt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/M_{T} [1/GeV]"     );
+        HistClass::CreateHisto(5,"charge",particles[i].c_str(), 3, -1, 1,               TString::Format("q_{%s}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"met",particles[i].c_str(), 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
+        HistClass::CreateHisto(5,"met_phi",particles[i].c_str(),40, -3.2, 3.2,          "#phi_{E^{miss}_{T}} [rad]" );
+        HistClass::CreateHisto(5,"ET_MET",particles[i].c_str(),50, 0, 6,                TString::Format("p^{%s}_{T}/E^{miss}_{T}", particleSymbols[i].c_str()) );
 
-        HistClass::CreateHisto(4,"jet_1_pt",particles[i].c_str(), 5000, 0, 5000,        "p_{T}^{jet} [GeV]" );
-        HistClass::CreateHisto(4,"jet_1_eta",particles[i].c_str(), 80, -4, 4,           "#eta_{jet}" );
-        HistClass::CreateHisto(4,"jet_1_phi",particles[i].c_str(), 40, -3.2, 3.2,       "#phi_{jet} [rad]" );
-        HistClass::CreateHisto(4,"jet_1_DeltaPhi",particles[i].c_str(), 40, 0, 3.2,     TString::Format("#Delta#phi(%s,jet)", particleSymbols[i].c_str()) );
-        HistClass::CreateHisto(4,"jet_1_DeltaPhiMET",particles[i].c_str(), 40, 0, 3.2,  "#Delta#phi(E_{T}^{miss},jet)");
+        HistClass::CreateHisto(5,"jet_1_pt",particles[i].c_str(), 5000, 0, 5000,        "p_{T}^{jet} [GeV]" );
+        HistClass::CreateHisto(5,"jet_1_eta",particles[i].c_str(), 80, -4, 4,           "#eta_{jet}" );
+        HistClass::CreateHisto(5,"jet_1_phi",particles[i].c_str(), 40, -3.2, 3.2,       "#phi_{jet} [rad]" );
+        HistClass::CreateHisto(5,"jet_1_DeltaPhi",particles[i].c_str(), 40, 0, 3.2,     TString::Format("#Delta#phi(%s,jet)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"jet_1_DeltaPhiMET",particles[i].c_str(), 40, 0, 3.2,  "#Delta#phi(E_{T}^{miss},jet)");
+        HistClass::CreateHisto(5,"jet_1_DeltaPhiMETlep",particles[i].c_str(), 40, 0, 3.2,  TString::Format("#Delta#phi(E_{T}^{miss}+%s,jet)", particleSymbols[i].c_str()) );
         if(not runOnData){
             HistClass::CreateHisto(2,"recoMgen_pt",particles[i].c_str(), 400, -100, 100,    "p_{T}^{reco}-p_{T}^{gen} [GeV]" );
             HistClass::CreateHisto(2,"recoMgen_pt_rel",particles[i].c_str(), 400, -10, 10,  "#frac{p_{T}^{reco}-p_{T}^{gen}}{p_{T}^{gen}}" );
@@ -102,129 +106,137 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     }
 
 
-    HistClass::CreateHisto(4,"Tau_decayMode", 100, 0, 10, "#N_{decay mode}^{#tau}");
-    HistClass::CreateHisto(4,"Tau_Vtx_X", 100, -1, 1, "Vtx_{x}^{#tau} [cm]");
-    HistClass::CreateHisto(4,"Tau_Vtx_Y", 100, -1, 1, "Vtx_{y}^{#tau} [cm]");
-    HistClass::CreateHisto(4,"Tau_Vtx_Z", 200, -30, 30, "Vtx_{z}^{#tau} [cm]");
-    //HistClass::CreateHisto(4,"Tau_EtaEta", 200, -1, 1, "#eta#eta_{#tau}");
-    //HistClass::CreateHisto(4,"Tau_EtaPhi", 200, -1, 1, "#eta#phi_{#tau}");
-    //HistClass::CreateHisto(4,"Tau_PhiPhi", 200, -1, 1, "#phi#phi_{#tau}");
-    //HistClass::CreateHisto(4,"Tau_NumSignaltracks", 40, -3, 37, "N_{sig tracks}^{#tau}");
-    HistClass::CreateHisto(4,"Tau_NumPFChargedHadrCands", 40, -3, 37, "N_{PFChargedHadrCands}^{#tau}");
-    HistClass::CreateHisto(4,"Tau_NumPFGammaCands", 40, -3, 37, "N_{PFGammaCands}^{#tau}");
-    HistClass::CreateHisto(4,"Tau_NumPFNeutralHadrCands", 40, -3, 37, "N_{PFNeutralHadrCands}^{#tau}");
-    HistClass::CreateHisto(4,"Tau_LeadingHadronPt", 5000, 0, 5000, "p_{T}^{leading hadron} [GeV]");
-    HistClass::CreateHisto(4,"Tau_EMFraction", 100, 0, 10, "EM Fraction^{#tau}");
-    HistClass::CreateHisto(4,"Tau_HcalEoverLeadChargedP", 100, 0, 10, "#frac{E_{Hcal}}{P_{leading charged}}");
-    HistClass::CreateHisto(4,"Tau_EcalEnergy", 5000, 0, 5000, "E_{Ecal}^{#tau} [GeV]");
-    HistClass::CreateHisto(4,"Tau_HcalEnergy", 5000, 0, 5000, "E_{Hcal}^{#tau} [GeV]");
-    HistClass::CreateHisto(4,"Tau_Mass", 5500, -0.5, 5, "mass(#tau) [GeV]");
-    HistClass::CreateHisto(4,"Tau_Jet_pt", 5000, 0, 5000, "p_{T}^{jet} [GeV]");
-    HistClass::CreateHisto(4,"Tau_Jet_eta", 80, -4, 4, "#eta_{jet}");
-    HistClass::CreateHisto(4,"Tau_Jet_phi", 40, -3.2, 3.2, "#phi_{jet} [rad]");
-    HistClass::CreateHisto(4,"Tau_dxy", 100, 0, 0.1, "d_{xy}^{#tau} [cm]");
-    HistClass::CreateHisto(4,"Tau_dxy_error", 100, 0, 0.1, "#sigma(d_{xy}^{#tau}) [cm]");
-    HistClass::CreateHisto(4,"Tau_dxy_Sig", 100, 0, 10, "Sig(d_{xy}^{#tau})");
+    HistClass::CreateHisto(5,"Tau_decayMode", 100, 0, 10, "#N_{decay mode}");
+    HistClass::CreateHisto(5,"Tau_Vtx_X", 100, -1, 1, "Vtx_{x} [cm]");
+    HistClass::CreateHisto(5,"Tau_Vtx_Y", 100, -1, 1, "Vtx_{y} [cm]");
+    HistClass::CreateHisto(5,"Tau_Vtx_Z", 200, -30, 30, "Vtx_{z} [cm]");
+    //HistClass::CreateHisto(5,"Tau_EtaEta", 200, -1, 1, "#eta#eta_{#tau}");
+    //HistClass::CreateHisto(5,"Tau_EtaPhi", 200, -1, 1, "#eta#phi_{#tau}");
+    //HistClass::CreateHisto(5,"Tau_PhiPhi", 200, -1, 1, "#phi#phi_{#tau}");
+    //HistClass::CreateHisto(5,"Tau_NumSignaltracks", 40, -3, 37, "N_{sig tracks}");
+    HistClass::CreateHisto(5,"Tau_NumPFChargedHadrCands", 40, -3, 37, "N_{PFChargedHadrCands}");
+    HistClass::CreateHisto(5,"Tau_NumPFGammaCands", 40, -3, 37, "N_{PFGammaCands}");
+    HistClass::CreateHisto(5,"Tau_NumPFNeutralHadrCands", 40, -3, 37, "N_{PFNeutralHadrCands}");
+    HistClass::CreateHisto(5,"Tau_LeadingHadronPt", 5000, 0, 5000, "p_{T}^{leading hadron} [GeV]");
+    HistClass::CreateHisto(5,"Tau_EMFraction", 100, 0, 10, "EM Fraction");
+    HistClass::CreateHisto(5,"Tau_HcalEoverLeadChargedP", 100, 0, 10, "#frac{E_{Hcal}}{P_{leading charged}}");
+    HistClass::CreateHisto(5,"Tau_EcalEnergy", 5000, 0, 5000, "E_{Ecal} [GeV]");
+    HistClass::CreateHisto(5,"Tau_HcalEnergy", 5000, 0, 5000, "E_{Hcal} [GeV]");
+    HistClass::CreateHisto(5,"Tau_Mass", 5500, -0.5, 5, "mass(#tau) [GeV]");
+    HistClass::CreateHisto(5,"Tau_Jet_pt", 5000, 0, 5000, "p_{T}^{jet} [GeV]");
+    HistClass::CreateHisto(5,"Tau_Jet_eta", 80, -4, 4, "#eta_{jet}");
+    HistClass::CreateHisto(5,"Tau_Jet_phi", 40, -3.2, 3.2, "#phi_{jet} [rad]");
+    HistClass::CreateHisto(5,"Tau_dxy", 100, 0, 0.1, "d_{xy} [cm]");
+    HistClass::CreateHisto(5,"Tau_dxy_error", 100, 0, 0.1, "#sigma(d_{xy}) [cm]");
+    HistClass::CreateHisto(5,"Tau_dxy_Sig", 100, 0, 10, "Sig(d_{xy})");
     HistClass::CreateHisto("Tau_eta_phi", 80, -4, 4, 40, -3.2, 3.2,"#eta_{#tau}","#phi_{#tau} [rad]");
-    HistClass::CreateHisto(4,"Tau_discriminator", 67, 0, 67,"discriminator_{#tau}");
+    HistClass::CreateHisto(5,"Tau_discriminator", 67, 0, 67,"discriminator_{#tau}");
     HistClass::NameBins(3,"Tau_discriminator",67,d_mydisc);
     HistClass::CreateHisto(15,"Tau_mt_decaymode", 5000, 0, 5000,"M_{T} [GeV]");
     HistClass::CreateHisto(25,"Tau_mt_genmatch", 5000, 0, 5000,"M_{T} [GeV]");
 
 
 
-    HistClass::CreateHisto(4,"Muon_Vtx_X", 100, -1, 1,"Vtx_{x}^{#mu} [cm]");
-    HistClass::CreateHisto(4,"Muon_Vtx_Y", 100, -1, 1,"Vtx_{y}^{#mu} [cm]");
-    HistClass::CreateHisto(4,"Muon_Vtx_Z", 200, -30, 30,"Vtx_{z}^{#mu} [cm]");
-    HistClass::CreateHisto(4,"Muon_Chi2", 400, 0, 200,"#chi_{#mu}^{2}");
-    HistClass::CreateHisto(4,"Muon_Ndof", 200, 0, 200,"N_{dof}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_LHits", 20, 0, 20,"N_{lost hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_VHits", 100, 0, 100,"N_{valid hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}^{#mu}");
-    HistClass::CreateHisto(4,"Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
-    HistClass::CreateHisto(4,"Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
-    HistClass::CreateHisto(4,"Muon_ptError", 1000, 0, 1000,"#sigma(p_{T}^{#mu}) [GeV]");
-    HistClass::CreateHisto(4,"Muon_ptErroroverpt", 1000, 0, 1.,"#sigma(p_{T}^{#mu})/p_{T}^{#mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_Cocktail_pt", 5000, 0, 5000,"p_{T}^{cocktail #mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
-    HistClass::CreateHisto(4,"Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} [rad]");
-    HistClass::CreateHisto(4,"Muon_CaloIso", 100, 0, 3,"ISO_{Calo}^{#mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_TrkIso", 100, 0, 3,"ISO_{Trk}^{#mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_ECALIso", 100, 0, 3,"ISO_{ECAL}^{#mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_HCALIso", 100, 0, 3,"ISO_{HCAL}^{#mu} [GeV]");
-    HistClass::CreateHisto(4,"Muon_ID", 6, 0, 6,"ID_{#mu}");
-    HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
-    HistClass::CreateHisto(4,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T}^{#mu} [1/GeV]");
-    HistClass::CreateHisto(4,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#mu} [1/GeV]");
-    HistClass::CreateHisto(4,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma_{p_{T}}/p_{T}^{#mu}");
+    HistClass::CreateHisto(5,"Muon_Vtx_X", 100, -1, 1,"Vtx_{x} [cm]");
+    HistClass::CreateHisto(5,"Muon_Vtx_Y", 100, -1, 1,"Vtx_{y} [cm]");
+    HistClass::CreateHisto(5,"Muon_Vtx_Z", 200, -30, 30,"Vtx_{z} [cm]");
+    HistClass::CreateHisto(5,"Muon_Chi2", 400, 0, 200,"#chi_{#mu}^{2}");
+    HistClass::CreateHisto(5,"Muon_Ndof", 200, 0, 200,"N_{dof}");
+    HistClass::CreateHisto(5,"Muon_LHits", 20, 0, 20,"N_{lost hits}");
+    HistClass::CreateHisto(5,"Muon_VHits", 100, 0, 100,"N_{valid hits}");
+    HistClass::CreateHisto(5,"Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}");
+    HistClass::CreateHisto(5,"Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}");
+    HistClass::CreateHisto(5,"Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}");
+    HistClass::CreateHisto(5,"Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}");
+    HistClass::CreateHisto(5,"Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}");
+    HistClass::CreateHisto(5,"Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}");
+    HistClass::CreateHisto(5,"Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
+    HistClass::CreateHisto(5,"Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
+    HistClass::CreateHisto(5,"Muon_ptError", 1000, 0, 1000,"#sigma(p_{T}) [GeV]");
+    HistClass::CreateHisto(5,"Muon_ptErroroverpt", 1000, 0, 1.,"#sigma(p_{T})/p_{T} [GeV]");
+    HistClass::CreateHisto(5,"Muon_Cocktail_pt", 5000, 0, 5000,"p_{T}^{cocktail #mu} [GeV]");
+    HistClass::CreateHisto(5,"Muon_Cocktail_eta", 80, -4, 4,"#eta_{cocktail #mu}");
+    HistClass::CreateHisto(5,"Muon_Cocktail_phi", 40, -3.2, 3.2,"#phi_{cocktail #mu} [rad]");
+    HistClass::CreateHisto(5,"Muon_CaloIso", 100, 0, 3,"ISO_{Calo} [GeV]");
+    HistClass::CreateHisto(5,"Muon_TrkIso", 100, 0, 3,"ISO_{Trk} [GeV]");
+    HistClass::CreateHisto(5,"Muon_ECALIso", 100, 0, 3,"ISO_{ECAL} [GeV]");
+    HistClass::CreateHisto(5,"Muon_HCALIso", 100, 0, 3,"ISO_{HCAL} [GeV]");
+    HistClass::CreateHisto(5,"Muon_Dxy", 1000, -3, 3,"D_{xy} [cm]");
+    HistClass::CreateHisto(5,"Muon_Dz", 100, -4, 4,"D_{z} [cm]");
+    HistClass::CreateHisto(5,"Muon_DxyBT", 1000, -3, 3,"D_{xy} [cm]");
+    HistClass::CreateHisto(5,"Muon_DzBT", 100, -4, 4,"D_{z} [cm]");
+    HistClass::CreateHisto(5,"Muon_DxyBS", 1000, -3, 3,"D_{xy} [cm]");
+    HistClass::CreateHisto(5,"Muon_DzBS", 100, -4, 4,"D_{z} [cm]");
 
-    HistClass::CreateHisto(4,"Ele_CaloIso", 100, 0, 100,"CaloIso");
-    HistClass::CreateHisto(4,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
-    HistClass::CreateHisto(4,"Ele_Class", 100, 0, 100,"Class");
-    HistClass::CreateHisto(4,"Ele_DEtaSCCalo", 100, 0, 100,"DEtaSCCalo");
-    HistClass::CreateHisto(4,"Ele_DEtaSCVtx", 100, 0, 100,"DEtaSCVtx");
-    HistClass::CreateHisto(4,"Ele_DEtaSeedTrk", 100, 0, 100,"DEtaSeedTrk");
-    HistClass::CreateHisto(4,"Ele_DPhiSCVtx", 100, 0, 100,"DPhiSCVtx");
-    HistClass::CreateHisto(4,"Ele_DPhiSeedTrk", 100, 0, 100,"DPhiSeedTrk");
-    HistClass::CreateHisto(4,"Ele_Dsz", 100, 0, 100,"Dsz");
-    HistClass::CreateHisto(4,"Ele_DszBS", 100, 0, 100,"DszBS");
-    HistClass::CreateHisto(4,"Ele_Dxy", 100, 0, 100,"Dxy");
-    HistClass::CreateHisto(4,"Ele_DxyBS", 100, 0, 100,"DxyBS");
-    HistClass::CreateHisto(4,"Ele_Dz", 100, 0, 100,"Dz");
-    HistClass::CreateHisto(4,"Ele_DzBS", 100, 0, 100,"DzBS");
-    HistClass::CreateHisto(4,"Ele_ECALIso", 100, 0, 100,"ECALIso");
-    HistClass::CreateHisto(4,"Ele_ECALIso03", 100, 0, 100,"ECALIso03");
-    HistClass::CreateHisto(4,"Ele_ECALIso04", 100, 0, 100,"ECALIso04");
-    HistClass::CreateHisto(4,"Ele_ESCOverPout", 100, 0, 100,"ESCOverPout");
-    HistClass::CreateHisto(4,"Ele_ESCSeedOverP", 100, 0, 100,"ESCSeedOverP");
-    HistClass::CreateHisto(4,"Ele_ESCSeedPout", 100, 0, 100,"ESCSeedPout");
-    HistClass::CreateHisto(4,"Ele_EoP", 100, 0, 100,"EoP");
-    HistClass::CreateHisto(4,"Ele_GSFNormChi2", 100, 0, 100,"GSFNormChi2");
-    HistClass::CreateHisto(4,"Ele_HCALIso", 100, 0, 100,"HCALIso");
-    HistClass::CreateHisto(4,"Ele_HCALIso03", 100, 0, 100,"HCALIso03");
-    HistClass::CreateHisto(4,"Ele_HCALIso03d1", 100, 0, 100,"HCALIso03d1");
-    HistClass::CreateHisto(4,"Ele_HCALIso03d2", 100, 0, 100,"HCALIso03d2");
-    HistClass::CreateHisto(4,"Ele_HCALIso04", 100, 0, 100,"HCALIso04");
-    HistClass::CreateHisto(4,"Ele_HCALIso04d1", 100, 0, 100,"HCALIso04d1");
-    HistClass::CreateHisto(4,"Ele_HCALIso04d2", 100, 0, 100,"HCALIso04d2");
-    HistClass::CreateHisto(4,"Ele_HCALIsoConeDR03_2012", 100, 0, 100,"HCALIsoConeDR03_2012");
-    HistClass::CreateHisto(4,"Ele_HCALIsoConeDR04_2012", 100, 0, 100,"HCALIsoConeDR04_2012");
-    HistClass::CreateHisto(4,"Ele_HCALOverECALd1", 100, 0, 100,"HCALOverECALd1");
-    HistClass::CreateHisto(4,"Ele_HoEm", 100, 0, 100,"HoEm");
-    HistClass::CreateHisto(4,"Ele_HoverE2012", 100, 0, 100,"HoverE2012");
-    HistClass::CreateHisto(4,"Ele_Match", 100, 0, 100,"Match");
-    HistClass::CreateHisto(4,"Ele_NinnerLayerLostHits", 20, 0, 20,"NinnerLayerLostHits");
-    HistClass::CreateHisto(4,"Ele_NumBrems", 100, 0, 100,"NumBrems");
-    HistClass::CreateHisto(4,"Ele_PErr", 100, 0, 100,"PErr");
-    HistClass::CreateHisto(4,"Ele_SCE", 100, 0, 100,"SCE");
-    HistClass::CreateHisto(4,"Ele_SCEErr", 100, 0, 100,"SCEErr");
-    HistClass::CreateHisto(4,"Ele_SCEt", 100, 0, 100,"SCEt");
-    HistClass::CreateHisto(4,"Ele_SCeta", 100, 0, 100,"SCeta");
-    HistClass::CreateHisto(4,"Ele_TrackerP", 1000, 0, 1000,"TrackerP");
-    HistClass::CreateHisto(4,"Ele_TrkIso", 100, 0, 100,"TrkIso");
-    HistClass::CreateHisto(4,"Ele_TrkIso03", 100, 0, 100,"TrkIso03");
-    HistClass::CreateHisto(4,"Ele_TrkIso04", 100, 0, 100,"TrkIso04");
-    HistClass::CreateHisto(4,"Ele_Vtx_X", 100, -50, 50,"Vtx_X");
-    HistClass::CreateHisto(4,"Ele_Vtx_Y", 100, -50, 50,"Vtx_Y");
-    HistClass::CreateHisto(4,"Ele_Vtx_Z", 100, -50, 50,"Vtx_Z");
-    HistClass::CreateHisto(4,"Ele_chargedHadronIso", 100, 0, 100,"chargedHadronIso");
-    HistClass::CreateHisto(4,"Ele_convDcot", 100, 0, 100,"convDcot");
-    HistClass::CreateHisto(4,"Ele_convDist", 100, 0, 100,"convDist");
-    HistClass::CreateHisto(4,"Ele_convRadius", 100, 0, 100,"convRadius");
-    HistClass::CreateHisto(4,"Ele_e1x5", 100, 0, 100,"e1x5");
-    HistClass::CreateHisto(4,"Ele_e2x5", 100, 0, 100,"e2x5");
-    HistClass::CreateHisto(4,"Ele_e5x5", 100, 0, 100,"e5x5");
-    HistClass::CreateHisto(4,"Ele_neutralHadronIso", 100, 0, 100,"neutralHadronIso");
-    HistClass::CreateHisto(4,"Ele_photonIso", 100, 0, 100,"photonIso");
-    HistClass::CreateHisto(4,"Ele_pin", 1000, 0, 1000,"pin");
-    HistClass::CreateHisto(4,"Ele_pout", 1000, 0, 1000,"pout");
-    HistClass::CreateHisto(4,"Ele_puChargedHadronIso", 100, 0, 100,"puChargedHadronIso");
-    HistClass::CreateHisto(4,"Ele_sigmaIetaIeta", 100, 0, 10,"sigmaIetaIeta");
+
+    HistClass::CreateHisto(5,"Muon_ID", 6, 0, 6,"ID_{#mu}");
+    HistClass::NameBins(3,"Muon_ID",6,d_mydiscmu);
+    //HistClass::CreateHisto(5,"Muon_pt_reciprocal", 5000, 0, 1,"1/p_{T} [1/GeV]");
+    //HistClass::CreateHisto(5,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#m [1/GeV]");
+    HistClass::CreateHisto(5,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma_{p_{T}}/p_{T}");
+
+    HistClass::CreateHisto(5,"Ele_CaloIso", 100, 0, 100,"CaloIso");
+    HistClass::CreateHisto(5,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
+    HistClass::CreateHisto(5,"Ele_Class", 100, 0, 100,"Class");
+    HistClass::CreateHisto(5,"Ele_DEtaSCCalo", 100, 0, 100,"DEtaSCCalo");
+    HistClass::CreateHisto(5,"Ele_DEtaSCVtx", 100, 0, 100,"DEtaSCVtx");
+    HistClass::CreateHisto(5,"Ele_DEtaSeedTrk", 100, 0, 100,"DEtaSeedTrk");
+    HistClass::CreateHisto(5,"Ele_DPhiSCVtx", 100, 0, 100,"DPhiSCVtx");
+    HistClass::CreateHisto(5,"Ele_DPhiSeedTrk", 100, 0, 100,"DPhiSeedTrk");
+    HistClass::CreateHisto(5,"Ele_Dsz", 100, 0, 100,"Dsz");
+    HistClass::CreateHisto(5,"Ele_DszBS", 100, 0, 100,"DszBS");
+    HistClass::CreateHisto(5,"Ele_Dxy", 100, 0, 100,"Dxy");
+    HistClass::CreateHisto(5,"Ele_DxyBS", 100, 0, 100,"DxyBS");
+    HistClass::CreateHisto(5,"Ele_Dz", 100, 0, 100,"Dz");
+    HistClass::CreateHisto(5,"Ele_DzBS", 100, 0, 100,"DzBS");
+    HistClass::CreateHisto(5,"Ele_ECALIso", 100, 0, 100,"ECALIso");
+    HistClass::CreateHisto(5,"Ele_ECALIso03", 100, 0, 100,"ECALIso03");
+    HistClass::CreateHisto(5,"Ele_ECALIso04", 100, 0, 100,"ECALIso04");
+    HistClass::CreateHisto(5,"Ele_ESCOverPout", 100, 0, 100,"ESCOverPout");
+    HistClass::CreateHisto(5,"Ele_ESCSeedOverP", 100, 0, 100,"ESCSeedOverP");
+    HistClass::CreateHisto(5,"Ele_ESCSeedPout", 100, 0, 100,"ESCSeedPout");
+    HistClass::CreateHisto(5,"Ele_EoP", 100, 0, 100,"EoP");
+    HistClass::CreateHisto(5,"Ele_GSFNormChi2", 100, 0, 100,"GSFNormChi2");
+    HistClass::CreateHisto(5,"Ele_HCALIso", 100, 0, 100,"HCALIso");
+    HistClass::CreateHisto(5,"Ele_HCALIso03", 100, 0, 100,"HCALIso03");
+    HistClass::CreateHisto(5,"Ele_HCALIso03d1", 100, 0, 100,"HCALIso03d1");
+    HistClass::CreateHisto(5,"Ele_HCALIso03d2", 100, 0, 100,"HCALIso03d2");
+    HistClass::CreateHisto(5,"Ele_HCALIso04", 100, 0, 100,"HCALIso04");
+    HistClass::CreateHisto(5,"Ele_HCALIso04d1", 100, 0, 100,"HCALIso04d1");
+    HistClass::CreateHisto(5,"Ele_HCALIso04d2", 100, 0, 100,"HCALIso04d2");
+    HistClass::CreateHisto(5,"Ele_HCALIsoConeDR03_2012", 100, 0, 100,"HCALIsoConeDR03_2012");
+    HistClass::CreateHisto(5,"Ele_HCALIsoConeDR04_2012", 100, 0, 100,"HCALIsoConeDR04_2012");
+    HistClass::CreateHisto(5,"Ele_HCALOverECALd1", 100, 0, 100,"HCALOverECALd1");
+    HistClass::CreateHisto(5,"Ele_HoEm", 100, 0, 100,"HoEm");
+    HistClass::CreateHisto(5,"Ele_HoverE2012", 100, 0, 100,"HoverE2012");
+    HistClass::CreateHisto(5,"Ele_Match", 100, 0, 100,"Match");
+    HistClass::CreateHisto(5,"Ele_NinnerLayerLostHits", 20, 0, 20,"NinnerLayerLostHits");
+    HistClass::CreateHisto(5,"Ele_NumBrems", 100, 0, 100,"NumBrems");
+    HistClass::CreateHisto(5,"Ele_PErr", 100, 0, 100,"PErr");
+    HistClass::CreateHisto(5,"Ele_SCE", 100, 0, 100,"SCE");
+    HistClass::CreateHisto(5,"Ele_SCEErr", 100, 0, 100,"SCEErr");
+    HistClass::CreateHisto(5,"Ele_SCEt", 100, 0, 100,"SCEt");
+    HistClass::CreateHisto(5,"Ele_SCeta", 100, 0, 100,"SCeta");
+    HistClass::CreateHisto(5,"Ele_TrackerP", 1000, 0, 1000,"TrackerP");
+    HistClass::CreateHisto(5,"Ele_TrkIso", 100, 0, 100,"TrkIso");
+    HistClass::CreateHisto(5,"Ele_TrkIso03", 100, 0, 100,"TrkIso03");
+    HistClass::CreateHisto(5,"Ele_TrkIso04", 100, 0, 100,"TrkIso04");
+    HistClass::CreateHisto(5,"Ele_Vtx_X", 100, -50, 50,"Vtx_X");
+    HistClass::CreateHisto(5,"Ele_Vtx_Y", 100, -50, 50,"Vtx_Y");
+    HistClass::CreateHisto(5,"Ele_Vtx_Z", 100, -50, 50,"Vtx_Z");
+    HistClass::CreateHisto(5,"Ele_chargedHadronIso", 100, 0, 100,"chargedHadronIso");
+    HistClass::CreateHisto(5,"Ele_convDcot", 100, 0, 100,"convDcot");
+    HistClass::CreateHisto(5,"Ele_convDist", 100, 0, 100,"convDist");
+    HistClass::CreateHisto(5,"Ele_convRadius", 100, 0, 100,"convRadius");
+    HistClass::CreateHisto(5,"Ele_e1x5", 100, 0, 100,"e1x5");
+    HistClass::CreateHisto(5,"Ele_e2x5", 100, 0, 100,"e2x5");
+    HistClass::CreateHisto(5,"Ele_e5x5", 100, 0, 100,"e5x5");
+    HistClass::CreateHisto(5,"Ele_neutralHadronIso", 100, 0, 100,"neutralHadronIso");
+    HistClass::CreateHisto(5,"Ele_photonIso", 100, 0, 100,"photonIso");
+    HistClass::CreateHisto(5,"Ele_pin", 1000, 0, 1000,"pin");
+    HistClass::CreateHisto(5,"Ele_pout", 1000, 0, 1000,"pout");
+    HistClass::CreateHisto(5,"Ele_puChargedHadronIso", 100, 0, 100,"puChargedHadronIso");
+    HistClass::CreateHisto(5,"Ele_sigmaIetaIeta", 100, 0, 10,"sigmaIetaIeta");
 
 
     if(not runOnData){
@@ -277,6 +289,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         Create_trigger_effs();
     }
 
+    Create_RECO_effs();
 
     //Kinematics
     mLeptonTree["mt"]=0;
@@ -312,26 +325,30 @@ specialAna::~specialAna() {
 
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
-    if(tail_selector(event)) return;
+
     if(not runOnData){
+        if(tail_selector(event)) return;
         Fill_Gen_Controll_histo();
+    }else{
+        if (!TriggerSelector(event)) return;
     }
 
-    applyKfactor(event,0);
-
     KinematicsSelector();
+
+    if (!triggerKinematics()) return;
+
     if(not runOnData){
+        applyKfactor(event,0);
         aplyDataMCScaleFactors();
     }
 
     TriggerAnalyser();
-
     if (!TriggerSelector(event)) return;
 
     cleanJets();
     Fill_stage_0_histos();
 
-
+    Fill_RECO_effs();
 
     if(sel_lepton && sel_met){
         Fill_Tree();
@@ -346,7 +363,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             n_lepton++;
         }
 
-        if((sel_lepton->getPt() > m_pt_cut) && (sel_lepton->getMass() > m_m_cut)) {
+        if((sel_lepton->getPt() > m_pt_cut) && sel_lepton->getUserRecord("passed")) {
+            Fill_Controll_histo(4, sel_lepton);
+        //(sel_lepton->getMass() > m_m_cut)
         //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
             // save event information (after cuts) to stringstream which is written to disk in endJob()
             // for event display generation:
@@ -525,9 +544,9 @@ bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
 }
 
 bool specialAna::Check_Muo_ID(pxl::Particle* muon) {
-	bool passed = false;
-	muon->getUserRecord("isHighPtMuon").asBool() ? passed = true : passed = false;
-	return passed;
+    bool passed = false;
+    muon->getUserRecord("isHighPtMuon").asBool() ? passed = true : passed = false;
+    return passed;
 }
 
 
@@ -546,7 +565,17 @@ void specialAna::KinematicsSelector() {
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
 
+    //cout<<numVetoMuo<<"  "<<numVetoEle<<"  "<<numVetoTau<<endl;
 
+    //the ordering is important muon is last (overrides the first two and so on)
+    if( numVetoEle==0 && TauList->size()==1 && numVetoMuo==0 ){
+        sel_lepton=( pxl::Particle* ) TauList->at(0);
+        m_pt_min_cut=m_pt_min_cut_tau;
+        m_delta_phi_cut=m_delta_phi_cut_tau;
+        m_pt_met_min_cut=m_pt_met_min_cut_tau;
+        m_pt_met_max_cut=m_pt_met_max_cut_tau;
+        sel_id=15;
+    }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         bool passedID=false;
         for( vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
@@ -564,6 +593,7 @@ void specialAna::KinematicsSelector() {
         }
         if(passedID){
             sel_lepton=( pxl::Particle* ) EleList->at(0);
+            m_pt_min_cut=m_pt_min_cut_ele;
             m_delta_phi_cut=m_delta_phi_cut_ele;
             m_pt_met_min_cut=m_pt_met_min_cut_ele;
             m_pt_met_max_cut=m_pt_met_max_cut_ele;
@@ -587,24 +617,19 @@ void specialAna::KinematicsSelector() {
         }
         if(passedID){
             sel_lepton=( pxl::Particle* ) MuonList->at(0);
+            m_pt_min_cut=m_pt_min_cut_muo;
             m_delta_phi_cut=m_delta_phi_cut_muo;
             m_pt_met_min_cut=m_pt_met_min_cut_muo;
             m_pt_met_max_cut=m_pt_met_max_cut_muo;
             sel_id=13;
         }
     }
-    if( numVetoEle==0 && TauList->size()==1 && numVetoMuo==0 ){
-        sel_lepton=( pxl::Particle* ) TauList->at(0);
-        m_delta_phi_cut=m_delta_phi_cut_tau;
-        m_pt_met_min_cut=m_pt_met_min_cut_tau;
-        m_pt_met_max_cut=m_pt_met_max_cut_tau;
-        sel_id=15;
-    }
 
 
 
 
-    if(sel_met && sel_lepton){
+
+    if(sel_met && sel_lepton && sel_lepton->getPt()>m_pt_min_cut){
         if(sel_lepton->getPt()/sel_met->getPt()>m_pt_met_min_cut && sel_lepton->getPt()/sel_met->getPt()<m_pt_met_max_cut){
             passedPtMet=true;
         }
@@ -659,7 +684,7 @@ void specialAna::TriggerAnalyser(){
 
 bool specialAna::TriggerSelector(const pxl::Event* event){
     bool triggered=false;
-    bool tiggerKinematics=false;
+
 
 
     // Warning this disables all triggers
@@ -708,27 +733,41 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
         //}
     }else{
         //this is 8TeV
+        string datastream = event->getUserRecord( "Dataset" );
+        TString Datastream = datastream;
         pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
         for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
             if (
-                string::npos != (*us).first.find( "HLT_HLT_Ele90_CaloIdVT_GsfTrkIdT") or
-                string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_GsfTrkIdT") or
-                string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_TrkIdT") or
-                string::npos != (*us).first.find( "HLT_HLT_Ele27_WP80_v") or
-                string::npos != (*us).first.find( "HLT_HLT_Mu40_") or
-                string::npos != (*us).first.find( "HLT_HLT_Mu40_eta2p1_") or
-                string::npos != (*us).first.find( "HLT_HLT_IsoMu24_eta") or
-                string::npos != (*us).first.find( "HLT_HLT_IsoMu24_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_HLT_IsoTkMu24_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_HLT_IsoTkMu20_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120") or
-                string::npos != (*us).first.find( "HLT_HLT_Ele95_CaloIdVT_GsfTrkIdT_") or
-                string::npos != (*us).first.find( "HLT_HLT_Ele32_eta2p1_WP85_Gsf_") or
-                string::npos != (*us).first.find( "HLT_HLT_Ele27_eta2p1_WP85_Gsf_") or
-                string::npos != (*us).first.find( "HLT_HLT_Ele25WP60_SC4_Mass55_") or
-                //string::npos != (*us).first.find( "HLT_HLT_Mu17_Mu8_v") or
-                string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
+                string::npos != (*us).first.find( "HLT_Ele27_CaloIdL_CaloIsoVL_TrkIdVL_TrkIsoVL_") or
+                string::npos != (*us).first.find( "HLT_Ele27_WP80_") or
+                string::npos != (*us).first.find( "HLT_Ele27_WP80_PFMET_MT50_") or
+                //string::npos != (*us).first.find( "HLTEle30_CaloIdVT_TrkIdT_") or
+                //string::npos != (*us).first.find( "HLT_Ele32_CaloIdL_CaloIsoVL_TrkIdVL_TrkIsoVL_") or
+                string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_GsfTrkIdT_") or
+                //string::npos != (*us).first.find( "HLTEle90_CaloIdVT_GsfTrkIdT_") or
+                //string::npos != (*us).first.find( "HLTIsoMu20_WCandPt80_") or
+                //string::npos != (*us).first.find( "HLTIsoMu20_eta2p1_") or
+                //string::npos != (*us).first.find( "HLTIsoMu24_") or
+                //string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_") or
+                //string::npos != (*us).first.find( "HLTIsoMu30_") or
+                string::npos != (*us).first.find( "HLT_IsoMu30_eta2p1_") or
+                //string::npos != (*us).first.find( "HLT_IsoMu34_eta2p1_") or
+                //string::npos != (*us).first.find( "HLT_IsoMu40_eta2p1_") or
+                //string::npos != (*us).first.find( "HLT_MET120_") or
+                //string::npos != (*us).first.find( "HLT_MET120_HBHENoiseCleaned_") or
+                //string::npos != (*us).first.find( "HLT_MET200_") or
+                //string::npos != (*us).first.find( "HLT_MET200_HBHENoiseCleaned_") or
+                string::npos != (*us).first.find( "HLT_Mu40_")
+                //string::npos != (*us).first.find( "HLT_Mu40_eta2p1_")
+                //string::npos != (*us).first.find( "HLT_PFMET150_") or
+                //string::npos != (*us).first.find( "HLT_PFMET180_")
             ){
+                if(Datastream.Contains("SingleEle") and  (string::npos != (*us).first.find( "Mu"))){
+                    continue;
+                }
+                if(Datastream.Contains("SingleMu") and  (string::npos != (*us).first.find( "Ele"))){
+                    continue;
+                }
                 triggered=(*us).second;
                 if(triggered){
                     break;
@@ -748,6 +787,14 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
         //}
     //}
 
+
+
+     return (triggered );
+
+}
+
+bool specialAna::triggerKinematics(){
+    bool tiggerKinematics=false;
     if(sel_lepton && sel_met){
         if(sel_lepton->getName()==m_TauType){
             // Warning this disables all triggers
@@ -758,22 +805,18 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
 
         }
         if(sel_lepton->getName()=="Muon"){
-            if(sel_lepton->getPt()>25){
+            if(sel_lepton->getPt()>20){
                 tiggerKinematics=true;
             }
         }
         if(sel_lepton->getName()=="Ele"){
-            if(sel_lepton->getPt()>30){
+            if(sel_lepton->getPt()>25){
                 tiggerKinematics=true;
             }
         }
 
     }
-
-      //std::cout<<triggered <<"   "<< tiggerKinematics<<std::endl;
-
-     return (triggered && tiggerKinematics);
-
+    return tiggerKinematics;
 }
 
 void specialAna::Fill_Tree(){
@@ -890,32 +933,47 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
     }else if( m_dataPeriod=="8TeV" ){
         /// W tail fitting
-        if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getPt() > 55)return true;
-                }
-            }
-        }
+        //if(Datastream.Contains("WJetsToLNu_TuneZ2Star_8TeV")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+                //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    //if(S3ListGen->at(i)->getPt() > 55)return true;
+                //}
+            //}
+        //}
         if(Datastream.Contains("WJetsToLNu_PtW")) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
-                    if(S3ListGen->at(i)->getPt() <= 55)return true;
+                    if(S3ListGen->at(i)->getPt() <= 60) return true;
                 }
             }
+
         }
+        //if(Datastream.Contains("WJetsToLNu_HT")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+                //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    //if(S3ListGen->at(i)->getPt() <= 55) return true;
+                //}
+            //}
+        //}
         /// W mass tail fitting
         if(Datastream.Contains("WJetsToLNu")) {
             //for(uint i = 0; i < S3ListGen->size(); i++){
             if (getPtHat() > 120) {
                 return true;
             }
+            if(!Datastream.Contains("_PtW")){
+                for(uint i = 0; i < S3ListGen->size(); i++){
+                    if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                        if(S3ListGen->at(i)->getPt() > 60) return true;
+                    }
+                }
+            }
                 //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
                     //if(S3ListGen->at(i)->getMass() > 300)return true;
                 //}
             //}
         }
-        if(Datastream.Contains("WTo")) {
+        if(Datastream.Contains("WTo") and Datastream.Contains("ptmin")) {
             //for(uint i = 0; i < S3ListGen->size(); i++){
             if (getPtHat() <= 120) return true;
                 //if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
@@ -923,6 +981,91 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                 //}
             //}
         }
+        if(Datastream.Contains("WTo") and !Datastream.Contains("ptmin") and !Datastream.Contains("toAnything")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            if (getPtHat() > 120) return true;
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 24){
+                    if(S3ListGen->at(i)->getPt() > 60) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-20-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 120) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-120-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 200) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-400-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 500) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-500-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 700) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-700-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 800) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-800-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 1000) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-1000-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 1500) return true;
+                }
+            }
+        }
+        if(Datastream.Contains("DYTo") and Datastream.Contains("M-1500-")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                if(TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32()) == 23 ){
+                    if(S3ListGen->at(i)->getMass() > 2000) return true;
+                }
+            }
+        }
+
+        if(Datastream.Contains("WWJets") or Datastream.Contains("WZJets") or Datastream.Contains("ZZJets")) {
+            for(uint i = 0; i < S3ListGen->size(); i++){
+                int part_id = TMath::Abs(S3ListGen->at(i)->getUserRecord("id").toInt32());
+                if(part_id == 23 || part_id == 24 ){
+                    if (getPtHat() > 500) return true;
+                }
+            }
+        }
+
+
+
     }
 
     /// Diboson tail fitting
@@ -1072,6 +1215,13 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
     HistClass::Fill(hist_number,"Muon_ECALIso",lepton->getUserRecord("ECALIso").toDouble() / lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Muon_HCALIso",lepton->getUserRecord("HCALIso").toDouble() / lepton->getPt(),weight);
 
+    HistClass::Fill(hist_number,"Muon_Dxy",lepton->getUserRecord("Dxy").toDouble() ,weight);
+    HistClass::Fill(hist_number,"Muon_Dz",lepton->getUserRecord("Dz").toDouble() ,weight);
+    HistClass::Fill(hist_number,"Muon_DxyBT",lepton->getUserRecord("DxyBT").toDouble() ,weight);
+    HistClass::Fill(hist_number,"Muon_DzBT",lepton->getUserRecord("DzBT").toDouble() ,weight);
+    HistClass::Fill(hist_number,"Muon_DxyBS",lepton->getUserRecord("DxyBS").toDouble() ,weight);
+    HistClass::Fill(hist_number,"Muon_DzBS",lepton->getUserRecord("DzBS").toDouble() ,weight);
+
     HistClass::Fill(hist_number,"Muon_pt_reciprocal",1/lepton->getPt(),weight);
     if(sel_met)
         HistClass::Fill(hist_number,"Muon_mt_reciprocal",1/MT(lepton,sel_met),weight);
@@ -1162,20 +1312,20 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
         //try{
             //lepton->getUserRecord(us->first);
             ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
-            ////HistClass::CreateHisto(4,"Muon_VHits","Muon_VHits", 100, 0, 100,"N_{valid hits}^{#mu}");
-            //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
+            ////HistClass::CreateHisto(5,"Muon_VHits","Muon_VHits", 100, 0, 100,"N_{valid hits}");
+            //cout<<"HistClass::CreateHisto(5,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
         //try{
             //lepton->getUserRecord(us->first);
             ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
-            //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
+            //cout<<"HistClass::CreateHisto(5,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
         //try{
             //lepton->getUserRecord(us->first);
             ////cout<<"HistClass::Fill(hist_number,\"Ele_"<<us->first<<"\",lepton->getUserRecord (\""<<us->first<<"\"),weight);"<<endl;
-            //cout<<"HistClass::CreateHisto(4,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
+            //cout<<"HistClass::CreateHisto(5,\"Ele_"<< us->first<<"\",\"Ele_"<< us->first<<"\", 100, 0, 100,\""<<  us->first<<"\");"<<endl;
         //}catch( std::runtime_error &exc ) {
         //}
     //}
@@ -1254,6 +1404,9 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
         if(syst==""){
             if(JetList->size()>0){
                 HistClass::Fill(hist_number,str(boost::format("%s_jet_1_DeltaPhiMET")%name ),DeltaPhi(sel_met,JetList->at(0)),weight);
+                calc_stuff.setP4(sel_met->getVector());
+                calc_stuff.addP4(sel_lepton->getVector());
+                HistClass::Fill(hist_number,str(boost::format("%s_jet_1_DeltaPhiMETlep")%name ),DeltaPhi(calc_stuff.getPhi(),JetList->at(0)->getPhi()),weight);
             }
         }
     }
@@ -1287,6 +1440,230 @@ void specialAna::Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoP
 
 }
 
+void specialAna::Create_RECO_effs() {
+    Create_RECO_object_effs("Muon");
+    Create_RECO_object_effs("Ele");
+    Create_RECO_object_effs("Tau");
+    TString x_bins_names[13] = {"1Pi0Pi0",
+                                "1Pi1Pi0",
+                                "1Pi2Pi0",
+                                "1Pi>2Pi0",
+                                "3Pi0Pi0",
+                                "3Pi1Pi0",
+                                "3Pi2Pi0",
+                                "3Pi>2Pi0",
+                                ">3Pi0Pi0",
+                                ">3Pi1Pi0",
+                                ">3Pi2Pi0",
+                                ">3Pi>2Pi0",
+                                "else"};
+    TString y_bins_names[16] = {"tauDecay1ChargedPion0PiZero",
+                                "tauDecay1ChargedPion1PiZero",
+                                "tauDecay1ChargedPion2PiZero",
+                                "tauDecay1ChargedPion3PiZero",
+                                "tauDecay1ChargedPion4PiZero",
+                                "tauDecay2ChargedPion0PiZero",
+                                "tauDecay2ChargedPion1PiZero",
+                                "tauDecay2ChargedPion2PiZero",
+                                "tauDecay2ChargedPion3PiZero",
+                                "tauDecay2ChargedPion4PiZero",
+                                "tauDecay3ChargedPion0PiZero",
+                                "tauDecay3ChargedPion1PiZero",
+                                "tauDecay3ChargedPion2PiZero",
+                                "tauDecay3ChargedPion3PiZero",
+                                "tauDecay3ChargedPion4PiZero",
+                                "tauDecayOther"};
+
+    HistClass::CreateHisto("Tau_RECO_vs_gendm_vs_recodm_0_500", 13, 0, 13, 16, 0, 16, "DM(gen)", "DM(reco)");
+    HistClass::NameBins("Tau_RECO_vs_gendm_vs_recodm_0_500", 13, x_bins_names, 16, y_bins_names);
+    HistClass::CreateHisto("Tau_RECO_vs_gendm_vs_recodm_500_1000", 13, 0, 13, 16, 0, 16, "DM(gen)", "DM(reco)");
+    HistClass::NameBins("Tau_RECO_vs_gendm_vs_recodm_500_1000", 13, x_bins_names, 16, y_bins_names);
+    HistClass::CreateHisto("Tau_RECO_vs_gendm_vs_recodm_1000_1500", 13, 0, 13, 16, 0, 16, "DM(gen)", "DM(reco)");
+    HistClass::NameBins("Tau_RECO_vs_gendm_vs_recodm_1000_1500", 13, x_bins_names, 16, y_bins_names);
+    HistClass::CreateHisto("Tau_RECO_vs_gendm_vs_recodm_1500_2000", 13, 0, 13, 16, 0, 16, "DM(gen)", "DM(reco)");
+    HistClass::NameBins("Tau_RECO_vs_gendm_vs_recodm_1500_2000", 13, x_bins_names, 16, y_bins_names);
+    HistClass::CreateHisto("Tau_RECO_vs_gendm_vs_recodm_2000", 13, 0, 13, 16, 0, 16, "DM(gen)", "DM(reco)");
+    HistClass::NameBins("Tau_RECO_vs_gendm_vs_recodm_2000", 13, x_bins_names, 16, y_bins_names);
+    Create_RECO_object_effs("MET");
+}
+
+void specialAna::Create_RECO_object_effs(std::string object) {
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_pT", object.c_str()),         100, 0, 1000,
+                         TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()));
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()),       70, 0, 70,
+                         "n_{vtx}");
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), 150, -3, 3, 100, 0, 3.5,
+                         TString::Format("#eta(%s(gen))", object.c_str()), TString::Format("#phi(%s(gen)) (rad)", object.c_str()));
+    if (object != "MET") {
+        HistClass::CreateEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()),         100, 0, 1000,
+                             TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()));
+        HistClass::CreateEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()),       70, 0, 70,
+                             "n_{vtx}");
+        HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), 150, -3, 3, 100, 0, 3.5,
+                             TString::Format("#eta(%s(gen))", object.c_str()), TString::Format("#phi(%s(gen)) (rad)", object.c_str()));
+    }
+}
+
+void specialAna::Fill_RECO_effs() {
+    Fill_RECO_object_effs("Muon", 13, *MuonList);
+    Fill_RECO_object_effs("Ele", 11, *EleList);
+    Fill_RECO_object_effs("Tau", 15, *TauList);
+    Fill_RECO_object_effs("MET", 12, *METList);
+}
+
+void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< pxl::Particle* > part_list) {
+    if (object == "MET") {
+        pxl::Particle* gen_met = 0;
+        for (std::vector< pxl::Particle* >::const_iterator part_it = S3ListGen->begin(); part_it != S3ListGen->end(); ++part_it) {
+            pxl::Particle *part_i = *part_it;
+            if (TMath::Abs(part_i->getPdgNumber()) != 12 and TMath::Abs(part_i->getPdgNumber()) != 14 and TMath::Abs(part_i->getPdgNumber()) != 16 ) continue;
+            if (gen_met == 0) {
+                gen_met = (pxl::Particle*) part_i->clone();
+            } else {
+                gen_met->addP4(part_i);
+            }
+        }
+        if (gen_met != 0) {
+            if (part_list.size() > 0 and DeltaPhi(part_list[0], gen_met) < 0.25) {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), gen_met->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), gen_met->getEta(), gen_met->getPhi(), true);
+            } else {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), gen_met->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), gen_met->getEta(), gen_met->getPhi(), false);
+            }
+        }
+        delete gen_met;
+    } else if (object == "Tau") {
+        for (std::vector< pxl::Particle* >::const_iterator part_it = TauVisListGen->begin(); part_it != TauVisListGen->end(); ++part_it) {
+            pxl::Particle *part_i = *part_it;
+            pxl::Particle* matched_reco_particle = 0;
+            if (part_i->getUserRecord("decay_mode_id") == 0 or part_i->getUserRecord("decay_mode_id") == 1) continue;
+            double delta_r_max = 0.25;
+            for (std::vector< pxl::Particle* >::const_iterator part_jt = part_list.begin(); part_jt != part_list.end(); ++part_jt) {
+                pxl::Particle *part_j = *part_jt;
+                if (DeltaR(part_j, part_i) < delta_r_max) {
+                    delta_r_max = DeltaR(part_j, part_i);
+                    matched_reco_particle = (pxl::Particle*) part_j->clone();
+                }
+            }
+            if (matched_reco_particle != 0) {
+                cout<<"found match"<<endl;
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+
+                if (matched_reco_particle->getUserRecord("decayMode") == 17) {
+                    if (part_i->getPt() < 500) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_0_500",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         15.5,
+                                         1.);
+                    } else if (part_i->getPt() > 500 and part_i->getPt() < 1000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_500_1000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         15.5,
+                                         1.);
+                    } else if (part_i->getPt() > 1000 and part_i->getPt() < 1500) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_1000_1500",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         15.5,
+                                         1.);
+                    } else if (part_i->getPt() > 1500 and part_i->getPt() < 2000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_1500_2000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         15.5,
+                                         1.);
+                    } else if (part_i->getPt() > 2000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_2000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         15.5,
+                                         1.);
+                    }
+                } else {
+                    if (part_i->getPt() < 500) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_0_500",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         (double)matched_reco_particle->getUserRecord("decayMode")+0.5,
+                                         1.);
+                    } else if (part_i->getPt() > 500 and part_i->getPt() < 1000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_500_1000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         (double)matched_reco_particle->getUserRecord("decayMode")+0.5,
+                                         1.);
+                    } else if (part_i->getPt() > 1000 and part_i->getPt() < 1500) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_1000_1500",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         (double)matched_reco_particle->getUserRecord("decayMode")+0.5,
+                                         1.);
+                    } else if (part_i->getPt() > 1500 and part_i->getPt() < 2000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_1500_2000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         (double)matched_reco_particle->getUserRecord("decayMode")+0.5,
+                                         1.);
+                    } else if (part_i->getPt() > 2000) {
+                        HistClass::Fill("Tau_RECO_vs_gendm_vs_recodm_2000",
+                                         (double)part_i->getUserRecord("decay_mode_id")-1.5,
+                                         (double)matched_reco_particle->getUserRecord("decayMode")+0.5,
+                                         1.);
+                    }
+                }
+            } else {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+            }
+            if (TMath::Abs(part_i -> getEta()) < 2.5) {
+                if (matched_reco_particle != 0) {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+                } else {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+                }
+            }
+            delete matched_reco_particle;
+        }
+    } else {
+        for (std::vector< pxl::Particle* >::const_iterator part_it = S3ListGen->begin(); part_it != S3ListGen->end(); ++part_it) {
+            pxl::Particle *part_i = *part_it;
+            pxl::Particle* matched_reco_particle = 0;
+            if (TMath::Abs(part_i->getPdgNumber()) != id) continue;
+            double delta_r_max = 0.25;
+            for (std::vector< pxl::Particle* >::const_iterator part_jt = part_list.begin(); part_jt != part_list.end(); ++part_jt) {
+                pxl::Particle *part_j = *part_jt;
+                if (DeltaR(part_j, part_i) < delta_r_max) {
+                    delta_r_max = DeltaR(part_j, part_i);
+                    matched_reco_particle = (pxl::Particle*) part_j->clone();
+                }
+            }
+            if (matched_reco_particle != 0) {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+            } else {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+            }
+            if (TMath::Abs(part_i -> getEta()) < 2.5) {
+                if (matched_reco_particle != 0) {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+                } else {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+                }
+            }
+            delete matched_reco_particle;
+        }
+    }
+}
 
 pxl::Particle* specialAna::Get_Truth_match(std::string name, pxl::Particle* lepton) {
     int part_temp_id = 0;
@@ -1343,7 +1720,7 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
     vis_tau_decay->setP4(0,0,0,0);
     while (true) {
         bool continue_loop = false;
-        for (int i = 0; i < temp_part->size(); i++) {
+        for (unsigned int i = 0; i < temp_part->size(); i++) {
             pxl::Particle* temp_part_dummy = temp_part->at(i);
             if (temp_part_dummy->getDaughters().size() == 0) {
                 if (TMath::Abs(temp_part_dummy->getPdgNumber()) == 11) { // electrons
@@ -1575,6 +1952,12 @@ double specialAna::DeltaPhi(pxl::Particle* lepton, pxl::Particle* met) {
         return  2.*TMath::Pi() - temp;
 }
 
+
+double specialAna::DeltaR(pxl::Particle* part_j, pxl::Particle* part_i) {
+    return part_j->getVector().deltaR(part_i->getVector());
+}
+
+
 double specialAna::MT(pxl::Particle* lepton, pxl::Particle* met) {
     double mm = 2 * lepton->getPt() * met->getPt() * ( 1. - cos(lepton->getPhi() - met->getPhi()) );
     return sqrt(mm);
@@ -1593,7 +1976,8 @@ double specialAna::getPtHat(){
         if(S3ListGen->at(i)->hasUserRecord("id")){
             S3ListGen->at(i)->setPdgNumber(S3ListGen->at(i)->getUserRecord("id"));
         }
-        if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+        //this method treats all Bosons as W
+        if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24 or TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 23 ){
             w=S3ListGen->at(i);
         }
         //take the neutrio to avoid showering and so on!!
@@ -1731,7 +2115,7 @@ void specialAna::endJob( const Serializable* ) {
     {
         cout<<*it<<endl;
     }
-    //        HistClass::CreateHisto(4,"ptoverMET",particleName[i].c_str(), 20, 0, 2,       TString::Format("#frac{p_{T}^{%s}}{MET}", particleLatex[i].c_str()) );
+    //        HistClass::CreateHisto(5,"ptoverMET",particleName[i].c_str(), 20, 0, 2,       TString::Format("#frac{p_{T}^{%s}}{MET}", particleLatex[i].c_str()) );
 
     cout << "n_lepton:   " << n_lepton << endl;
     cout << "h_counters: " << HistClass::ReturnHist("h_counters")->GetBinContent(1) << endl;
@@ -1850,6 +2234,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     METListGen     = new vector< pxl::Particle* >;
     JetListGen     = new vector< pxl::Particle* >;
     TauListGen     = new vector< pxl::Particle* >;
+    TauVisListGen  = new std::vector< pxl::Particle* >;
     S3ListGen      = new vector< pxl::Particle* >;
 
     if( not runOnData ){
@@ -1888,7 +2273,12 @@ void specialAna::initEvent( const pxl::Event* event ){
             else if( Name == "Tau"     ) TauListGen->push_back( part );
             else if( Name == (m_METType+"_gen") ) METListGen->push_back( part );
             else if( Name == m_JetAlgo ) JetListGen->push_back( part );
-            else if( Name == genCollection) S3ListGen->push_back( part );
+            else if( Name == genCollection) {
+                S3ListGen->push_back( part );
+                if(abs(part->getPdgNumber()) == 15 ) {
+                    TauVisListGen->push_back(Get_tau_truth_decay_mode(part));
+                }
+            }
         }
 
     }
@@ -1901,6 +2291,11 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     }
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
+
+    if( (datastream.find("WTo")!=1) and (datastream.find("WJets")!=1) ){
+        return;
+    }
+
 
     if( m_dataPeriod=="13TeV" ){
         double wmass=0.;

@@ -1,0 +1,13 @@
+# MET cuts:
+MET.use = 1
+MET.IdTag = 1
+# MET Type to be used in Gen (especially important for matching).
+MET.Type.Gen = genMetTrue
+# Pile-Up (Type-0 PC), JEC (Type-I) and xy-shift corrected MET.
+MET.Type.Rec = pfMetT0pcT1Txy
+
+MET.pt.min = 0.
+MET.dPhi.Ele.min = 0.0
+MET.Error.Fakes = 0.0
+
+

@@ -61,9 +61,7 @@ public:
     void applyKfactor(const pxl::Event* event, int mode);
     void aplyDataMCScaleFactors();
 
-    bool Check_Muo_ID(pxl::Particle* muon);
     bool Check_Tau_ID(pxl::Particle* tau);
-    bool Check_Ele_ID(pxl::Particle* ele);
 
     void cleanJets();
 
@@ -73,6 +71,7 @@ public:
     bool triggerKinematics();
     void Create_trigger_effs();
     void TriggerAnalyser();
+    void QCDAnalyse();
 
 
     bool tail_selector(const pxl::Event* event);
@@ -99,7 +98,7 @@ public:
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 
-    const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau,m_pt_min_cut_ele,m_pt_min_cut_muo,m_pt_min_cut_tau;
+    const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_min_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_min_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau,m_pt_min_cut_tau;
 
     const std::string particles[3] = {"Ele", "Muon", "Tau"};
     const std::string particleSymbols[3] = {"e", "#mu", "#tau"};
@@ -167,6 +166,8 @@ public:
     pxl::Particle* sel_muon_gen;
     pxl::Particle* sel_tau_gen;
     pxl::Particle* sel_ele_gen;
+
+    pxl::Particle* qcd_lepton;
 
     pxl::Particle* sel_lepton;
     pxl::Particle* sel_met;

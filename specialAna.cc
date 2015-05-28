@@ -8,7 +8,6 @@
 #pragma GCC diagnostic pop
 
 
-
 specialAna::specialAna( const Tools::MConfig &cfg ) :
    runOnData(       cfg.GetItem< bool >( "General.RunOnData" ) ),
    m_JetAlgo(       cfg.GetItem< string >( "Jet.Type.Rec" ) ),
@@ -74,6 +73,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         //str(boost::format("N_{%s}")%particleLatex[i] )
         HistClass::CreateHisto("cutflow",particles[i].c_str(), 40, 0, 39,               "stage" );
         HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,                   TString::Format("N_{%s}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"IDFail",particles[i].c_str(), 6, 0, 6,                  "failcode" );
         HistClass::CreateHisto(5,"pt",particles[i].c_str(), 5000, 0, 5000,              "p_{T} [GeV]");
         HistClass::CreateHisto(5,"pt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/p_{T} [1/GeV]" );
         HistClass::CreateHisto(5,"deltapt_over_pt",particles[i].c_str(), 5000, 0, 10,   "#frac{#Delta p_{T}}{p_{T}}" );
@@ -94,6 +94,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         HistClass::CreateHisto(5,"jet_1_DeltaPhi",particles[i].c_str(), 40, 0, 3.2,     TString::Format("#Delta#phi(%s,jet)", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(5,"jet_1_DeltaPhiMET",particles[i].c_str(), 40, 0, 3.2,  "#Delta#phi(E_{T}^{miss},jet)");
         HistClass::CreateHisto(5,"jet_1_DeltaPhiMETlep",particles[i].c_str(), 40, 0, 3.2,  TString::Format("#Delta#phi(E_{T}^{miss}+%s,jet)", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(5,"jet_1_lep_Minv",particles[i].c_str(),  5000, 0, 5000,  TString::Format("Mass(%s,jet)", particleSymbols[i].c_str()) );
         if(not runOnData){
             HistClass::CreateHisto(2,"recoMgen_pt",particles[i].c_str(), 400, -100, 100,    "p_{T}^{reco}-p_{T}^{gen} [GeV]" );
             HistClass::CreateHisto(2,"recoMgen_pt_rel",particles[i].c_str(), 400, -10, 10,  "#frac{p_{T}^{reco}-p_{T}^{gen}}{p_{T}^{gen}}" );
@@ -239,6 +240,18 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(5,"Ele_sigmaIetaIeta", 100, 0, 10,"sigmaIetaIeta");
 
 
+    //for qcd hist (as systematic)
+    for(unsigned char pi=0; pi<3; pi++){
+        HistClass::CreateHisto(5,str(boost::format("%s_pt_syst_iso_QCD")%particles[pi]).c_str(), 5000, 0, 5000, std::string("p_{T}^{") + particleSymbols[pi] + "} [GeV]");
+        HistClass::CreateHisto(5,str(boost::format("%s_eta_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, std::string("#eta_{") + particleSymbols[pi] + "}");
+        HistClass::CreateHisto(5,str(boost::format("%s_phi_syst_iso_QCD")%particles[pi]).c_str(),40, -3.2, 3.2, std::string("#phi_{") + particleSymbols[pi] + "} [rad]");
+        HistClass::CreateHisto(5,str(boost::format("%s_DeltaPhi_syst_iso_QCD")%particles[pi]).c_str(),40, 0, 3.2, std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
+        HistClass::CreateHisto(5,str(boost::format("%s_mt_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, std::string("M_{T}_{") + particleSymbols[pi] + "} [GeV]");
+        HistClass::CreateHisto(5,str(boost::format("%s_ET_MET_syst_iso_QCD")%particles[pi]).c_str(),50, 0, 6, std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
+        HistClass::CreateHisto(5,str(boost::format("%s_met_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, "E^{miss}_{T} [GeV]");
+        HistClass::CreateHisto(5,str(boost::format("%s_met_phi_syst_iso_QCD")%particles[pi]).c_str(),40, -3.2, 3.2,"#phi_{E^{miss}_{T}} [rad]");
+    }
+
     if(not runOnData){
         // 4 for loops to create 480 histograms
         for(unsigned char pi=0; pi<3; pi++){ // loop over particles
@@ -329,11 +342,12 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     if(not runOnData){
         if(tail_selector(event)) return;
         Fill_Gen_Controll_histo();
-    }else{
-        if (!TriggerSelector(event)) return;
     }
 
     KinematicsSelector();
+    QCDAnalyse();
+
+    if (sel_lepton==0 and qcd_lepton==0) return;
 
     if (!triggerKinematics()) return;
 
@@ -375,6 +389,18 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
                             << event->getUserRecord("EventNum") << "\n";
         }
     }
+    if(qcd_lepton && sel_met){
+        if(qcd_lepton->getUserRecord("passedDeltaPhi")){
+            Fill_Particle_hisos(1, qcd_lepton , "iso_QCD");
+        }
+        if(qcd_lepton->getUserRecord("passedPtMet")){
+            Fill_Particle_hisos(2, qcd_lepton , "iso_QCD");
+        }
+        if(qcd_lepton->getUserRecord("passed")){
+            Fill_Particle_hisos(3, qcd_lepton , "iso_QCD");
+        }
+
+    }
 
     // plan as follows:
     // (in music:)
@@ -389,14 +415,14 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     // - fill (systematically shifted) particles into histograms
     if(!runOnData){
         FillSystematics(event, "Muon");
-        FillSystematics(event, "Ele");
-        FillSystematics(event, "Tau");
         FillSystematicsUpDown(event, "Muon", "Up", "Resolution");
         FillSystematicsUpDown(event, "Muon", "Down", "Resolution");
+        FillSystematics(event, "Ele");
+        FillSystematics(event, "Tau");
         FillSystematics(event, "Jet");
         FillSystematics(event, m_METType);
-        //FillSystematicsUpDown(event, "Jet", "Up", "Resolution");
-        //FillSystematicsUpDown(event, "Jet", "Down", "Resolution");
+        FillSystematicsUpDown(event, "Jet", "Up", "Resolution");
+        FillSystematicsUpDown(event, "Jet", "Down", "Resolution");
         // FillSystematics(event, "met");
     }
 
@@ -416,17 +442,18 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
     // make sure the object key is the same as in Systematics.cc specified
     // tempEventView = event->getObjectOwner().findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
     // For jets we have to use the music nameing convention
-    if(particleName=="Jet"){
-        //
-        std::string jetType="JES";
-        std::string upperUpdown= boost::to_upper_copy(updown);
-        if (shiftType=="Resolution"){
-            jetType="JER";
-        }
-        tempEventView = event->findObject< pxl::EventView >("Rec_"+jetType+ "_"+upperUpdown);
-    }else{
-        tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
-    }
+    //if(particleName=="Jet"){
+        ////
+        //std::string jetType="JES";
+        //std::string upperUpdown= boost::to_upper_copy(updown);
+        //if (shiftType=="Resolution"){
+            //jetType="JER";
+        //}
+        //tempEventView = event->findObject< pxl::EventView >("Rec_"+jetType+ "_"+upperUpdown);
+    //}else{
+        //tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
+    //}
+    tempEventView = event->findObject< pxl::EventView >(particleName + "_syst" + shiftType + updown);
 
 
 
@@ -543,12 +570,6 @@ bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
     return passed;
 }
 
-bool specialAna::Check_Muo_ID(pxl::Particle* muon) {
-    bool passed = false;
-    muon->getUserRecord("isHighPtMuon").asBool() ? passed = true : passed = false;
-    return passed;
-}
-
 
 void specialAna::KinematicsSelector() {
 
@@ -577,22 +598,22 @@ void specialAna::KinematicsSelector() {
         sel_id=15;
     }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
-        bool passedID=false;
+        int passedID=0;
+        pxl::Particle* tmpEle;
         for( vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
             if( (*it)->hasUserRecord("IDpassed")){
-                if ( not passedID &&  (*it)->getUserRecord("IDpassed").toBool() ){
-                    passedID=true;
-                }else if(passedID && (*it)->getUserRecord("IDpassed").toBool()){
-                    passedID=false;
-                    break;
+                if ( (*it)->getUserRecord("IDpassed").toBool() ){
+                    passedID++;
+                    tmpEle=(*it);
                 }
             }else if (EleList->size()==1){
-                passedID=true;
+                passedID++;
+                tmpEle=( pxl::Particle* ) EleList->at(0);
                 break;
             }
         }
-        if(passedID){
-            sel_lepton=( pxl::Particle* ) EleList->at(0);
+        if(passedID==1){
+            sel_lepton=tmpEle;
             m_pt_min_cut=m_pt_min_cut_ele;
             m_delta_phi_cut=m_delta_phi_cut_ele;
             m_pt_met_min_cut=m_pt_met_min_cut_ele;
@@ -601,22 +622,22 @@ void specialAna::KinematicsSelector() {
         }
     }
     if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
-        bool passedID=false;
+        int passedID=0;
+        pxl::Particle* tmpMuo;
         for( vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
             if( (*it)->hasUserRecord("IDpassed")){
                 if ( not passedID &&  (*it)->getUserRecord("IDpassed").toBool() ){
-                    passedID=true;
-                }else if(passedID && (*it)->getUserRecord("IDpassed").toBool()){
-                    passedID=false;
-                    break;
+                    passedID++;
+                    tmpMuo=(*it);
                 }
             }else if (MuonList->size()==1){
-                passedID=true;
+                passedID++;
+                tmpMuo=( pxl::Particle* ) MuonList->at(0);
                 break;
             }
         }
-        if(passedID){
-            sel_lepton=( pxl::Particle* ) MuonList->at(0);
+        if(passedID==1){
+            sel_lepton=tmpMuo;
             m_pt_min_cut=m_pt_min_cut_muo;
             m_delta_phi_cut=m_delta_phi_cut_muo;
             m_pt_met_min_cut=m_pt_met_min_cut_muo;
@@ -641,7 +662,6 @@ void specialAna::KinematicsSelector() {
             passed=true;
         }
 
-    }else{
     }
     if(sel_lepton){
         sel_lepton->setUserRecord("passedPtMet",passedPtMet);
@@ -814,9 +834,114 @@ bool specialAna::triggerKinematics(){
                 tiggerKinematics=true;
             }
         }
+    }
+    //same for qcd lepton candiadates
+    if(qcd_lepton && sel_met){
+        if(qcd_lepton->getName()==m_TauType){
+            //if(qcd_lepton->getPt()>100 && sel_met->getPt()>150){
+            if(qcd_lepton->getPt()>50 && sel_met->getPt()>50){
+                tiggerKinematics=true;
+            }
+
+        }
+        if(qcd_lepton->getName()=="Muon"){
+            if(qcd_lepton->getPt()>20){
+                tiggerKinematics=true;
+            }
+        }
+        if(qcd_lepton->getName()=="Ele"){
+            if(qcd_lepton->getPt()>25){
+                tiggerKinematics=true;
+            }
+        }
 
     }
     return tiggerKinematics;
+}
+
+
+void specialAna::QCDAnalyse() {
+    //inverted isolation
+    if(sel_lepton!=0){
+        return;
+    }
+    int qcd_id=0;
+    bool passed=false;
+    bool passedPtMet=false;
+    bool passedDeltaPhi=false;
+
+    double m_leptonVetoPt=20;
+    int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
+    int numVetoTau=vetoNumber(TauList,m_leptonVetoPt);
+    int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
+
+    if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
+        int passedID=0;
+        pxl::Particle* tmpEle;
+        for( vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
+            if( (*it)->hasUserRecord("ISOfailed")){
+                if ( (*it)->getUserRecord("ISOfailed").toBool() ){
+                    passedID++;
+                    tmpEle=(*it);
+                }
+            }else if (EleList->size()==1){
+                passedID++;
+                tmpEle=( pxl::Particle* ) EleList->at(0);
+                break;
+            }
+        }
+        if(passedID==1){
+            qcd_lepton=tmpEle;
+            m_pt_min_cut=m_pt_min_cut_ele;
+            m_delta_phi_cut=m_delta_phi_cut_ele;
+            m_pt_met_min_cut=m_pt_met_min_cut_ele;
+            m_pt_met_max_cut=m_pt_met_max_cut_ele;
+            qcd_id=11;
+        }
+    }
+    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
+        int passedID=0;
+        pxl::Particle* tmpMuo;
+        for( vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
+            if( (*it)->hasUserRecord("ISOfailed")){
+                if ( not passedID &&  (*it)->getUserRecord("ISOfailed").toBool() ){
+                    passedID++;
+                    tmpMuo=(*it);
+                }
+            }else if (MuonList->size()==1){
+                passedID++;
+                tmpMuo=( pxl::Particle* ) MuonList->at(0);
+                break;
+            }
+        }
+        if(passedID==1){
+            qcd_lepton=tmpMuo;
+            m_pt_min_cut=m_pt_min_cut_muo;
+            m_delta_phi_cut=m_delta_phi_cut_muo;
+            m_pt_met_min_cut=m_pt_met_min_cut_muo;
+            m_pt_met_max_cut=m_pt_met_max_cut_muo;
+            qcd_id=13;
+        }
+    }
+
+    if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
+        if(qcd_lepton->getPt()/sel_met->getPt()>m_pt_met_min_cut && qcd_lepton->getPt()/sel_met->getPt()<m_pt_met_max_cut){
+            passedPtMet=true;
+        }
+        if(DeltaPhi(qcd_lepton->getPhi(),sel_met->getPhi())>m_delta_phi_cut){
+            passedDeltaPhi=true;
+        }
+        if (passedDeltaPhi && passedPtMet){
+            passed=true;
+        }
+    }
+    if(qcd_lepton){
+        qcd_lepton->setUserRecord("passedPtMet",passedPtMet);
+        qcd_lepton->setUserRecord("passedDeltaPhi",passedDeltaPhi);
+        qcd_lepton->setUserRecord("passed",passed);
+        qcd_lepton->setPdgNumber(qcd_id);
+    }
+
 }
 
 void specialAna::Fill_Tree(){
@@ -1114,7 +1239,7 @@ void specialAna::Fill_Gen_Controll_histo() {
             HistClass::Fill(0,"Ele_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
             HistClass::Fill(0,"Ele_eta_Gen",S3ListGen->at(i)->getEta(),m_GenEvtView->getUserRecord( "Weight" ));
             HistClass::Fill(0,"Ele_phi_Gen",S3ListGen->at(i)->getPhi(),m_GenEvtView->getUserRecord( "Weight" ));
-        }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+        }else if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24 or TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 23){
             if( (( pxl::Particle*)  S3ListGen->at(i)->getMother())!=0){
                 if(TMath::Abs( (( pxl::Particle*)  S3ListGen->at(i)->getMother())->getPdgNumber()) == 15){
                     continue;
@@ -1379,14 +1504,18 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     if(lepton->getName()==m_TauType){
         name="Tau";
     }
+    //without systematics:
     if(syst==""){
+        if (lepton->hasUserRecord("IDFailValue")){
+            HistClass::Fill(hist_number,str(boost::format("%s_IDFail")%name ),lepton->getUserRecord("IDFailValue"),weight);
+        }
         HistClass::Fill(hist_number,str(boost::format("%s_charge")%name ),lepton->getCharge(),weight);
         if(JetList->size()>0){
             HistClass::Fill(hist_number,str(boost::format("%s_jet_1_pt")%name ),JetList->at(0)->getPt(),weight);
             HistClass::Fill(hist_number,str(boost::format("%s_jet_1_eta")%name ),JetList->at(0)->getEta(),weight);
             HistClass::Fill(hist_number,str(boost::format("%s_jet_1_phi")%name ),JetList->at(0)->getPhi(),weight);
-
             HistClass::Fill(hist_number,str(boost::format("%s_jet_1_DeltaPhi")%name ),DeltaPhi(lepton,JetList->at(0)),weight);
+            HistClass::Fill(hist_number,str(boost::format("%s_jet_1_lep_Minv")%name ),Mass(JetList->at(0),lepton),weight);
         }
     } else {
         syst="_syst_"+syst;
@@ -1405,7 +1534,7 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
             if(JetList->size()>0){
                 HistClass::Fill(hist_number,str(boost::format("%s_jet_1_DeltaPhiMET")%name ),DeltaPhi(sel_met,JetList->at(0)),weight);
                 calc_stuff.setP4(sel_met->getVector());
-                calc_stuff.addP4(sel_lepton->getVector());
+                calc_stuff.addP4(lepton->getVector());
                 HistClass::Fill(hist_number,str(boost::format("%s_jet_1_DeltaPhiMETlep")%name ),DeltaPhi(calc_stuff.getPhi(),JetList->at(0)->getPhi()),weight);
             }
         }
@@ -2069,7 +2198,7 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
 
         if( (*part_it)->getPt()>ptTreshold && passedID ){
             numVeto++;
-        }else{
+        }else if((*part_it)->getPt()>ptTreshold) {
             //Lists are Pt sorted
             break;
         }
@@ -2226,6 +2355,7 @@ void specialAna::initEvent( const pxl::Event* event ){
         sel_met=0;
     }
     sel_lepton=0;
+    qcd_lepton=0;
 
     //     h1_num_Taus.Fill(TauList->size());
     EleListGen     = new vector< pxl::Particle* >;

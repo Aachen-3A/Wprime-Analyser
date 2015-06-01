@@ -36,6 +36,7 @@ public:
     TFile* file1;
     ofstream eventDisplayFile;
     std::stringstream eventsAfterCuts;
+    std::stringstream eventsAfterCutsEvents;
 
     void Fill_stage_0_histos( );
     void Fill_Gen_Controll_histo( );
@@ -63,6 +64,7 @@ public:
 
     bool Check_Tau_ID(pxl::Particle* tau);
 
+    void printEvent();
     void cleanJets();
 
 
@@ -85,6 +87,7 @@ public:
     double MT(pxl::Particle* lepton, pxl::Particle* met);
     double Mass(pxl::Particle* p1, pxl::Particle* p2);
     double getPtHat();
+    double getPtHatDi();
     double getGenHT();
     double getWmass();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
@@ -95,6 +98,7 @@ public:
     pxl::EventView *m_TrigEvtView;
 
     bool runOnData;
+    bool useSyst;
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 

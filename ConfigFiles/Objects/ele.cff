@@ -1,7 +1,7 @@
 Ele.use = 1
 Ele.Type.Gen = "Ele"
 Ele.Type.Rec = "Ele"
-Ele.pt.min = 10
+Ele.pt.min = 15
 Ele.eta.Barrel.max = 1.442
 Ele.eta.Endcap.min = 1.56
 Ele.eta.Endcap.max = 2.5

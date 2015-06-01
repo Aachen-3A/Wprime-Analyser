@@ -6,7 +6,7 @@ Muon.use = 1
 Muon.IdTag = 1
 Muon.Type.Gen = "Muon"
 Muon.Type.Rec = "Muon"
-Muon.pt.min = 10
+Muon.pt.min = 15
 Muon.eta.max = 2.1
 # If true (1), muons are cleaned against muons in Delta R.
 Muon.cleanDuplicates = 0
@@ -17,7 +17,7 @@ Muon.InvertIsolation = 0
 # - "musicID.bool" with a switch at for high pt ID
 # the .bool ids cut on one bool, where the cut based use the cuts provided below
 
-Muon.ID.Type="isHighPtMuon.bool"
+Muon.ID.Type="isHighPtMuon.Cut"
 Muon.ID.HighPtSwitchPt=200
 # Three different isolation types supported (all relative):
 # - "Tracker" (Subdetector based)

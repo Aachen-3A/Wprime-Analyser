@@ -23,15 +23,27 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_delta_phi_cut_ele(     cfg.GetItem< double >( "Ele.wprime.delta_phi_cut" ) ),
    m_pt_min_cut_ele(        cfg.GetItem< double >( "Ele.wprime.pt_min" ) ),
 
+   m_pt_met_min_cut_funk_root_ele(  "Ele.wprime.pt_met_cut_min_func",  cfg.GetItem< string >( "Ele.wprime.pt_met_cut_min_func" ).c_str() ,0,8000),
+   m_pt_met_max_cut_funk_root_ele(  "Ele.wprime.pt_met_cut_max_func",  cfg.GetItem< string >( "Ele.wprime.pt_met_cut_max_func" ).c_str() ,0,8000),
+   m_delta_phi_cut_funk_root_ele(   "Ele.wprime.delta_phi_cut_func",  cfg.GetItem< string >( "Ele.wprime.delta_phi_cut_func" ).c_str() ,0,8000),
+
    m_pt_met_min_cut_muo(    cfg.GetItem< double >( "Muo.wprime.pt_met_cut_min" ) ),
    m_pt_met_max_cut_muo(    cfg.GetItem< double >( "Muo.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_muo(     cfg.GetItem< double >( "Muo.wprime.delta_phi_cut" ) ),
    m_pt_min_cut_muo(        cfg.GetItem< double >( "Muo.wprime.pt_min" ) ),
 
+   m_pt_met_min_cut_funk_root_muo(  "Muo.wprime.pt_met_cut_min_func",  cfg.GetItem< string >( "Muo.wprime.pt_met_cut_min_func" ).c_str() ,0,8000),
+   m_pt_met_max_cut_funk_root_muo(  "Muo.wprime.pt_met_cut_max_func",  cfg.GetItem< string >( "Muo.wprime.pt_met_cut_max_func" ).c_str() ,0,8000),
+   m_delta_phi_cut_funk_root_muo(   "Muo.wprime.delta_phi_cut_func",  cfg.GetItem< string >( "Muo.wprime.delta_phi_cut_func" ).c_str() ,0,8000),
+
    m_pt_met_min_cut_tau(    cfg.GetItem< double >( "Tau.wprime.pt_met_cut_min" ) ),
    m_pt_met_max_cut_tau(    cfg.GetItem< double >( "Tau.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_tau(     cfg.GetItem< double >( "Tau.wprime.delta_phi_cut" ) ),
    m_pt_min_cut_tau(        cfg.GetItem< double >( "Tau.wprime.pt_min" ) ),
+
+   m_pt_met_min_cut_funk_root_tau(  "Tau.wprime.pt_met_cut_min_func",   cfg.GetItem< string >( "Tau.wprime.pt_met_cut_min_func" ).c_str() ,0,8000),
+   m_pt_met_max_cut_funk_root_tau(  "Tau.wprime.pt_met_cut_max_func",  cfg.GetItem< string >( "Tau.wprime.pt_met_cut_max_func" ).c_str() ,0,8000),
+   m_delta_phi_cut_funk_root_tau(  "Tau.wprime.delta_phi_cut_func",   cfg.GetItem< string >( "Tau.wprime.delta_phi_cut_func" ).c_str() ,0,8000),
 
    m_pt_cut(                cfg.GetItem< double >( "wprime.pt_cut" ) ),
    m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
@@ -53,6 +65,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     m_kfactorFile= new TFile(m_kfactorFile_Config.c_str(),"READ");
     m_kfactorHist[0] = (TH1D*) m_kfactorFile->Get("k_fakp");
     m_kfactorHist[1] = (TH1D*) m_kfactorFile->Get("k_fakm");
+
 
     file1->cd();
 
@@ -145,14 +158,14 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(6,"Muon_Vtx_Z", 200, -30, 30,"Vtx_{z} [cm]");
     HistClass::CreateHisto(6,"Muon_Chi2", 400, 0, 200,"#chi_{#mu}^{2}");
     HistClass::CreateHisto(6,"Muon_Ndof", 200, 0, 200,"N_{dof}");
-    HistClass::CreateHisto(6,"Muon_LHits", 20, 0, 20,"N_{lost hits}");
-    HistClass::CreateHisto(6,"Muon_VHits", 100, 0, 100,"N_{valid hits}");
-    HistClass::CreateHisto(6,"Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}");
-    HistClass::CreateHisto(6,"Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}");
-    HistClass::CreateHisto(6,"Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}");
-    HistClass::CreateHisto(6,"Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}");
-    HistClass::CreateHisto(6,"Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}");
-    HistClass::CreateHisto(6,"Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}");
+    //HistClass::CreateHisto(6,"Muon_LHits", 20, 0, 20,"N_{lost hits}");
+    //HistClass::CreateHisto(6,"Muon_VHits", 100, 0, 100,"N_{valid hits}");
+    //HistClass::CreateHisto(6,"Muon_VHitsPixel", 20, 0, 20,"N_{valid pixel hits}");
+    //HistClass::CreateHisto(6,"Muon_VHitsTracker", 40, 0, 40,"N_{valid tracker hits}");
+    //HistClass::CreateHisto(6,"Muon_VHitsMuonSys", 60, 0, 60,"N_{valid muon system hits}");
+    //HistClass::CreateHisto(6,"Muon_TrackerLayersWithMeas", 20, 0, 20,"N_{tracker layers with hits}");
+    //HistClass::CreateHisto(6,"Muon_PixelLayersWithMeas", 60, 0, 60,"N_{pixel layers with hits}");
+    //HistClass::CreateHisto(6,"Muon_NMatchedStations", 60, 0, 60,"N_{matched muon stations}");
     HistClass::CreateHisto(6,"Muon_qoverp", 200, 0, 0.2,"#frac{q_{mu}}{p_{mu}}");
     HistClass::CreateHisto(6,"Muon_qoverpError", 100, 0, 0.001,"#sigma(#frac{q_{mu}}{p_{mu}})");
     HistClass::CreateHisto(6,"Muon_ptError", 1000, 0, 1000,"#sigma(p_{T}) [GeV]");
@@ -335,6 +348,21 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     mLeptonTree["lepton_type"]=0;
     HistClass::CreateTree( &mLeptonTree, "slimtree");
 
+    mQCDTree["pt"]=0;
+    mQCDTree["met"]=0;
+    mQCDTree["iso"]=0;
+    mQCDTree["delta_phi"]=0;
+    mQCDTree["ThisWeight"]=0;
+    mQCDTree["lepton_type"]=0;
+
+
+    HistClass::CreateTree( &mQCDTree, "qcdtree");
+
+    TFile qcd_weight(Tools::musicAbsPath("specialAna/ConfigFiles/ConfigInputs/qcdFakeOutput.root").c_str());
+    qcd_weight_pt=(TH1D*) qcd_weight.Get("qcdFake_pt");
+    cout<<qcd_weight_pt->FindBin(10)<<endl;
+
+
 }
 
 specialAna::~specialAna() {
@@ -368,8 +396,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
 
     Fill_RECO_effs();
 
-    if(sel_lepton && sel_met){
+    if(sel_lepton && sel_met && sel_lepton->getPt()>m_pt_min_cut){
         Fill_Tree();
+        Fill_QCD_Tree(true);
         Fill_Controll_histo(5, sel_lepton);
         if(sel_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Controll_histo(1, sel_lepton);
@@ -395,7 +424,8 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             printEvent();
         }
     }
-    if(qcd_lepton && sel_met){
+    if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){
+        Fill_QCD_Tree(false);
         if(qcd_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Particle_hisos(1, qcd_lepton , "iso_QCD");
         }
@@ -601,6 +631,10 @@ void specialAna::KinematicsSelector() {
         m_delta_phi_cut=m_delta_phi_cut_tau;
         m_pt_met_min_cut=m_pt_met_min_cut_tau;
         m_pt_met_max_cut=m_pt_met_max_cut_tau;
+
+        m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
+        m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
+        m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
         sel_id=15;
     }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
@@ -624,6 +658,9 @@ void specialAna::KinematicsSelector() {
             m_delta_phi_cut=m_delta_phi_cut_ele;
             m_pt_met_min_cut=m_pt_met_min_cut_ele;
             m_pt_met_max_cut=m_pt_met_max_cut_ele;
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_ele;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_ele;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_ele;
             sel_id=11;
         }
     }
@@ -648,6 +685,10 @@ void specialAna::KinematicsSelector() {
             m_delta_phi_cut=m_delta_phi_cut_muo;
             m_pt_met_min_cut=m_pt_met_min_cut_muo;
             m_pt_met_max_cut=m_pt_met_max_cut_muo;
+
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
             sel_id=13;
         }
     }
@@ -657,6 +698,12 @@ void specialAna::KinematicsSelector() {
 
 
     if(sel_met && sel_lepton && sel_lepton->getPt()>m_pt_min_cut){
+
+        double mt=MT(sel_lepton,sel_met);
+        m_pt_met_min_cut=   m_pt_met_min_cut_funk_root.Eval(mt);
+        m_pt_met_max_cut=   m_pt_met_max_cut_funk_root.Eval(mt);
+        m_delta_phi_cut=    m_delta_phi_cut_funk_root.Eval(mt);
+
         if(sel_lepton->getPt()/sel_met->getPt()>m_pt_met_min_cut && sel_lepton->getPt()/sel_met->getPt()<m_pt_met_max_cut){
             passedPtMet=true;
         }
@@ -765,7 +812,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
         for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
             if (
                 //string::npos != (*us).first.find( "HLT_Ele27_CaloIdL_CaloIsoVL_TrkIdVL_TrkIsoVL_") or
-                string::npos != (*us).first.find( "HLT_Ele27_WP80_") or
+                string::npos != (*us).first.find( "HLT_Ele27_WP80_v") or
                 //string::npos != (*us).first.find( "HLT_Ele27_WP80_PFMET_MT50_") or
                 //string::npos != (*us).first.find( "HLTEle30_CaloIdVT_TrkIdT_") or
                 //string::npos != (*us).first.find( "HLT_Ele32_CaloIdL_CaloIsoVL_TrkIdVL_TrkIsoVL_") or
@@ -774,7 +821,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 //string::npos != (*us).first.find( "HLTIsoMu20_WCandPt80_") or
                 //string::npos != (*us).first.find( "HLTIsoMu20_eta2p1_") or
                 //string::npos != (*us).first.find( "HLTIsoMu24_") or
-                //string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_") or
+                string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_") or
                 //string::npos != (*us).first.find( "HLTIsoMu30_") or
                 string::npos != (*us).first.find( "HLT_IsoMu30_eta2p1_") or
                 //string::npos != (*us).first.find( "HLT_IsoMu34_eta2p1_") or
@@ -902,6 +949,10 @@ void specialAna::QCDAnalyse() {
             m_delta_phi_cut=m_delta_phi_cut_ele;
             m_pt_met_min_cut=m_pt_met_min_cut_ele;
             m_pt_met_max_cut=m_pt_met_max_cut_ele;
+
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_ele;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_ele;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_ele;
             qcd_id=11;
         }
     }
@@ -926,11 +977,21 @@ void specialAna::QCDAnalyse() {
             m_delta_phi_cut=m_delta_phi_cut_muo;
             m_pt_met_min_cut=m_pt_met_min_cut_muo;
             m_pt_met_max_cut=m_pt_met_max_cut_muo;
+
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
             qcd_id=13;
         }
     }
 
     if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
+        weight *= max(0.,qcd_weight_pt->GetBinContent(qcd_weight_pt->FindBin(qcd_lepton->getPt())));
+        double mt=MT(qcd_lepton,sel_met);
+        m_pt_met_min_cut=   m_pt_met_min_cut_funk_root.Eval(mt);
+        m_pt_met_max_cut=   m_pt_met_max_cut_funk_root.Eval(mt);
+        m_delta_phi_cut=    m_delta_phi_cut_funk_root.Eval(mt);
+
         if(qcd_lepton->getPt()/sel_met->getPt()>m_pt_met_min_cut && qcd_lepton->getPt()/sel_met->getPt()<m_pt_met_max_cut){
             passedPtMet=true;
         }
@@ -985,6 +1046,25 @@ void specialAna::Fill_Tree(){
     mLeptonTree["lepton_type"]=sel_lepton->getPdgNumber();
 
     HistClass::FillTree("slimtree");
+
+}
+void specialAna::Fill_QCD_Tree(bool iso){
+    if(iso){
+        mQCDTree["met"]=sel_met->getPt();
+        mQCDTree["pt"]=sel_lepton->getPt();
+        mQCDTree["delta_phi"]=DeltaPhi(sel_lepton,sel_met);
+        mQCDTree["iso"]=iso;
+        mQCDTree["ThisWeight"]=weight;
+        mQCDTree["lepton_type"]=sel_lepton->getPdgNumber();
+    }else{
+        mQCDTree["met"]=sel_met->getPt();
+        mQCDTree["pt"]=qcd_lepton->getPt();
+        mQCDTree["delta_phi"]=DeltaPhi(qcd_lepton,sel_met);
+        mQCDTree["iso"]=iso;
+        mQCDTree["ThisWeight"]=weight;
+        mQCDTree["lepton_type"]=qcd_lepton->getPdgNumber();
+    }
+    HistClass::FillTree("qcdtree");
 
 }
 
@@ -1325,20 +1405,17 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
         if(lepton->getUserRecord( (string)d_mydiscmu[j] ))
             HistClass::Fill(hist_number,"Muon_ID",j+1,weight);
     }
-    HistClass::Fill(hist_number,"Muon_Chi2",lepton->getUserRecord("chi2"),weight);
-    HistClass::Fill(hist_number,"Muon_Ndof",lepton->getUserRecord("ndof"),weight);
-    HistClass::Fill(hist_number,"Muon_LHits",lepton->getUserRecord("LHits"),weight);
-    HistClass::Fill(hist_number,"Muon_VHits",lepton->getUserRecord("VHits"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsPixel",lepton->getUserRecord("VHitsPixel"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsTracker",lepton->getUserRecord("VHitsTracker"),weight);
-    HistClass::Fill(hist_number,"Muon_VHitsMuonSys",lepton->getUserRecord("VHitsMuonSys"),weight);
-    HistClass::Fill(hist_number,"Muon_TrackerLayersWithMeas",lepton->getUserRecord("TrackerLayersWithMeas"),weight);
-    HistClass::Fill(hist_number,"Muon_PixelLayersWithMeas",lepton->getUserRecord("PixelLayersWithMeas"),weight);
-    HistClass::Fill(hist_number,"Muon_NMatchedStations",lepton->getUserRecord("NMatchedStations"),weight);
-    HistClass::Fill(hist_number,"Muon_qoverp",lepton->getUserRecord("qoverp"),weight);
-    HistClass::Fill(hist_number,"Muon_qoverpError",lepton->getUserRecord("qoverpError"),weight);
-    HistClass::Fill(hist_number,"Muon_ptError",lepton->getUserRecord("ptError"),weight);
-    HistClass::Fill(hist_number,"Muon_ptErroroverpt",lepton->getUserRecord("ptError").toDouble()/lepton->getPt(),weight);
+
+
+    //HistClass::Fill(hist_number,"Muon_LHits",lepton->getUserRecord("LHits"),weight);
+    //HistClass::Fill(hist_number,"Muon_VHits",lepton->getUserRecord("VHits"),weight);
+    //HistClass::Fill(hist_number,"Muon_VHitsPixel",lepton->getUserRecord("VHitsPixel"),weight);
+    //HistClass::Fill(hist_number,"Muon_VHitsTracker",lepton->getUserRecord("VHitsTracker"),weight);
+    //HistClass::Fill(hist_number,"Muon_VHitsMuonSys",lepton->getUserRecord("VHitsMuonSys"),weight);
+    //HistClass::Fill(hist_number,"Muon_TrackerLayersWithMeas",lepton->getUserRecord("TrackerLayersWithMeas"),weight);
+    //HistClass::Fill(hist_number,"Muon_PixelLayersWithMeas",lepton->getUserRecord("PixelLayersWithMeas"),weight);
+    //HistClass::Fill(hist_number,"Muon_NMatchedStations",lepton->getUserRecord("NMatchedStations"),weight);
+
     if(lepton->getUserRecord("validCocktail")){
         TLorentzVector* cocktailMuon = new TLorentzVector();
         cocktailMuon->SetXYZM(lepton->getUserRecord("pxCocktail"),lepton->getUserRecord("pyCocktail"),lepton->getUserRecord("pzCocktail"),0.105);
@@ -1354,15 +1431,26 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
 
     HistClass::Fill(hist_number,"Muon_Dxy",lepton->getUserRecord("Dxy").toDouble() ,weight);
     HistClass::Fill(hist_number,"Muon_Dz",lepton->getUserRecord("Dz").toDouble() ,weight);
-    HistClass::Fill(hist_number,"Muon_DxyBT",lepton->getUserRecord("DxyBT").toDouble() ,weight);
-    HistClass::Fill(hist_number,"Muon_DzBT",lepton->getUserRecord("DzBT").toDouble() ,weight);
-    HistClass::Fill(hist_number,"Muon_DxyBS",lepton->getUserRecord("DxyBS").toDouble() ,weight);
-    HistClass::Fill(hist_number,"Muon_DzBS",lepton->getUserRecord("DzBS").toDouble() ,weight);
+    if(lepton->hasUserRecord("ndof")){
+        HistClass::Fill(hist_number,"Muon_Ndof",lepton->getUserRecord("ndof"),weight);
+        HistClass::Fill(hist_number,"Muon_Chi2",lepton->getUserRecord("chi2"),weight);
+        HistClass::Fill(hist_number,"Muon_qoverp",lepton->getUserRecord("qoverp"),weight);
+        HistClass::Fill(hist_number,"Muon_qoverpError",lepton->getUserRecord("qoverpError"),weight);
+        HistClass::Fill(hist_number,"Muon_ptError",lepton->getUserRecord("ptError"),weight);
+        HistClass::Fill(hist_number,"Muon_ptErroroverpt",lepton->getUserRecord("ptError").toDouble()/lepton->getPt(),weight);
+        HistClass::Fill(hist_number,"Muon_dpt_over_pt",(lepton->getUserRecord("ptError").toDouble())/lepton->getPt(),weight);
+    }
+    if(lepton->hasUserRecord("DxyBT")){
+        HistClass::Fill(hist_number,"Muon_DxyBT",lepton->getUserRecord("DxyBT").toDouble() ,weight);
+        HistClass::Fill(hist_number,"Muon_DzBT",lepton->getUserRecord("DzBT").toDouble() ,weight);
+        HistClass::Fill(hist_number,"Muon_DxyBS",lepton->getUserRecord("DxyBS").toDouble() ,weight);
+        HistClass::Fill(hist_number,"Muon_DzBS",lepton->getUserRecord("DzBS").toDouble() ,weight);
+    }
 
     HistClass::Fill(hist_number,"Muon_pt_reciprocal",1/lepton->getPt(),weight);
     if(sel_met)
         HistClass::Fill(hist_number,"Muon_mt_reciprocal",1/MT(lepton,sel_met),weight);
-    HistClass::Fill(hist_number,"Muon_dpt_over_pt",(lepton->getUserRecord("ptError").toDouble())/lepton->getPt(),weight);
+
 }
 void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
@@ -1692,7 +1780,7 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
                 }
             }
             if (matched_reco_particle != 0) {
-                cout<<"found match"<<endl;
+                //cout<<"found match"<<endl;
                 HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
@@ -2692,7 +2780,108 @@ void specialAna::aplyDataMCScaleFactors(){
                     sf*= 0.981677 *0.999406 *0.997955 ;
                 }
             }
+        }else if(sel_lepton && sel_lepton->getPdgNumber()==11){
+            /*
+             * CB
+             * https://twiki.cern.ch/twiki/bin/view/Main/EGammaScaleFactors2012?rev=28
+            Tight
+            pT 	10 - 15 	15 - 20 	20 - 30 	30 - 40 	40 - 50 	50 - 200
+            0.0 < abs(η) < 0.8 	0.827 + 0.021- 0.021 	0.924 + 0.010- 0.010 	0.960 + 0.003- 0.003 	0.978 + 0.001- 0.001 	0.981 + 0.001- 0.001 	0.982 + 0.002- 0.002
+            0.8 < abs(η) < 1.442 	0.948 + 0.024- 0.023 	0.932 + 0.012- 0.012 	0.936 + 0.004- 0.004 	0.958 + 0.002- 0.002 	0.969 + 0.001- 0.001 	0.969 + 0.002- 0.002
+            1.442 < abs(η) < 1.556 	1.073 + 0.117- 0.107 	0.808 + 0.045- 0.042 	0.933 + 0.015- 0.017 	0.907 + 0.008- 0.008 	0.904 + 0.004- 0.004 	0.926 + 0.011- 0.011
+            1.556 < abs(η) < 2.0 	0.854 + 0.048- 0.047 	0.853 + 0.022- 0.022 	0.879 + 0.007- 0.007 	0.909 + 0.003- 0.003 	0.942 + 0.002- 0.002 	0.957 + 0.004- 0.004
+            2.0 < abs(η) < 2.5 	1.007 + 0.047- 0.046 	0.903 + 0.029- 0.029 	0.974 + 0.004- 0.004 	0.987 + 0.004- 0.004 	0.991 + 0.003- 0.003 	0.999 + 0.005- 0.005
+            */
+            /*
+             * HEEP
+             * https://twiki.cern.ch/twiki/bin/view/CMS/HEEPEfficiencies?rev=21
+            Et > 35 	0.997 ± 0.000 (stat.) ± 0.007 (syst.) 	0.979 ± 0.000 (stat.) ± 0.006 (syst.)
+            Et > 100 	0.985 ± 0.002 (stat.) ± 0.014 (syst.) 	0.981 ± 0.006 (stat.) ± 0.004 (syst.)
+            */
+            //HEEP
+            if( sel_lepton->getPt()>100){
+                if(sel_lepton->hasUserRecord("isBarrel")){
+                    sf=0.985;
+                }else{
+                    sf=0.981;
+                }
+            }
+            //CB
+            else{
+                if(fabs(sel_lepton->getEta())>=0.0  && fabs(sel_lepton->getEta())<0.8 ){
+                    if(sel_lepton->getPt()>10 and sel_lepton->getPt()<=15){
+                        sf=0.8;
+                    }else if(sel_lepton->getPt()>15 and sel_lepton->getPt()<=20){
+                        sf=	0.924;
+                    }else if(sel_lepton->getPt()>20 and sel_lepton->getPt()<=30){
+                        sf=	0.978;
+                    }else if(sel_lepton->getPt()>30 and sel_lepton->getPt()<=40){
+                        sf=	 0.978;
+                    }else if(sel_lepton->getPt()>40 and sel_lepton->getPt()<=50){
+                        sf=	 0.981;
+                    }else if(sel_lepton->getPt()>50 and sel_lepton->getPt()<=200){
+                        sf=	 0.982;
+                    }
+                }else if(fabs(sel_lepton->getEta())>=0.8  && fabs(sel_lepton->getEta())<1.442 ){
+                    if(sel_lepton->getPt()>10 and sel_lepton->getPt()<=15){
+                        sf=0.948;
+                    }else if(sel_lepton->getPt()>15 and sel_lepton->getPt()<=20){
+                        sf=	0.932;
+                    }else if(sel_lepton->getPt()>20 and sel_lepton->getPt()<=30){
+                        sf=	0.936;
+                    }else if(sel_lepton->getPt()>30 and sel_lepton->getPt()<=40){
+                        sf=	 0.958;
+                    }else if(sel_lepton->getPt()>40 and sel_lepton->getPt()<=50){
+                        sf=	 0.969;
+                    }else if(sel_lepton->getPt()>50 and sel_lepton->getPt()<=200){
+                        sf=	 0.969;
+                    }
+                }else if(fabs(sel_lepton->getEta())>=1.442  && fabs(sel_lepton->getEta())<1.556){
+                    if(sel_lepton->getPt()>10 and sel_lepton->getPt()<=15){
+                        sf=1.073;
+                    }else if(sel_lepton->getPt()>15 and sel_lepton->getPt()<=20){
+                        sf=	0.808;
+                    }else if(sel_lepton->getPt()>20 and sel_lepton->getPt()<=30){
+                        sf=	0.933;
+                    }else if(sel_lepton->getPt()>30 and sel_lepton->getPt()<=40){
+                        sf=	 0.907 ;
+                    }else if(sel_lepton->getPt()>40 and sel_lepton->getPt()<=50){
+                        sf=	 0.904;
+                    }else if(sel_lepton->getPt()>50 and sel_lepton->getPt()<=200){
+                        sf=	 0.926;
+                    }
+                }else if(fabs(sel_lepton->getEta())>=1.556  && fabs(sel_lepton->getEta())<2.0){
+                    if(sel_lepton->getPt()>10 and sel_lepton->getPt()<=15){
+                        sf=0.854;
+                    }else if(sel_lepton->getPt()>15 and sel_lepton->getPt()<=20){
+                        sf=	0.853;
+                    }else if(sel_lepton->getPt()>20 and sel_lepton->getPt()<=30){
+                        sf=	0.879;
+                    }else if(sel_lepton->getPt()>30 and sel_lepton->getPt()<=40){
+                        sf=	 0.909 ;
+                    }else if(sel_lepton->getPt()>40 and sel_lepton->getPt()<=50){
+                        sf=	 0.942;
+                    }else if(sel_lepton->getPt()>50 and sel_lepton->getPt()<=200){
+                        sf=	 0.957;
+                    }
+                }else if(fabs(sel_lepton->getEta())>=2.  && fabs(sel_lepton->getEta())<2.5){
+                    if(sel_lepton->getPt()>10 and sel_lepton->getPt()<=15){
+                        sf=1.007;
+                    }else if(sel_lepton->getPt()>15 and sel_lepton->getPt()<=20){
+                        sf=	0.903;
+                    }else if(sel_lepton->getPt()>20 and sel_lepton->getPt()<=30){
+                        sf=	0.974;
+                    }else if(sel_lepton->getPt()>30 and sel_lepton->getPt()<=40){
+                        sf=	0.987 ;
+                    }else if(sel_lepton->getPt()>40 and sel_lepton->getPt()<=50){
+                        sf=	 0.991;
+                    }else if(sel_lepton->getPt()>50 and sel_lepton->getPt()<=200){
+                        sf=	 0.999;
+                    }
+                }
+            }
         }
+
     }
     weight*=sf;
 

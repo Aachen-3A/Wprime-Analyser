@@ -7,7 +7,7 @@ Ele.eta.Endcap.min = 1.56
 Ele.eta.Endcap.max = 2.5
 Ele.DeltaR.max = 0.4
 Ele.InvertIsolation = 0
-Ele.Rho.Label = "rho50"
+Ele.Rho.Label = "fixedGridRhoFastjetAll"
 
 # ID method to use. Supported:
 # - "CB"
@@ -22,8 +22,8 @@ Ele.ID.switchpt=100
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification?rev=30
 # CBID = Cut Based IDentification
 ##next option new in miniAOD
-Ele.CBID.usebool = 0
-Ele.CBID.boolname = cutBasedElectronID-PHYS14-PU20bx25-V0-miniAOD-standalone-loose
+Ele.CBID.usebool = 1
+Ele.CBID.boolname = cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose
 Ele.CBID.fBrem.min = 0.15           # Only for 2011!
 # lowEta: |eta|<1.0                 # Only for 2011!
 Ele.CBID.lowEta.fBrem.min = 0.0     # Only for 2011!
@@ -55,8 +55,8 @@ Ele.CBID.Endcap.Conversion.reject = 1
 # HEEP v4.1:
 # See also:
 # https://twiki.cern.ch/twiki/bin/view/CMS/HEEPElectronID?rev=65
-Ele.HEEPID.usebool = 0
-Ele.HEEPID.boolname = heepElectronID-HEEPV50-prePHYS14-25ns-miniAOD
+Ele.HEEPID.usebool = 1
+Ele.HEEPID.boolname = heepElectronID-HEEPV51
 # HEEPID = High Energy Electron Pairs IDentification
 Ele.HEEPID.RequireEcalDriven = 1
 Ele.HEEPID.RejectOutOfTime = 1
@@ -70,8 +70,7 @@ Ele.HEEPID.Barrel.HcalD1.Offset = 2
 Ele.HEEPID.Barrel.HcalD1.Slope = 0.03
 Ele.HEEPID.Barrel.HcalD1.RhoSlope = 0.28
 Ele.HEEPID.Barrel.NInnerLayerLostHits.max = 1
-Ele.HEEPID.Barrel.dxy.max = 0.00
-#Ele.HEEPID.Barrel.dxy.max = 0.02
+Ele.HEEPID.Barrel.dxy.max = 0.02
 Ele.HEEPID.Barrel.R29.max = 0.9
 Ele.HEEPID.Barrel.E1x5.min = 0.83
 Ele.HEEPID.Barrel.E2x5.min = 0.94
@@ -106,6 +105,9 @@ Ele.EffArea.EA_charged_hadrons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
 Ele.EffArea.EA_neutral_hadrons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
 
 Ele.EffArea.EA_photons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
+
+
+
 
 #################
 ## Sytematics  ##

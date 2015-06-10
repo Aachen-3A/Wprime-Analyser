@@ -12,6 +12,7 @@
 #include "Tools/PXL/Sort.hh"
 //#include "Tools/Tools.hh"
 #include "Tools/MConfig.hh"
+#include "TF1.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TString.h"
@@ -47,6 +48,7 @@ public:
     void Fill_Particle_hisos(int hist_number, pxl::Particle* lepton, string syst="");
     void Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoPart);
     void Fill_Tree();
+    void Fill_QCD_Tree(bool iso);
 
 
     void Create_RECO_effs();
@@ -102,13 +104,28 @@ public:
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
 
-    const double    m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_min_cut_ele,m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_min_cut_muo,m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau,m_pt_min_cut_tau;
+    const double        m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_min_cut_ele;
+    const TF1 m_pt_met_min_cut_funk_root_ele;
+    const TF1 m_pt_met_max_cut_funk_root_ele;
+    const TF1 m_delta_phi_cut_funk_root_ele;
+    const double        m_pt_met_min_cut_muo,m_pt_met_max_cut_muo,m_delta_phi_cut_muo,m_pt_min_cut_muo;
+    const TF1 m_pt_met_min_cut_funk_root_muo;
+    const TF1 m_pt_met_max_cut_funk_root_muo;
+    const TF1 m_delta_phi_cut_funk_root_muo;
+    const double        m_pt_met_min_cut_tau,m_pt_met_max_cut_tau,m_delta_phi_cut_tau,m_pt_min_cut_tau;
+    const TF1 m_pt_met_min_cut_funk_root_tau;
+    const TF1 m_pt_met_max_cut_funk_root_tau;
+    const TF1 m_delta_phi_cut_funk_root_tau;
+
+
 
     const std::string particles[3] = {"Ele", "Muon", "Tau"};
     const std::string particleSymbols[3] = {"e", "#mu", "#tau"};
     const std::string shifted[5]   = {"Ele", "Muon", "Tau", "met", "Jet"};
     const std::string type[2]      = {"Scale", "Resolution"};
     const std::string updown[2]    = {"Up", "Down"};
+
+    TH1D* qcd_weight_pt;
 
 
     TString d_mydisc[66];
@@ -118,6 +135,10 @@ public:
     double m_pt_met_min_cut;
     double m_pt_met_max_cut;
     double m_delta_phi_cut;
+    TF1 m_pt_met_min_cut_funk_root;
+    TF1 m_pt_met_max_cut_funk_root;
+    TF1 m_delta_phi_cut_funk_root;
+
     double m_pt_min_cut;
     double m_pt_cut;
     double m_m_cut;
@@ -182,6 +203,7 @@ public:
 
 
     map< string,float > mLeptonTree;
+    map< string,float > mQCDTree;
 
 
 };

@@ -80,13 +80,14 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_W_pthat_Gen", 8000, 0, 8000, "#hat{p}_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_HT_constructed_Gen", 8000, 0, 8000, "H_{T} [GeV]");
+        HistClass::CreateHisto("MC_cutflow_Gen", 40, 0, 40,               "stage" );
     }
 
 
     for(unsigned int i=0;i<3;i++){
 
         //str(boost::format("N_{%s}")%particleLatex[i] )
-        HistClass::CreateHisto("cutflow",particles[i].c_str(), 40, 0, 39,               "stage" );
+        HistClass::CreateHisto("cutflow",particles[i].c_str(), 40, 0, 40,               "stage" );
         HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,                   TString::Format("N_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(6,"IDFail",particles[i].c_str(), 6, 0, 6,                  "failcode" );
         HistClass::CreateHisto(6,"pt",particles[i].c_str(), 5000, 0, 5000,              "p_{T} [GeV]");
@@ -371,17 +372,23 @@ specialAna::~specialAna() {
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
 
+    HistClass::Fill("MC_cutflow_Gen",0,1.);
+
     if(not runOnData){
         if(tail_selector(event)) return;
         Fill_Gen_Controll_histo();
     }
+    HistClass::Fill("MC_cutflow_Gen",1,1.);
 
     KinematicsSelector();
     QCDAnalyse();
 
+
     if (sel_lepton==0 and qcd_lepton==0) return;
+    HistClass::Fill("MC_cutflow_Gen",2,1.);
 
     if (!triggerKinematics()) return;
+    HistClass::Fill("MC_cutflow_Gen",3,1.);
 
     if(not runOnData){
         applyKfactor(event,0);
@@ -390,6 +397,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
 
     TriggerAnalyser();
     if (!TriggerSelector(event)) return;
+    HistClass::Fill("MC_cutflow_Gen",4,1.);
 
     cleanJets();
     Fill_stage_0_histos();
@@ -397,17 +405,21 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     Fill_RECO_effs();
 
     if(sel_lepton && sel_met && sel_lepton->getPt()>m_pt_min_cut){
+        HistClass::Fill("MC_cutflow_Gen",5,1.);
         Fill_Tree();
         Fill_QCD_Tree(true);
         Fill_Controll_histo(5, sel_lepton);
         if(sel_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Controll_histo(1, sel_lepton);
+            HistClass::Fill("MC_cutflow_Gen",6,1.);
         }
         if(sel_lepton->getUserRecord("passedPtMet")){
             Fill_Controll_histo(2, sel_lepton);
+            HistClass::Fill("MC_cutflow_Gen",7,1.);
         }
         if(sel_lepton->getUserRecord("passed")){
             Fill_Controll_histo(3, sel_lepton);
+            HistClass::Fill("MC_cutflow_Gen",8,1.);
             n_lepton++;
         }
 

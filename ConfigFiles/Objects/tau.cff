@@ -1,5 +1,5 @@
 Tau.use = 0
-Tau.IdTag = 1
+Tau.IdTag = 0
 Tau.Type.Gen = "Tau"
 Tau.Type.Rec = "slimmedTaus"
 Tau.Eta.max = 3.

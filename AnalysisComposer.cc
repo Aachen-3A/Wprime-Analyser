@@ -1,4 +1,4 @@
-#include "Validator/AnalysisComposer.hh"
+#include "specialAna/AnalysisComposer.hh"
 
 // some standard libraries
 #include <exception>
@@ -21,7 +21,7 @@
 using std::string;
 namespace po = boost::program_options;
 AnalysisComposer::AnalysisComposer( ) :
-   m_analysisName("Validation"),
+   m_analysisName("specialAna"),
    runOnData( false )
 {}
 

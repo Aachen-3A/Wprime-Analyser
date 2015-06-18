@@ -77,11 +77,13 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     if(not runOnData){
         HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} [GeV]");
+        HistClass::CreateHisto("MC_W_pthat2_Gen", 8000, 0, 8000, "p_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_W_pt_Gen", 8000, 0, 8000, "p_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_W_pthat_Gen", 8000, 0, 8000, "#hat{p}_{T}^{W} [GeV]");
         HistClass::CreateHisto("MC_HT_constructed_Gen", 8000, 0, 8000, "H_{T} [GeV]");
-        HistClass::CreateHisto("MC_cutflow_Gen", 40, 0, 40,               "stage" );
+
     }
+    HistClass::CreateHisto("MC_cutflow_Gen", 40, 0, 40,               "stage" );
 
 
     for(unsigned int i=0;i<3;i++){
@@ -393,9 +395,10 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     if(not runOnData){
         applyKfactor(event,0);
         aplyDataMCScaleFactors();
+        TriggerAnalyser();
     }
 
-    TriggerAnalyser();
+
     if (!TriggerSelector(event)) return;
     HistClass::Fill("MC_cutflow_Gen",4,1.);
 
@@ -403,6 +406,10 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     Fill_stage_0_histos();
 
     Fill_RECO_effs();
+
+    if(sel_lepton && sel_lepton->getPdgNumber()==15 && sel_lepton->getUserRecord("LeadingHadronPt").toDouble()>500){
+        Fill_Controll_histo(4, sel_lepton);
+    }
 
     if(sel_lepton && sel_met && sel_lepton->getPt()>m_pt_min_cut){
         HistClass::Fill("MC_cutflow_Gen",5,1.);
@@ -424,7 +431,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
 
         if((sel_lepton->getPt() > m_pt_cut) && sel_lepton->getUserRecord("passed")) {
-            Fill_Controll_histo(4, sel_lepton);
+            //Fill_Controll_histo(4, sel_lepton);
         //(sel_lepton->getMass() > m_m_cut)
         //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
             // save event information (after cuts) to stringstream which is written to disk in endJob()
@@ -433,7 +440,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
                             << event->getUserRecord("Run") << ":"
                             << event->getUserRecord("LumiSection") << ":"
                             << event->getUserRecord("EventNum") << "\n";
-            printEvent();
+            //printEvent();
         }
     }
     if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){
@@ -793,7 +800,8 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_IterTrk02") or
                 string::npos != (*us).first.find( "HLT_IsoTkMu24_eta2p1_IterTrk02") or
                 string::npos != (*us).first.find( "HLT_IsoTkMu20_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120") or
+                //string::npos != (*us).first.find( "HLT_LooseIsoPFTau") or
+                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30") or
                 string::npos != (*us).first.find( "HLT_Ele95_CaloIdVT_GsfTrkIdT_") or
                 string::npos != (*us).first.find( "HLT_Ele32_eta2p1_WP85_Gsf_") or
                 string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP85_Gsf_") or
@@ -884,9 +892,9 @@ bool specialAna::triggerKinematics(){
         if(sel_lepton->getName()==m_TauType){
             // Warning this disables all triggers
             //if(sel_lepton->getPt()>100 && sel_met->getPt()>150){
-            if(sel_lepton->getPt()>50 && sel_met->getPt()>50){
+            //if(sel_lepton->getPt()>50 && sel_met->getPt()>50){
                 tiggerKinematics=true;
-            }
+            //}
 
         }
         if(sel_lepton->getName()=="Muon"){
@@ -904,9 +912,9 @@ bool specialAna::triggerKinematics(){
     if(qcd_lepton && sel_met){
         if(qcd_lepton->getName()==m_TauType){
             //if(qcd_lepton->getPt()>100 && sel_met->getPt()>150){
-            if(qcd_lepton->getPt()>50 && sel_met->getPt()>50){
+            //if(qcd_lepton->getPt()>50 && sel_met->getPt()>50){
                 tiggerKinematics=true;
-            }
+            //}
 
         }
         if(qcd_lepton->getName()=="Muon"){
@@ -1130,13 +1138,13 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 4000) return true;
-                }
-            }
-        }
+        //if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
+            //for(uint i = 0; i < S3ListGen->size(); i++){
+                //if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
+                    //if(S3ListGen->at(i)->getMass() > 4000) return true;
+                //}
+            //}
+        //}
         if(Datastream.Contains("WJetsToLNu_")) {
             if(getWmass() > 200) return true;
             if(Datastream.Contains("WJetsToLNu_13TeV")){
@@ -1370,6 +1378,10 @@ void specialAna::Fill_Gen_Controll_histo() {
     //ht+=METListGen->at(0)->getPt();
     //cout<<"jet ht: "<<ht<<"   "<<getGenHT()<<endl;
     HistClass::Fill("MC_W_pthat_Gen",getPtHat(),m_GenEvtView->getUserRecord( "Weight" ));
+
+    if(m_GenEvtView->hasUserRecord( "binScale" )){
+        HistClass::Fill("MC_W_pthat2_Gen", m_GenEvtView->getUserRecord( "binScale" ).toDouble()  ,m_GenEvtView->getUserRecord( "Weight" ));
+    }
     HistClass::Fill("MC_HT_constructed_Gen",getGenHT(),m_GenEvtView->getUserRecord( "Weight" ));
 
     HistClass::Fill(0,"Tau_num_Gen",tau_gen_num,m_GenEvtView->getUserRecord( "Weight" ));
@@ -1535,6 +1547,8 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     HistClass::Fill(hist_number,"Ele_pout",lepton->getUserRecord ("pout"),weight);
     if(lepton->hasUserRecord("puChargedHadronIso")){
         HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso"),weight);
+    }
+    if(lepton->hasUserRecord("Ele_Match")){
         HistClass::Fill(hist_number,"Ele_Match",lepton->getUserRecord ("Match"),weight);
     }
     HistClass::Fill(hist_number,"Ele_sigmaIetaIeta",lepton->getUserRecord ("sigmaIetaIeta"),weight);
@@ -1582,15 +1596,20 @@ void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton)
         HistClass::Fill(hist_number,"Tau_NumPFGammaCands",lepton->getUserRecord("NumPFGammaCands"),weight);
         HistClass::Fill(hist_number,"Tau_NumPFNeutralHadrCands",lepton->getUserRecord("NumPFNeutralHadrCands"),weight);
         HistClass::Fill(hist_number,"Tau_LeadingHadronPt",lepton->getUserRecord("LeadingHadronPt"),weight);
-        //TLorentzVector* jet = new TLorentzVector();
-        //jet->SetPxPyPzE(lepton->getUserRecord("tauJetpx"),lepton->getUserRecord("tauJetpy"),lepton->getUserRecord("tauJetpz"),lepton->getUserRecord("tauJetE"));
-        //HistClass::Fill(hist_number,"Tau_Jet_pt",jet->Pt(),weight);
-        //HistClass::Fill(hist_number,"Tau_Jet_eta",jet->Eta(),weight);
-        //HistClass::Fill(hist_number,"Tau_Jet_phi",jet->Phi(),weight);
+        //HistClass::Fill(hist_number,"tauJetpx",lepton->getUserRecord("tauJetpx"),weight);
+        //HistClass::Fill(hist_number,"tauJetpy",lepton->getUserRecord("tauJetpy"),weight);
+        //HistClass::Fill(hist_number,"tauJetpz",lepton->getUserRecord("tauJetpz"),weight);
+        TLorentzVector* jet = new TLorentzVector();
+        jet->SetPxPyPzE(lepton->getUserRecord("tauJetpx"),lepton->getUserRecord("tauJetpy"),lepton->getUserRecord("tauJetpz"),lepton->getUserRecord("tauJetE"));
+        HistClass::Fill(hist_number,"Tau_Jet_pt",jet->Pt(),weight);
+        HistClass::Fill(hist_number,"Tau_Jet_eta",jet->Eta(),weight);
+        HistClass::Fill(hist_number,"Tau_Jet_phi",jet->Phi(),weight);
+        lepton->setUserRecord("tauJetpt",jet->Pt());
         //delete jet;
         HistClass::Fill(hist_number,"Tau_dxy",lepton->getUserRecord("dxy"),weight);
         HistClass::Fill(hist_number,"Tau_dxy_error",lepton->getUserRecord("dxy_error"),weight);
         HistClass::Fill(hist_number,"Tau_dxy_Sig",lepton->getUserRecord("dxy_Sig"),weight);
+
     }
     HistClass::Fill(hist_number,"Tau_Mass",lepton->getMass(),weight);
 
@@ -1676,6 +1695,7 @@ void specialAna::Fill_Gen_Rec_histos(pxl::Particle* genPart,pxl::Particle* recoP
             name="Tau";
         }
         if( not ( genPart->getPt()==0 ) ){
+
             HistClass::Fill( (boost::format("0_%s_recoMgen_pt")%name).str().c_str() ,recoPart->getPt()-genPart->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
             HistClass::Fill( (boost::format("0_%s_recoMgen_pt_rel")%name ).str().c_str(),(recoPart->getPt()-genPart->getPt())/genPart->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
             HistClass::FillSparse( "Muon_Res",2,(recoPart->getPt()-genPart->getPt())/genPart->getPt(),genPart->getPt());
@@ -1687,6 +1707,7 @@ void specialAna::Create_RECO_effs() {
     Create_RECO_object_effs("Muon");
     Create_RECO_object_effs("Ele");
     Create_RECO_object_effs("Tau");
+    Create_RECO_object_effs("TauVis");
     TString x_bins_names[13] = {"1Pi0Pi0",
                                 "1Pi1Pi0",
                                 "1Pi2Pi0",
@@ -1731,26 +1752,31 @@ void specialAna::Create_RECO_effs() {
 }
 
 void specialAna::Create_RECO_object_effs(std::string object) {
-    HistClass::CreateEff(TString::Format("%s_RECO_vs_pT", object.c_str()),         100, 0, 1000,
-                         TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()));
+
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_pT", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()));
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_leadcharged_pt", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s leadcharged(gen)} (GeV)", object.c_str()));
     HistClass::CreateEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()),       70, 0, 70,
                          "n_{vtx}");
-    HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), 150, -3, 3, 100, 0, 3.5,
+    HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), 150, -3, 3, 500, 0, 3.5,
                          TString::Format("#eta(%s(gen))", object.c_str()), TString::Format("#phi(%s(gen)) (rad)", object.c_str()));
     if (object != "MET") {
-        HistClass::CreateEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()),         100, 0, 1000,
+        HistClass::CreateEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()),         500, 0, 5000,
                              TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()));
         HistClass::CreateEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()),       70, 0, 70,
                              "n_{vtx}");
-        HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), 150, -3, 3, 100, 0, 3.5,
+        HistClass::CreateEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), 150, -3, 3, 500, 0, 3.5,
                              TString::Format("#eta(%s(gen))", object.c_str()), TString::Format("#phi(%s(gen)) (rad)", object.c_str()));
     }
+    HistClass::CreateProf(TString::Format("%s_RECO_vs_pT", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()),"(reco-gen)/gen");
+    HistClass::CreateProf(TString::Format("%s_RECO_vs_jetpT", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()),"(reco-gen)/gen");
+
 }
 
 void specialAna::Fill_RECO_effs() {
     Fill_RECO_object_effs("Muon", 13, *MuonList);
     Fill_RECO_object_effs("Ele", 11, *EleList);
     Fill_RECO_object_effs("Tau", 15, *TauList);
+    Fill_RECO_object_effs("TauVis", 15, *TauList);
     Fill_RECO_object_effs("MET", 12, *METList);
 }
 
@@ -1768,6 +1794,7 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
         }
         if (gen_met != 0) {
             if (part_list.size() > 0 and DeltaPhi(part_list[0], gen_met) < 0.25) {
+                HistClass::Profile(TString::Format("%s_RECO_vs_pT", object.c_str()), gen_met->getPt(),  (part_list[0]->getPt()-gen_met->getPt())/gen_met->getPt());
                 HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), gen_met->getPt(), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), gen_met->getEta(), gen_met->getPhi(), true);
@@ -1778,11 +1805,11 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
             }
         }
         delete gen_met;
-    } else if (object == "Tau") {
+    } else if (object == "TauVis") {
         for (std::vector< pxl::Particle* >::const_iterator part_it = TauVisListGen->begin(); part_it != TauVisListGen->end(); ++part_it) {
             pxl::Particle *part_i = *part_it;
             pxl::Particle* matched_reco_particle = 0;
-            if (part_i->getUserRecord("decay_mode_id") == 0 or part_i->getUserRecord("decay_mode_id") == 1) continue;
+            //if (part_i->getUserRecord("decay_mode_id") == 0 or part_i->getUserRecord("decay_mode_id") == 1) continue;
             double delta_r_max = 0.25;
             for (std::vector< pxl::Particle* >::const_iterator part_jt = part_list.begin(); part_jt != part_list.end(); ++part_jt) {
                 pxl::Particle *part_j = *part_jt;
@@ -1791,9 +1818,14 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
                     matched_reco_particle = (pxl::Particle*) part_j->clone();
                 }
             }
+
             if (matched_reco_particle != 0) {
                 //cout<<"found match"<<endl;
+                HistClass::Profile(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(),  (matched_reco_particle->getPt()-part_i->getPt())/part_i->getPt());
+                HistClass::Profile(TString::Format("%s_RECO_vs_jetpT", object.c_str()), part_i->getPt(),  (matched_reco_particle->getUserRecord("tauJetpt").toDouble()-part_i->getPt())/part_i->getPt());
                 HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_leadcharged_pt", object.c_str()), Get_highest_pt_dauter(part_i)->getPt(), true);
+
                 HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
 
@@ -1854,6 +1886,45 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
                 }
             } else {
                 HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_leadcharged_pt", object.c_str()), Get_highest_pt_dauter(part_i)->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+            }
+            if (TMath::Abs(part_i -> getEta()) < 2.5) {
+                if (matched_reco_particle != 0) {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+                } else {
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_pT_in_Acc", object.c_str()), part_i->getPt(), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx_in_Acc", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
+                    HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi_in_Acc", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
+                }
+            }
+            delete matched_reco_particle;
+        }
+    } else if (object == "Tau") {
+        for (std::vector< pxl::Particle* >::const_iterator part_it = S3ListGen->begin(); part_it != S3ListGen->end(); ++part_it) {
+            pxl::Particle *part_i = *part_it;
+            pxl::Particle* matched_reco_particle = 0;
+            if (TMath::Abs(part_i->getPdgNumber()) != id) continue;
+            double delta_r_max = 0.25;
+            for (std::vector< pxl::Particle* >::const_iterator part_jt = part_list.begin(); part_jt != part_list.end(); ++part_jt) {
+                pxl::Particle *part_j = *part_jt;
+                if (DeltaR(part_j, part_i) < delta_r_max) {
+                    delta_r_max = DeltaR(part_j, part_i);
+                    matched_reco_particle = (pxl::Particle*) part_j->clone();
+                }
+            }
+            if (matched_reco_particle != 0) {
+                HistClass::Profile(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(),  (matched_reco_particle->getPt()-part_i->getPt())/part_i->getPt());
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_leadcharged_pt", object.c_str()), Get_highest_pt_dauter(part_i)->getPt(), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
+            } else {
+                HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), false);
+                HistClass::FillEff(TString::Format("%s_RECO_vs_leadcharged_pt", object.c_str()), Get_highest_pt_dauter(part_i)->getPt(), false);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), false);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), false);
             }
@@ -1884,6 +1955,7 @@ void specialAna::Fill_RECO_object_effs(std::string object, int id, std::vector< 
                 }
             }
             if (matched_reco_particle != 0) {
+                HistClass::Profile(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(),  (matched_reco_particle->getPt()-part_i->getPt())/part_i->getPt());
                 HistClass::FillEff(TString::Format("%s_RECO_vs_pT", object.c_str()), part_i->getPt(), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_Nvtx", object.c_str()), m_RecEvtView->getUserRecord("NumVertices"), true);
                 HistClass::FillEff(TString::Format("%s_RECO_vs_eta_vs_phi", object.c_str()), part_i->getEta(), part_i->getPhi(), true);
@@ -1965,7 +2037,7 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
         bool continue_loop = false;
         for (unsigned int i = 0; i < temp_part->size(); i++) {
             pxl::Particle* temp_part_dummy = temp_part->at(i);
-            if (temp_part_dummy->getDaughters().size() == 0) {
+            if (temp_part_dummy->getDaughters().size() == 0 or TMath::Abs(temp_part_dummy->getPdgNumber()) == 111) {
                 if (TMath::Abs(temp_part_dummy->getPdgNumber()) == 11) { // electrons
                     final_state_part_list->push_back(temp_part_dummy);
                     n_prong++;
@@ -1990,6 +2062,12 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
                     final_state_part_list->push_back(temp_part_dummy);
                     n_prong++;
                     vis_tau_decay->addP4(temp_part_dummy);
+                }
+                else{
+                    final_state_part_list->push_back(temp_part_dummy);
+                    //n_prong++;
+                    vis_tau_decay->addP4(temp_part_dummy);
+                    //cout<<"ssdusdsdb "<<temp_part_dummy->getPdgNumber()<<"    "<< temp_part_dummy->getDaughters().size() <<endl;
                 }
             } else {
                 for (std::set< pxl::Relative* >::const_iterator part_it = temp_part_dummy->getDaughters().begin(); part_it != temp_part_dummy->getDaughters().end(); ++part_it) {
@@ -2039,13 +2117,32 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
             break;
         } else {
             temp_part->clear();
-            new_temp_part->clear();
-            //delete temp_part;
-            //temp_part = new std::vector< pxl::Particle* >;
-            //*temp_part = *new_temp_part;
-            //delete new_temp_part;
-            //new_temp_part = new std::vector< pxl::Particle* >;
+            //new_temp_part->clear();
+            delete temp_part;
+            temp_part = new std::vector< pxl::Particle* >;
+            *temp_part = *new_temp_part;
+            delete new_temp_part;
+            new_temp_part = new std::vector< pxl::Particle* >;
         }
+    }
+
+    if(final_state_part_list->size()==0){
+        cout<<"---------------------begin---------------------------"<<endl;
+        for (std::set< pxl::Relative* >::const_iterator part_it = truth_tau->getDaughters().begin(); part_it != truth_tau->getDaughters().end(); ++part_it) {
+            pxl::Relative *part_i = *part_it;
+            pxl::Particle* part = (pxl::Particle*)part_i;
+
+            cout<<part->getPdgNumber()<<"    "<< part->getDaughters().size() <<endl;
+            for (std::set< pxl::Relative* >::const_iterator part_it2 = part->getDaughters().begin(); part_it2 != part->getDaughters().end(); ++part_it2) {
+                pxl::Relative *part_i2 = *part_it2;
+                pxl::Particle* part2 = (pxl::Particle*)part_i2;
+
+                cout<<"sub "<<part2->getPdgNumber()<<"    "<< part2->getDaughters().size() <<endl;
+
+            }
+
+        }
+        cout<<"----------------------end--------------------------"<<endl;
     }
 
     int n_piplus = 0;
@@ -2055,6 +2152,7 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
     int n_ele = 0;
     int n_muo = 0;
     int charge = 0;
+    int n_other=0;
     for (std::vector< pxl::Particle* >::const_iterator part_it = final_state_part_list->begin(); part_it != final_state_part_list->end(); ++part_it) {
         pxl::Particle *part_i = *part_it;
         if (abs(part_i->getPdgNumber()) == 211) {
@@ -2076,8 +2174,10 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
             n_muo++;
             charge+=part_i->getPdgNumber()/abs(part_i->getPdgNumber());
         } else {
-            std::cerr << "Found a particle that should not be here" << std::endl;
-            std::cerr << "ID: " << part_i->getPdgNumber() << std::endl;
+            n_other++;
+            //std::cerr << "Found a particle that should not be here" << std::endl;
+            //std::cerr << "ID: " << part_i->getPdgNumber() << std::endl;
+            //std::cerr << << std::endl;
         }
     }
 
@@ -2089,18 +2189,47 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
             n_pizero++;
             n_ele=0;
         }else{
-            std::cerr << "Sanity check failed!" << std::endl;
-            std::cerr << "Found electron and hadrons as tau decay products" << std::endl;
-            std::cerr << "ele: "<<n_ele<<"  pi+ "<<n_piplus<<"  K+"<<n_Kplus << std::endl;
+            decay_mode = TString::Format("%iEle%iPi%iK", n_ele,n_piplus,n_Kplus);
+            decay_mode_id = 14;
+            //std::cerr << "Sanity check failed!" << std::endl;
+            //std::cerr << "Found electron and hadrons as tau decay products" << std::endl;
+            //std::cerr << "ele: "<<n_ele<<"  pi+ "<<n_piplus<<"  K+"<<n_Kplus << std::endl;
         }
         //raise(SIGINT);
     } else if (n_ele > 0 and n_muo == 0) {
         decay_mode = TString::Format("%iEle", n_ele);
         decay_mode_id = 0;
     } else if (n_muo > 0 and (n_piplus > 0 or n_Kplus > 0)) {
-        std::cerr << "Sanity check failed!" << std::endl;
-        std::cerr << "Found muon and hadrons as tau decay products" << std::endl;
-        std::cerr << "muon: "<<n_muo<<"  pi+ "<<n_piplus<<"  K+"<<n_Kplus << std::endl;
+        if(n_muo==2){
+            //found a Z!!
+            n_muo=0;
+        }
+        decay_mode = TString::Format("%iMuo%iPi%iK", n_muo,n_piplus,n_Kplus);
+        decay_mode_id = 14;
+        //std::cerr << "Sanity check failed!" << std::endl;
+        //std::cerr << "Found muon and hadrons as tau decay products" << std::endl;
+        //std::cerr << "muon: "<<n_muo<<"  pi+ "<<n_piplus<<"  K+"<<n_Kplus << std::endl;
+
+
+        ////if(final_state_part_list->size()==0){
+        //printEvent();
+        //cout<<"---------------------begin---------------------------"<<endl;
+        //for (std::set< pxl::Relative* >::const_iterator part_it = truth_tau->getDaughters().begin(); part_it != truth_tau->getDaughters().end(); ++part_it) {
+            //pxl::Relative *part_i = *part_it;
+            //pxl::Particle* part = (pxl::Particle*)part_i;
+
+            //cout<<part->getPdgNumber()<<"    "<< part->getDaughters().size() <<endl;
+            //for (std::set< pxl::Relative* >::const_iterator part_it2 = part->getDaughters().begin(); part_it2 != part->getDaughters().end(); ++part_it2) {
+                //pxl::Relative *part_i2 = *part_it2;
+                //pxl::Particle* part2 = (pxl::Particle*)part_i2;
+
+                //cout<<"sub "<<part2->getPdgNumber()<<"    "<< part2->getDaughters().size() <<endl;
+
+            //}
+
+        //}
+        //cout<<"----------------------end--------------------------"<<endl;
+    //}
     } else if (n_muo > 0 and n_ele == 0) {
         decay_mode = TString::Format("%iMuo", n_muo);
         decay_mode_id = 1;
@@ -2174,8 +2303,33 @@ pxl::Particle* specialAna::Get_tau_truth_decay_mode( pxl::Particle* truth_tau) {
     vis_tau_decay->setUserRecord("n_prong",  n_prong);
     vis_tau_decay->setUserRecord("decay_mode",  (std::string)decay_mode);
     vis_tau_decay->setUserRecord("decay_mode_id",  decay_mode_id);
-
+    if (n_muo > 0 and (n_piplus > 0 or n_Kplus > 0)){
+        cout<<(std::string)decay_mode<<"  : "<<n_prong<<"  : "<<vis_tau_decay->getPt()<<"  "<<truth_tau->getPt()<<endl;
+    }
     return vis_tau_decay;
+}
+
+pxl::Particle* specialAna::Get_highest_pt_dauter( pxl::Particle* truth_tau) {
+    pxl::Particle* temp_part_dummy=truth_tau;
+    double highestpt=0;
+
+    for (std::set< pxl::Relative* >::const_iterator part_it = truth_tau->getDaughters().begin(); part_it != truth_tau->getDaughters().end(); ++part_it) {
+        pxl::Relative *part_i = *part_it;
+        pxl::Particle* part = (pxl::Particle*)part_i;
+        if(part->getDaughters().size()>0 ){
+            part=Get_highest_pt_dauter(part);
+        }
+        if(part->getPt()>highestpt && part->getPdgNumber() != 111
+                                && abs(part->getPdgNumber()) != 130
+                                && abs(part->getPdgNumber()) != 310
+                                && abs(part->getPdgNumber()) != 311
+                                && abs(part->getPdgNumber()) != 22
+                                ){
+            temp_part_dummy=part;
+            highestpt=part->getPt();
+        }
+    }
+    return temp_part_dummy;
 }
 
 double specialAna::DeltaPhi(double a, double b) {
@@ -2358,6 +2512,9 @@ void specialAna::printEvent(){
     m_RecEvtView->getObjectsOfType< pxl::Particle >( AllParticles );
     pxl::sortParticles( AllParticles );
     eventsAfterCutsEvents<<"<event>\n";
+    eventsAfterCutsEvents<<"#"<< temp_run << ":"
+                            << temp_ls << ":"
+                            << temp_event <<"\n";
     // push them into the corresponding vectors
     for( vector< pxl::Particle* >::const_iterator part_it = AllParticles.begin(); part_it != AllParticles.end(); ++part_it ) {
         pxl::Particle *part = *part_it;
@@ -2421,11 +2578,11 @@ void specialAna::endJob( const Serializable* ) {
     cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
     file1->cd();
     HistClass::WriteAll("counters");
-    if(not runOnData){
-        file1->mkdir("MC");
-        file1->cd("MC/");
-        HistClass::WriteAll("_Gen");
-    }
+    //if(not runOnData){
+    file1->mkdir("MC");
+    file1->cd("MC/");
+    HistClass::WriteAll("_Gen");
+    //}
     file1->cd();
     file1->mkdir("Taus");
     file1->cd("Taus/");
@@ -2451,6 +2608,7 @@ void specialAna::endJob( const Serializable* ) {
     file1->mkdir("Effs");
     file1->cd("Effs/");
     HistClass::WriteAllEff();
+    HistClass::WriteAllProf();
     file1->Close();
 
     std::string outputstring = eventsAfterCuts.str();
@@ -2924,6 +3082,7 @@ void specialAna::endEvent( const pxl::Event* event ){
         delete METListGen;
         delete JetListGen;
         delete TauListGen;
+        delete TauVisListGen;
         delete S3ListGen;
 
         EleListGen = 0;
@@ -2932,6 +3091,7 @@ void specialAna::endEvent( const pxl::Event* event ){
         METListGen = 0;
         JetListGen = 0;
         TauListGen = 0;
+        TauVisListGen = 0;
         S3ListGen = 0;
     }
 }

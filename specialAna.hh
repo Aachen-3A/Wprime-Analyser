@@ -83,6 +83,7 @@ public:
     pxl::Particle* Get_Truth_match(std::string name, pxl::Particle* lepton);
     pxl::Particle* Get_Truth_match_all_flavor(pxl::Particle* lepton);
     pxl::Particle* Get_tau_truth_decay_mode(pxl::Particle* truth_tau);
+    pxl::Particle* Get_highest_pt_dauter( pxl::Particle* truth_tau);
     double DeltaPhi(double a, double b);
     double DeltaPhi(pxl::Particle* lepton, pxl::Particle* met);
     double DeltaR(pxl::Particle* part_j, pxl::Particle* part_i);

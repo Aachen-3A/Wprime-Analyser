@@ -41,7 +41,7 @@ Muon.NMuonHits.min = 1 ##corresponds to more than 0
 Muon.NMatchedStations.min = 2  ##corresponds to more than 1
 Muon.NTrackerLayersWithMeas.min = 6
 Muon.XYImpactParameter.max = 0.2        # = dB
-Muon.ZImpactParameter.max = 0.5
+Muon.ZImpactParameter.max = 99999999999999999999999.
 Muon.GlobalChi2.max = 10
 # Use High Pt Muon ID for muons with pt > 200?
 # If true, 'UseCocktail' should also be set to true.

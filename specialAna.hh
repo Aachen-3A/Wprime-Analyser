@@ -129,7 +129,63 @@ public:
     TH1D* qcd_weight_pt;
 
 
-    TString d_mydisc[66];
+    std::vector<TString> d_mydisc= {
+        "byCombinedIsolationDeltaBetaCorrRaw3Hits",
+        "byIsolationMVA3newDMwLTraw",
+        "byIsolationMVA3newDMwoLTraw",
+        "byIsolationMVA3oldDMwLTraw",
+        "byIsolationMVA3oldDMwoLTraw",
+        "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+        "byLooseIsolationMVA3newDMwLT",
+        "byLooseIsolationMVA3newDMwoLT",
+        "byLooseIsolationMVA3oldDMwLT",
+        "byLooseIsolationMVA3oldDMwoLT",
+        "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+        "byMediumIsolationMVA3newDMwLT",
+        "byMediumIsolationMVA3newDMwoLT",
+        "byMediumIsolationMVA3oldDMwLT",
+        "byMediumIsolationMVA3oldDMwoLT",
+        "byTightCombinedIsolationDeltaBetaCorr3Hits",
+        "byTightIsolationMVA3newDMwLT",
+        "byTightIsolationMVA3newDMwoLT",
+        "byTightIsolationMVA3oldDMwLT",
+        "byTightIsolationMVA3oldDMwoLT",
+        "byVLooseIsolationMVA3newDMwLT",
+        "byVLooseIsolationMVA3newDMwoLT",
+        "byVLooseIsolationMVA3oldDMwLT",
+        "byVLooseIsolationMVA3oldDMwoLT",
+        "byVTightIsolationMVA3newDMwLT",
+        "byVTightIsolationMVA3newDMwoLT",
+        "byVTightIsolationMVA3oldDMwLT",
+        "byVTightIsolationMVA3oldDMwoLT",
+        "byVVTightIsolationMVA3newDMwLT",
+        "byVVTightIsolationMVA3newDMwoLT",
+        "byVVTightIsolationMVA3oldDMwLT",
+        "byVVTightIsolationMVA3oldDMwoLT",
+        "decayModeFindingNewDMs",
+        "againstMuonMedium2",
+        "againstMuonMediumMVA",
+        "againstMuonMVAraw",
+        "againstMuonLooseMVA",
+        "againstMuonTight2",
+        "againstMuonLoose3",
+        "againstMuonLoose",
+        "againstMuonTight",
+        "againstElectronLoose",
+        "againstElectronLooseMVA5",
+        "againstElectronVLooseMVA5",
+        "againstElectronMVA5category",
+        "againstMuonTight3",
+        "againstElectronMVA5raw",
+        "againstElectronMedium",
+        "againstElectronMediumMVA5",
+        "againstMuonTightMVA",
+        "againstMuonMedium",
+        "againstElectronTight",
+        "againstElectronTightMVA5",
+        "againstMuonLoose2",
+        "againstElectronVTightMVA5",
+    };
 
     bool isOldPXLFile;
 
@@ -205,6 +261,8 @@ public:
 
     map< string,float > mLeptonTree;
     map< string,float > mQCDTree;
+
+    map< pxl::Particle*,pxl::Particle* > tau_gen_visMap;
 
 
 };

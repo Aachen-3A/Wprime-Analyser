@@ -486,13 +486,26 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             HistClass::Fill("MC_cutflow_Gen",8,1.);
         }
 
-        if((MT(sel_lepton,sel_met) > m_min_mt_for_eventinfo) && sel_lepton->getUserRecord("passed")) {
-            // save event info for events for event display generation:
-            eventsAfterCuts << MT(sel_lepton,sel_met) << ":"
-                            << event->getUserRecord("Dataset") << ":"
-                            << event->getUserRecord("Run") << ":"
-                            << event->getUserRecord("LumiSection") << ":"
-                            << event->getUserRecord("EventNum") << "\n";
+        if(runOnData){
+              if((sel_lepton->getPt() > m_min_mt_for_eventinfo) && sel_lepton->getUserRecord("passed")) {
+                //Fill_Controll_histo(4, sel_lepton);
+            //(sel_lepton->getMass() > m_m_cut)
+            //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
+                // save event information (after cuts) to stringstream which is written to disk in endJob()
+                // for event display generation:
+                eventsAfterCuts <<"Mt "			    <<MT(sel_lepton,sel_met)                            << ": "
+                                <<"Runnumber "		<<event->getUserRecord("Run")                       << ": "
+                                <<"Lumiblock "		<<event->getUserRecord("LumiSection")               << ": "
+                                <<"Event "			<<event->getUserRecord("EventNum")                  << ": "
+                                <<"pt "			    <<sel_lepton->getPt()                               << ": "
+                                <<"eta "			<<sel_lepton->getEta()                              << ": "
+                                <<"phi "			<<sel_lepton->getPhi()                              << ": "
+                                <<"MET "			<<sel_met->getPt()                                  << ": "
+                                <<"dphi "			<<DeltaPhi(sel_lepton->getPhi(),sel_met->getPhi())  << ": "
+                                <<"charge "   		<<sel_lepton->getCharge()                           << ": "
+                                <<"pt/met "			<<sel_lepton->getPt()/sel_met->getPt()              << endl;
+                //printEvent();
+            }
         }
     }
     if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){

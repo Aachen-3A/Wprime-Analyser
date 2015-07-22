@@ -487,12 +487,8 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
 
         if(runOnData){
-              if((sel_lepton->getPt() > m_min_mt_for_eventinfo) && sel_lepton->getUserRecord("passed")) {
-                //Fill_Controll_histo(4, sel_lepton);
-            //(sel_lepton->getMass() > m_m_cut)
-            //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
-                // save event information (after cuts) to stringstream which is written to disk in endJob()
-                // for event display generation:
+            if((MT(sel_lepton,sel_met) > m_min_mt_for_eventinfo) && sel_lepton->getUserRecord("passed")) {
+            // save event info for events for event display generation:
                 eventsAfterCuts <<"Mt "			    <<MT(sel_lepton,sel_met)                            << ": "
                                 <<"Runnumber "		<<event->getUserRecord("Run")                       << ": "
                                 <<"Lumiblock "		<<event->getUserRecord("LumiSection")               << ": "
@@ -504,7 +500,6 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
                                 <<"dphi "			<<DeltaPhi(sel_lepton->getPhi(),sel_met->getPhi())  << ": "
                                 <<"charge "   		<<sel_lepton->getCharge()                           << ": "
                                 <<"pt/met "			<<sel_lepton->getPt()/sel_met->getPt()              << endl;
-                //printEvent();
             }
         }
     }

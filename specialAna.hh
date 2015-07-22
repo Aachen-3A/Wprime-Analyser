@@ -222,7 +222,6 @@ public:
     unsigned int numBJet;
 
     int events_;
-    unsigned int n_lepton;
     TFile* m_kfactorFile;
     TH1D* m_kfactorHist[3];
 

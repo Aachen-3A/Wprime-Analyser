@@ -69,8 +69,6 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     file1->cd();
 
-    n_lepton = 0; // counting leptons passing the selection
-
     // number of events, saved in a histogram
     HistClass::CreateHistoUnchangedName("h_counters", 10, 0, 11, "N_{events}");
 
@@ -486,7 +484,6 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         if(sel_lepton->getUserRecord("passed")){
             Fill_Controll_histo(3, sel_lepton);
             HistClass::Fill("MC_cutflow_Gen",8,1.);
-            n_lepton++;
         }
 
         if((sel_lepton->getPt() > m_pt_cut) && sel_lepton->getUserRecord("passed")) {
@@ -2964,9 +2961,7 @@ void specialAna::endJob( const Serializable* ) {
     }
     //        HistClass::CreateHisto(6,"ptoverMET",particleName[i].c_str(), 20, 0, 2,       TString::Format("#frac{p_{T}^{%s}}{MET}", particleLatex[i].c_str()) );
 
-    cout << "n_lepton:   " << n_lepton << endl;
     cout << "h_counters: " << HistClass::ReturnHist("h_counters")->GetBinContent(1) << endl;
-    cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
     file1->cd();
     HistClass::WriteAll("counters");
     //if(not runOnData){

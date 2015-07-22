@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <fstream>
 
@@ -258,8 +259,8 @@ public:
     unordered_set< string > triggers;
 
 
-    map< string,float > mLeptonTree;
-    map< string,float > mQCDTree;
+    std::unordered_map< string,float > mLeptonTree;
+    std::unordered_map< string,float > mQCDTree;
 
     map< pxl::Particle*,pxl::Particle* > tau_gen_visMap;
 

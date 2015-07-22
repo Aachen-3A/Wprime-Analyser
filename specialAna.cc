@@ -1184,21 +1184,21 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_200")) {
+         if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_200") || Datastream.Contains("Nu_M-200"))) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 500) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_500")) {
+        if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_500") || Datastream.Contains("Nu_M-500"))) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 1000) return true;
                 }
             }
         }
-        if(Datastream.Contains("WTo") && Datastream.Contains("Nu_M_1000_13TeV")) {
+        if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_1000_13TeV") || Datastream.Contains("Nu_M-1000"))) {
             for(uint i = 0; i < S3ListGen->size(); i++){
                 if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
                     if(S3ListGen->at(i)->getMass() > 3000) return true;

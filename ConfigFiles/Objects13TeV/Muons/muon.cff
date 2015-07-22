@@ -15,12 +15,12 @@ Muon.InvertIsolation = 0
 Muon.CleanDuplicates = 0
 
 
-# Supported ID types:
+# Supported ID types: 
 #   "CombinedID", "HighPtID", "TightID", "MediumID", "SoftID" or "None"
 # The "CombinedID" uses the "TightID" until the specified PtSwitch is
 # reached, then it switches to the "HighPtID".
 # "None" means no ID criteria are applied and all muons pass.
-Muon.ID.Type = "CombinedID"
+Muon.ID.Type = "TightID"
 Muon.ID.PtSwitch = 200
 
 
@@ -34,5 +34,3 @@ import "$PXLANA/ConfigFiles/Objects/Muons/highpt.cff"
 import "$PXLANA/ConfigFiles/Objects/Muons/isolation.cff"
 import "$PXLANA/ConfigFiles/Objects/Muons/effectivearea.cff"
 import "$PXLANA/ConfigFiles/Objects/Muons/systematics.cff"
-
-

@@ -197,7 +197,7 @@ public:
     TF1 m_delta_phi_cut_funk_root;
 
     double m_pt_min_cut;
-    double m_pt_cut;
+    double m_min_mt_for_eventinfo;
     double m_m_cut;
     const std::string m_cutdatafile;
     const vector< string >  m_trigger_string;

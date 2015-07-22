@@ -45,7 +45,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_pt_met_max_cut_funk_root_tau(  "Tau.wprime.pt_met_cut_max_func",  cfg.GetItem< string >( "Tau.wprime.pt_met_cut_max_func" ).c_str() ,0,8000),
    m_delta_phi_cut_funk_root_tau(  "Tau.wprime.delta_phi_cut_func",   cfg.GetItem< string >( "Tau.wprime.delta_phi_cut_func" ).c_str() ,0,8000),
 
-   m_pt_cut(                cfg.GetItem< double >( "wprime.pt_cut" ) ),
+   m_min_mt_for_eventinfo(  cfg.GetItem< double >( "wprime.min_mt_for_eventinfo" ) ),
    m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
    m_cutdatafile(           cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
 
@@ -486,17 +486,13 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             HistClass::Fill("MC_cutflow_Gen",8,1.);
         }
 
-        if((sel_lepton->getPt() > m_pt_cut) && sel_lepton->getUserRecord("passed")) {
-            //Fill_Controll_histo(4, sel_lepton);
-        //(sel_lepton->getMass() > m_m_cut)
-        //if(sel_lepton->getName()==m_TauType && sel_lepton->getUserRecord("passed")) {
-            // save event information (after cuts) to stringstream which is written to disk in endJob()
-            // for event display generation:
-            eventsAfterCuts << event->getUserRecord("Dataset") << ":"
+        if((MT(sel_lepton,sel_met) > m_min_mt_for_eventinfo) && sel_lepton->getUserRecord("passed")) {
+            // save event info for events for event display generation:
+            eventsAfterCuts << MT(sel_lepton,sel_met) << ":"
+                            << event->getUserRecord("Dataset") << ":"
                             << event->getUserRecord("Run") << ":"
                             << event->getUserRecord("LumiSection") << ":"
                             << event->getUserRecord("EventNum") << "\n";
-            //printEvent();
         }
     }
     if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){

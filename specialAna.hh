@@ -222,6 +222,9 @@ public:
     unsigned int numJet;
     unsigned int numBJet;
 
+    //store the w mass to avoid calculations:
+    double wmass_stored;
+
     int events_;
     TFile* m_kfactorFile;
     TH1D* m_kfactorHist[3];

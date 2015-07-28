@@ -405,9 +405,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     HistClass::CreateTree( &mQCDTree, "qcdtree");
 
-    TFile qcd_weight(Tools::musicAbsPath("specialAna/ConfigFiles/ConfigInputs/qcdFakeOutput.root").c_str());
+    TFile qcd_weight(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight"))).c_str());
     qcd_weight_pt=(TH1D*) qcd_weight.Get("qcdFake_pt");
-    cout<<qcd_weight_pt->FindBin(10)<<endl;
 
 
 }
@@ -850,10 +849,14 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
         pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
         for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
             if (
-                string::npos != (*us).first.find( "HLT_HLT_Ele90_CaloIdVT_GsfTrkIdT") or
-                string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_GsfTrkIdT") or
-                string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_TrkIdT") or
-                string::npos != (*us).first.find( "HLT_Ele27_WP80_v") or
+                string::npos != (*us).first.find( "HLT_Ele115_CaloIdVT_GsfTrkIdT_v") or
+                string::npos != (*us).first.find( "HLT_Ele105_CaloIdVT_GsfTrkIdT_v") or
+                //string::npos != (*us).first.find( "HLT_Ele90_CaloIdVT_GsfTrkIdT_v") or
+                //string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_GsfTrkIdT") or
+                //string::npos != (*us).first.find( "HLT_Ele80_CaloIdVT_TrkIdT") or
+                string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP75_Gsf_v") or
+                string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WPLoose_Gsf_v") or
+
                 string::npos != (*us).first.find( "HLT_Mu40_") or
                 string::npos != (*us).first.find( "HLT_Mu40_eta2p1_") or
                 string::npos != (*us).first.find( "HLT_IsoMu24_eta") or
@@ -861,13 +864,17 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 string::npos != (*us).first.find( "HLT_IsoTkMu24_eta2p1_IterTrk02") or
                 string::npos != (*us).first.find( "HLT_IsoTkMu20_eta2p1_IterTrk02") or
                 //string::npos != (*us).first.find( "HLT_LooseIsoPFTau") or
-                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30") or
-                string::npos != (*us).first.find( "HLT_Ele95_CaloIdVT_GsfTrkIdT_") or
-                string::npos != (*us).first.find( "HLT_Ele32_eta2p1_WP85_Gsf_") or
-                string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP85_Gsf_") or
-                string::npos != (*us).first.find( "HLT_Ele25WP60_SC4_Mass55_") or
+                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120")
+
+                //string::npos != (*us).first.find( "HLT_Ele95_CaloIdVT_GsfTrkIdT_") or
+                //string::npos != (*us).first.find( "HLT_Ele32_eta2p1_WP85_Gsf_") or
+                //string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP85_Gsf_") or
+                //string::npos != (*us).first.find( "HLT_Ele25WP60_SC4_Mass55_") or
                 //string::npos != (*us).first.find( "HLT_Mu17_Mu8_v") or
-                string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
+
+
+                //string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
+                //string::npos != (*us).first.find( "PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight")
             ){
                 triggered=(*us).second;
                 if(triggered){
@@ -1179,32 +1186,16 @@ bool specialAna::tail_selector( const pxl::Event* event) {
     if( m_dataPeriod=="13TeV" ){
         /// W tail fitting
         if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){ //W
-                    if(S3ListGen->at(i)->getMass() > 200) return true;
-                }
-            }
+                if(getWmass() > 200) return true;
         }
          if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_200") || Datastream.Contains("Nu_M-200"))) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 500) return true;
-                }
-            }
+                if(getWmass() > 500) return true;
         }
         if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_500") || Datastream.Contains("Nu_M-500"))) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 1000) return true;
-                }
-            }
+                if(getWmass() > 1000) return true;
         }
         if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_1000_13TeV") || Datastream.Contains("Nu_M-1000"))) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(TMath::Abs(S3ListGen->at(i)->getPdgNumber()) == 24){
-                    if(S3ListGen->at(i)->getMass() > 3000) return true;
-                }
-            }
+                if(getWmass() > 3000) return true;
         }
         if(Datastream.Contains("WJetsToLNu_")) {
             if(getWmass() > 200) return true;
@@ -1389,7 +1380,7 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
 void specialAna::Fill_Gen_Controll_histo() {
 
-
+    HistClass::Fill("MC_W_m_Gen",getWmass(),m_GenEvtView->getUserRecord( "Weight" ));
     int muon_gen_num=0;
     int ele_gen_num=0;
     int tau_gen_num=0;
@@ -1418,7 +1409,7 @@ void specialAna::Fill_Gen_Controll_histo() {
                     continue;
                 }
             }
-            HistClass::Fill("MC_W_m_Gen",S3ListGen->at(i)->getMass(),m_GenEvtView->getUserRecord( "Weight" ));
+
             HistClass::Fill("MC_W_pt_Gen",S3ListGen->at(i)->getPt(),m_GenEvtView->getUserRecord( "Weight" ));
 
 
@@ -2844,12 +2835,16 @@ double specialAna::getGenHT(){
 }
 
 double specialAna::getWmass(){
+    if(wmass_stored!=0){
+        return wmass_stored;
+    }
     pxl::Particle* lepton=0;
     pxl::Particle* neutrino=0;
     for(uint i = 0; i < S3ListGen->size(); i++){
 
         if (abs(S3ListGen->at(i)->getPdgNumber())==24){
-            return S3ListGen->at(i)->getMass();
+            wmass_stored=S3ListGen->at(i)->getMass();
+            return wmass_stored;
         }
 
         int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
@@ -2861,11 +2856,14 @@ double specialAna::getWmass(){
         }
     }
     if(neutrino!=0 and lepton!=0){
-        return Mass(neutrino,lepton);
+        wmass_stored=Mass(neutrino,lepton);
+        return wmass_stored;
     }else{
-        return -1;
+        wmass_stored=-1;
+        return wmass_stored;
     }
-    return -1;
+    wmass_stored=-1;
+    return wmass_stored;
 }
 
 int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
@@ -3020,6 +3018,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     //no pu weight at the moment!!
 
     weight = 1;
+    wmass_stored=0;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
     m_GenEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Gen" );
     if(event->getObjectOwner().findObject< pxl::EventView >( "Trig" )){
@@ -3177,37 +3176,18 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
     string datastream = event->getUserRecord( "Dataset" );
     TString Datastream = datastream;
 
-    if( (datastream.find("WTo")!=1) and (datastream.find("WJets")!=1) ){
+    if( (datastream.find("WTo")!=1) and (datastream.find("WJetsToLNu_")!=1) ){
         return;
     }
 
 
     if( m_dataPeriod=="13TeV" ){
-        double wmass=0.;
-        //additive
-        //p0                        =      1.18304   +/-   0.00128801
-        //p1                        = -2.66112e-05   +/-   2.5832e-06
-        //p2                        = -2.82645e-08   +/-   1.00043e-09
-        double par []={1.18304,-2.66112e-05,-2.82645e-08};
-        //multiply
-        //p0                        =      1.17943   +/-   0.00136125
-        //p1                        = -1.79983e-05   +/-   2.61106e-06
-        //p2                        = -2.94026e-08   +/-   9.2078e-10
-        if(mode==1){
-            par[0]= 1.17943;
-            par[1]= -1.79983e-05;
-            par[2]= -2.94026e-08;
+        double mass=getWmass();
+        if(mass>0){
+            weight*=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
+            //cout<<m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass))<<endl;
         }
-        if(Datastream.Contains("WTo") ) {
-            for(uint i = 0; i < S3ListGen->size(); i++){
-                if(S3ListGen->at(i)->getPdgNumber() == 24){
-                    wmass=S3ListGen->at(i)->getMass();
-                    break;
-                }
-            }
-            weight*=(par[0]+wmass*par[1]+wmass*wmass*par[2]);
 
-        }
     }else if(m_dataPeriod=="8TeV"){
         double mass=0.;
         int l=-1;

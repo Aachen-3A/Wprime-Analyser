@@ -73,6 +73,7 @@ public:
 
     void KinematicsSelector();
     bool TriggerSelector(const pxl::Event* event);
+    bool TriggerSelector_highpt(const pxl::Event* event);
     bool triggerKinematics();
     void Create_trigger_effs();
     void TriggerAnalyser();
@@ -107,6 +108,8 @@ public:
 
 
     const double        m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_min_cut_ele;
+    //for high pt ana use a higher theshold:
+    const double m_pt_min_cut_ele_high_pt;
     const TF1 m_pt_met_min_cut_funk_root_ele;
     const TF1 m_pt_met_max_cut_funk_root_ele;
     const TF1 m_delta_phi_cut_funk_root_ele;

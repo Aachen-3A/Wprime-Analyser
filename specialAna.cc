@@ -22,6 +22,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_pt_met_max_cut_ele(    cfg.GetItem< double >( "Ele.wprime.pt_met_cut_max" ) ),
    m_delta_phi_cut_ele(     cfg.GetItem< double >( "Ele.wprime.delta_phi_cut" ) ),
    m_pt_min_cut_ele(        cfg.GetItem< double >( "Ele.wprime.pt_min" ) ),
+   m_pt_min_cut_ele_high_pt(        cfg.GetItem< double >( "Ele.wprime.pt_min_high_pt" ) ),
 
    m_pt_met_min_cut_funk_root_ele(  "Ele.wprime.pt_met_cut_min_func",  cfg.GetItem< string >( "Ele.wprime.pt_met_cut_min_func" ).c_str() ,0,8000),
    m_pt_met_max_cut_funk_root_ele(  "Ele.wprime.pt_met_cut_max_func",  cfg.GetItem< string >( "Ele.wprime.pt_met_cut_max_func" ).c_str() ,0,8000),
@@ -317,33 +318,35 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     if(not runOnData){
         if(useSyst){
             // 4 for loops to create 480 histograms
-            for(unsigned char pi=0; pi<3; pi++){ // loop over particles
-                for(unsigned char si=0; si<5; si++){ // loop over shifted particles
-                    for(unsigned char ti=0; ti<2; ti++){ // loop over type
-                        for(unsigned char ui=0; ui<2; ui++){ // loop over updown
-                            HistClass::CreateHisto(boost::format("3_%s_pt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   5000, 0, 5000,
-                                                   std::string("p_{T}^{") + particleSymbols[pi] + "} [GeV]");
-                            HistClass::CreateHisto(boost::format("3_%s_eta_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   5000, 0, 5000,
-                                                   std::string("#eta_{") + particleSymbols[pi] + "}");
-                            HistClass::CreateHisto(boost::format("3_%s_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   40, -3.2, 3.2,
-                                                   std::string("#phi_{") + particleSymbols[pi] + "} [rad]");
-                            HistClass::CreateHisto(boost::format("3_%s_DeltaPhi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   40, 0, 3.2,
-                                                   std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
-                            HistClass::CreateHisto(boost::format("3_%s_mt_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   5000, 0, 5000,
-                                                   std::string("M_{T}_{") + particleSymbols[pi] + "} [GeV]");
-                            HistClass::CreateHisto(boost::format("3_%s_ET_MET_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   50, 0, 6,
-                                                   std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
-                            HistClass::CreateHisto(boost::format("3_%s_met_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   5000, 0, 5000,
-                                                   "E^{miss}_{T} [GeV]");
-                            HistClass::CreateHisto(boost::format("3_%s_met_phi_syst_%s%s%s")%particles[pi] %shifted[si] %type[ti] %updown[ui],
-                                                   40, -3.2, 3.2,"#phi_{E^{miss}_{T}} [rad]");
+            for(unsigned int pi=0; pi<3; pi++){ // loop over particles
+                for(unsigned int si=0; si<5; si++){ // loop over shifted particles
+                    for(unsigned int ti=0; ti<2; ti++){ // loop over type
+                        for(unsigned int ui=0; ui<2; ui++){ // loop over updown
+                            for(unsigned int stage=1;stage<5;stage++){
+                                HistClass::CreateHisto(boost::format("%d_%s_pt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       5000, 0, 5000,
+                                                       std::string("p_{T}^{") + particleSymbols[pi] + "} [GeV]");
+                                HistClass::CreateHisto(boost::format("%d_%s_eta_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       5000, 0, 5000,
+                                                       std::string("#eta_{") + particleSymbols[pi] + "}");
+                                HistClass::CreateHisto(boost::format("%d_%s_phi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       40, -3.2, 3.2,
+                                                       std::string("#phi_{") + particleSymbols[pi] + "} [rad]");
+                                HistClass::CreateHisto(boost::format("%d_%s_DeltaPhi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       40, 0, 3.2,
+                                                       std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
+                                HistClass::CreateHisto(boost::format("%d_%s_mt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       5000, 0, 5000,
+                                                       std::string("M_{T}_{") + particleSymbols[pi] + "} [GeV]");
+                                HistClass::CreateHisto(boost::format("%d_%s_ET_MET_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       50, 0, 6,
+                                                       std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
+                                HistClass::CreateHisto(boost::format("%d_%s_met_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       5000, 0, 5000,
+                                                       "E^{miss}_{T} [GeV]");
+                                HistClass::CreateHisto(boost::format("%d_%s_met_phi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                                       40, -3.2, 3.2,"#phi_{E^{miss}_{T}} [rad]");
+                            }
                         }
                     }
                 }
@@ -463,10 +466,6 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
 
 
 
-    if(sel_lepton && sel_lepton->getPdgNumber()==15 && sel_lepton->getUserRecord("LeadingHadronPt").toDouble()>500){
-        Fill_Controll_histo(4, sel_lepton);
-    }
-
     if(sel_lepton && sel_met && sel_lepton->getPt()>m_pt_min_cut){
         HistClass::Fill("MC_cutflow_Gen",5,1.);
         Fill_Tree();
@@ -483,6 +482,10 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         if(sel_lepton->getUserRecord("passed")){
             Fill_Controll_histo(3, sel_lepton);
             HistClass::Fill("MC_cutflow_Gen",8,1.);
+        }
+        if(sel_lepton->getUserRecord("passed") && sel_lepton->getPdgNumber()==11 && sel_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event) ){
+            Fill_Controll_histo(4, sel_lepton);
+            HistClass::Fill("MC_cutflow_Gen",9,1.);
         }
 
         if(runOnData){
@@ -504,6 +507,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     }
     if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){
         Fill_QCD_Tree(false);
+        Fill_Particle_hisos(5, qcd_lepton , "iso_QCD");
         if(qcd_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Particle_hisos(1, qcd_lepton , "iso_QCD");
         }
@@ -512,6 +516,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
         if(qcd_lepton->getUserRecord("passed")){
             Fill_Particle_hisos(3, qcd_lepton , "iso_QCD");
+        }
+        if(qcd_lepton->getUserRecord("passed") && qcd_lepton->getPdgNumber()==11 && qcd_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event)){
+            Fill_Particle_hisos(4, qcd_lepton , "iso_QCD");
         }
 
     }
@@ -636,17 +643,33 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
     KinematicsSelector();
 
     if(sel_lepton && sel_met){
-        //if(sel_lepton->getUserRecord("passedDeltaPhi")){
-            //Fill_Particle_hisos(1, sel_lepton, shiftType + updown);
-        //}
-        //if(sel_lepton->getUserRecord("passedPtMet")){
-            //Fill_Particle_hisos(2, sel_lepton, shiftType + updown);
-        //}
+        if(sel_lepton->getUserRecord("passedDeltaPhi")){
+            if(particleName==m_METType){
+                Fill_Particle_hisos(1, sel_lepton, "met" + shiftType + updown);
+            }else{
+                Fill_Particle_hisos(1, sel_lepton, particleName + shiftType + updown);
+            }
+        }
+        if(sel_lepton->getUserRecord("passedPtMet")){
+            if(particleName==m_METType){
+                Fill_Particle_hisos(2, sel_lepton, "met" + shiftType + updown);
+            }else{
+                Fill_Particle_hisos(2, sel_lepton, particleName + shiftType + updown);
+            }
+        }
         if(sel_lepton->getUserRecord("passed")){
             if(particleName==m_METType){
                 Fill_Particle_hisos(3, sel_lepton, "met" + shiftType + updown);
             }else{
                 Fill_Particle_hisos(3, sel_lepton, particleName + shiftType + updown);
+            }
+            // cout << "h1_3_" << sel_lepton->getName() << "_[val]_syst_" + particleName + shiftType + updown << endl;
+        }
+        if(sel_lepton->getUserRecord("passed") && sel_lepton->getPdgNumber()==11 && sel_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event)){
+            if(particleName==m_METType){
+                Fill_Particle_hisos(4, sel_lepton, "met" + shiftType + updown);
+            }else{
+                Fill_Particle_hisos(4, sel_lepton, particleName + shiftType + updown);
             }
             // cout << "h1_3_" << sel_lepton->getName() << "_[val]_syst_" + particleName + shiftType + updown << endl;
         }
@@ -999,7 +1022,31 @@ bool specialAna::triggerKinematics(){
     }
     return tiggerKinematics;
 }
+bool specialAna::TriggerSelector_highpt(const pxl::Event* event){
+    bool triggered=false;
 
+
+    //I dont understand the 8TeV triggers at the moment!!
+    if( m_dataPeriod =="13TeV"){
+        //this is 13 TeV
+        //for( std::vector< string >::const_iterator it=m_trigger_string.begin(); it!= m_trigger_string.end();it++){
+        pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
+        for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
+            if (
+                string::npos != (*us).first.find( "HLT_Ele115_CaloIdVT_GsfTrkIdT_v") or
+                string::npos != (*us).first.find( "HLT_Ele105_CaloIdVT_GsfTrkIdT_v")
+            ){
+                triggered=(*us).second;
+                if(triggered){
+                    break;
+                }
+            }
+        }
+    }
+
+     return (triggered );
+
+}
 
 void specialAna::QCDAnalyse() {
     //inverted isolation

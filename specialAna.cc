@@ -92,6 +92,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         HistClass::CreateHisto("num",particles[i].c_str(), 40, 0, 39,                   TString::Format("N_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(6,"IDFail",particles[i].c_str(), 6, 0, 6,                  "failcode" );
         HistClass::CreateHisto(6,"pt",particles[i].c_str(), 5000, 0, 5000,              "p_{T} [GeV]");
+        HistClass::CreateHisto(6,"nPrimaryVertices",particles[i].c_str(), 100, 0, 100,  "number of primary vertices");
         HistClass::CreateHisto(6,"pt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/p_{T} [1/GeV]" );
         HistClass::CreateHisto(6,"deltapt_over_pt",particles[i].c_str(), 5000, 0, 10,   "#frac{#Delta p_{T}}{p_{T}}" );
         HistClass::CreateHisto(6,"eta",particles[i].c_str(), 80, -4, 4,                 "#eta" );
@@ -166,8 +167,6 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     //for(int i=0;i<31;i++){
         //HistClass::FillStr("Tau_triggers",x_bins_names[i].Data(),0);
     //}
-
-
 
     HistClass::CreateHisto(1,"Tau_gen_decayMode", 15, 0, 15, "#N_{decay mode}");
     HistClass::CreateHisto(6,"Tau_decayMode", 100, 0, 10, "#N_{decay mode}");
@@ -1825,6 +1824,8 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     HistClass::Fill(hist_number,str(boost::format("%s_pt%s")%name %syst ),lepton->getPt(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_eta%s")%name %syst ),lepton->getEta(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_phi%s")%name %syst ),lepton->getPhi(),weight);
+
+    HistClass::Fill(hist_number,str(boost::format("%s_nPrimaryVertices")%name ),m_RecEvtView->getUserRecord("NumVertices"),weight);
 
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi%s")%name %syst ),DeltaPhi(lepton,sel_met),weight);

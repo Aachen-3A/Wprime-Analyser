@@ -2,7 +2,7 @@ Tau.use = 1
 Tau.IdTag = 0
 Tau.Type.Gen = "Tau"
 Tau.Type.Rec = "slimmedTaus"
-Tau.Eta.max = 3.
+Tau.Eta.max = 2.3
 Tau.DeltaR.max = 0.01
 Tau.pt.min = 50.
 # Tau fake rate difference between MC and data has rather large uncertainties:

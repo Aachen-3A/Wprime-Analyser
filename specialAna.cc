@@ -132,41 +132,20 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         }
 
     }
-    //TString x_bins_names[31] = { "HLT_HLT_Photon42_R9Id85_OR_CaloId24b40e_Iso50T80L_Photon25_AND_HE10_R9Id65_Eta2_Mass15_v1",
-                                //"HLT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v2",
-                                //"HLT_HLT_Ele33_CaloIdM_TrackIdM_PFJet30_v2",
-                                //"HLT_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_v2",
-                                //"HLT_HLT_Ele8_CaloIdM_TrackIdM_PFJet30_v2",
-                                //"HLT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v2",
-                                //"HLT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v2",
-                                //"HLT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v2",
-                                //"HLT_HLT_Ele32_eta2p1_WPLoose_Gsf_v1",
-                                //"HLT_HLT_Ele32_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_v1",
-                                //"HLT_HLT_Ele32_eta2p1_WPLoose_Gsf_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v1",
-                                //"HLT_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_v1",
-                                //"HLT_HLT_Ele27_eta2p1_WPTight_Gsf_v1",
-                                //"HLT_HLT_Ele27_eta2p1_WPLoose_Gsf_v1",
-                                //"HLT_HLT_Ele23_CaloIdM_TrackIdM_PFJet30_v2",
-                                //"HLT_HLT_Ele27_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_v1",
-                                //"HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v2",
-                                //"HLT_HLT_Ele27_eta2p1_WPLoose_Gsf_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v1",
-                                //"HLT_HLT_Ele32_eta2p1_WPLoose_Gsf_CentralPFJet30_BTagCSV07_v1",
-                                //"HLT_HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_DoublePixelSeedMatch_Mass70_v1",
-                                //"HLT_HLT_Ele22_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_v1",
-                                //"HLT_HLT_Ele27_eta2p1_WPLoose_Gsf_CentralPFJet30_BTagCSV07_v1",
-                                //"HLT_HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v2",
-                                //"HLT_HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95_v1",
-                                //"HLT_HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v2",
-                                //"HLT_HLT_Photon36_R9Id85_OR_CaloId24b40e_Iso50T80L_Photon22_AND_HE10_R9Id65_Eta2_Mass15_v2",
-                                //"HLT_HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v1",
-                                //"HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v2",
-                                //"HLT_HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v1",
-                                //"HLT_HLT_PFMET90_PFMHT90_IDTight_v1",
-                                //"HLT_HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v2"};
-    //HistClass::CreateHisto("Tau_triggers", 31, 0, 31, "trigger");
-    //for(int i=0;i<31;i++){
-        //HistClass::FillStr("Tau_triggers",x_bins_names[i].Data(),0);
-    //}
+
+
+    HistClass::CreateHisto("0_all_triggers_Gen", 28, 0, 28, "trigger");
+    HistClass::CreateHisto("1_all_triggers_Gen", 28, 0, 28, "trigger");
+    HistClass::CreateHisto("2_all_triggers_Gen", 28, 0, 28, "trigger");
+    HistClass::CreateHisto("3_all_triggers_Gen", 28, 0, 28, "trigger");
+    HistClass::CreateHisto("4_all_triggers_Gen", 28, 0, 28, "trigger");
+    for(int i=0;i<28;i++){
+        HistClass::FillStr("0_all_triggers_Gen",x_bins_names[i].c_str(),0);
+        HistClass::FillStr("1_all_triggers_Gen",x_bins_names[i].c_str(),0);
+        HistClass::FillStr("2_all_triggers_Gen",x_bins_names[i].c_str(),0);
+        HistClass::FillStr("3_all_triggers_Gen",x_bins_names[i].c_str(),0);
+        HistClass::FillStr("4_all_triggers_Gen",x_bins_names[i].c_str(),0);
+    }
 
     HistClass::CreateHisto(1,"Tau_gen_decayMode", 15, 0, 15, "#N_{decay mode}");
     HistClass::CreateHisto(6,"Tau_decayMode", 100, 0, 10, "#N_{decay mode}");
@@ -453,11 +432,12 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         aplyDataMCScaleFactors();
     }
 
-
+    FillTriggers(0);
     if (!TriggerSelector(event)){
         endEvent( event );
         return;
     }
+    FillTriggers(1);
     HistClass::Fill("MC_cutflow_Gen",4,1.);
 
     cleanJets();
@@ -855,13 +835,41 @@ void specialAna::TriggerAnalyser(){
 
 }
 
+void specialAna::FillTriggers(int ihist){
+    pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
+    for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
+        if(std::find(std::begin(x_bins_names), std::end(x_bins_names),(*us).first) != std::end(x_bins_names)){
+            HistClass::FillStr((boost::format("%d_all_triggers_Gen")%ihist).str().c_str(),((*us).first).c_str(),1.);
+            if(ihist==1 && sel_lepton){
+                if(sel_lepton->getPdgNumber()==11){
+                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%2).str().c_str(),((*us).first).c_str(),1.);
+                }
+                if(sel_lepton->getPdgNumber()==13){
+                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%3).str().c_str(),((*us).first).c_str(),1.);
+                }
+                if(sel_lepton->getPdgNumber()==15){
+                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%4).str().c_str(),((*us).first).c_str(),1.);
+                }
+            }
+        }
+    }
+}
+
 bool specialAna::TriggerSelector(const pxl::Event* event){
     bool triggered=false;
 
 
-
     // Warning this disables all triggers
     //triggered=true;
+    string datastream = event->getUserRecord( "Dataset" );
+    TString Datastream = datastream;
+
+    int usePdgNumber=0;
+    if(sel_lepton){
+        usePdgNumber=abs(sel_lepton->getPdgNumber());
+    }else{
+        usePdgNumber=abs(qcd_lepton->getPdgNumber());
+    }
 
 
     //I dont understand the 8TeV triggers at the moment!!
@@ -879,14 +887,15 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP75_Gsf_v") or
                 string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WPLoose_Gsf_v") or
 
-                string::npos != (*us).first.find( "HLT_Mu40_") or
-                string::npos != (*us).first.find( "HLT_Mu40_eta2p1_") or
-                string::npos != (*us).first.find( "HLT_IsoMu24_eta") or
-                string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_IsoTkMu24_eta2p1_IterTrk02") or
-                string::npos != (*us).first.find( "HLT_IsoTkMu20_eta2p1_IterTrk02") or
+                string::npos != (*us).first.find( "HLT_Mu45_eta2p1_v") or
+                string::npos != (*us).first.find( "HLT_Mu50_eta2p1_v") or
+                string::npos != (*us).first.find( "HLT_Mu50_v") or
+                string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_v") or
+                string::npos != (*us).first.find( "HLT_IsoMu24_eta2p1_IterTrk02_v") or
+                //string::npos != (*us).first.find( "HLT_IsoTkMu24_eta2p1_IterTrk02_v") or
+                //string::npos != (*us).first.find( "HLT_IsoTkMu20_eta2p1_IterTrk02_v") or
                 //string::npos != (*us).first.find( "HLT_LooseIsoPFTau") or
-                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120")
+                string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v") or
 
                 //string::npos != (*us).first.find( "HLT_Ele95_CaloIdVT_GsfTrkIdT_") or
                 //string::npos != (*us).first.find( "HLT_Ele32_eta2p1_WP85_Gsf_") or
@@ -895,11 +904,46 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 //string::npos != (*us).first.find( "HLT_Mu17_Mu8_v") or
 
 
-                //string::npos != (*us).first.find( "HLT_MonoCentralPFJet80")
-                //string::npos != (*us).first.find( "PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight")
+                string::npos != (*us).first.find( "HLT_MonoCentralPFJet80") or
+                string::npos != (*us).first.find( "PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight")
             ){
+                if(runOnData){
+                    //corss cleaning for datasets
+                    bool wrongDataset=false;
+                    if(Datastream.Contains("SingleElectron") and  !(string::npos != (*us).first.find( "Ele"))){
+                        wrongDataset=true;
+                    }else if(Datastream.Contains("SingleMuon") and  (!(string::npos != (*us).first.find( "Mu")) or (string::npos != (*us).first.find( "PFMET")) ) ){
+                        wrongDataset=true;
+                    }else if(Datastream.Contains("Tau") and  !(string::npos != (*us).first.find( "Tau"))  ){
+                        wrongDataset=true;
+                    }else if(Datastream.Contains("MET") and  !( (string::npos != (*us).first.find( "Jet")) and (string::npos != (*us).first.find( "PFMET")) ) ){
+                        wrongDataset=true;
+                    }
+                    if(wrongDataset){
+                        //cout<<"wrong PD "<<(*us).first<<" "<< datastream<<endl;
+                        //break here because the event will be in a other PD!!
+                        break;
+                    }
+                }
+
+
+                if(usePdgNumber==11 and string::npos == (*us).first.find( "Ele")){
+                    //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
+                    continue;
+                }
+                if(usePdgNumber==13 and (string::npos == (*us).first.find( "Mu")  or string::npos != (*us).first.find( "MET"))){
+                    //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
+                    continue;
+                }
+                if(usePdgNumber==15
+                //){
+                and !(string::npos != (*us).first.find( "Tau") or string::npos != (*us).first.find( "PFMET") or string::npos != (*us).first.find( "PFJet")) ){
+                    //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
+                    continue;
+                }
                 triggered=(*us).second;
                 if(triggered){
+                    //cout<<"hurraayyyyy "<<(*us).first<<" "<< usePdgNumber<<endl;
                     break;
                 }
             }
@@ -915,8 +959,6 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
         //}
     }else{
         //this is 8TeV
-        string datastream = event->getUserRecord( "Dataset" );
-        TString Datastream = datastream;
         pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
         for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
             if (
@@ -944,10 +986,23 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 //string::npos != (*us).first.find( "HLT_PFMET150_") or
                 //string::npos != (*us).first.find( "HLT_PFMET180_")
             ){
-                if(Datastream.Contains("SingleEle") and  (string::npos != (*us).first.find( "Mu"))){
+
+                if(runOnData){
+                    if(Datastream.Contains("SingleEle") and  (string::npos != (*us).first.find( "Mu"))){
+                        continue;
+                    }
+                    if(Datastream.Contains("SingleMu") and  (string::npos != (*us).first.find( "Ele"))){
+                        continue;
+                    }
+                }
+
+                if(usePdgNumber==11 and !string::npos != (*us).first.find( "Ele")){
                     continue;
                 }
-                if(Datastream.Contains("SingleMu") and  (string::npos != (*us).first.find( "Ele"))){
+                if(usePdgNumber==13 and !string::npos != (*us).first.find( "Mu")){
+                    continue;
+                }
+                if(usePdgNumber==15 and !(string::npos != (*us).first.find( "Tau") or string::npos != (*us).first.find( "PFMET") or string::npos != (*us).first.find( "PFJet")) ){
                     continue;
                 }
                 triggered=(*us).second;

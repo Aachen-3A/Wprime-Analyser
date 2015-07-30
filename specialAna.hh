@@ -51,6 +51,7 @@ public:
     void Fill_Tree();
     void Fill_QCD_Tree(bool iso);
 
+    void FillTriggers(int ihist);
 
     void Create_RECO_effs();
     void Create_RECO_object_effs(std::string object);
@@ -191,6 +192,35 @@ public:
         "againstElectronVTightMVA5",
     };
 
+    std::string x_bins_names[28] = { "HLT_HLT_Ele105_CaloIdVT_GsfTrkIdT_v2",
+                                "HLT_HLT_Ele115_CaloIdVT_GsfTrkIdT_v1",
+                                "HLT_HLT_Ele27_eta2p1_WPLoose_Gsf_v1",
+                                "HLT_HLT_Ele32_eta2p1_WPLoose_Gsf_v1",
+                                "HLT_HLT_Ele32_eta2p1_WPTight_Gsf_v1",
+                                "HLT_HLT_IsoMu27_v2",
+                                "HLT_HLT_IsoTkMu20_eta2p1_v2",
+                                "HLT_HLT_IsoTkMu20_v2",
+                                "HLT_HLT_IsoTkMu24_eta2p1_v2",
+                                "HLT_HLT_IsoTkMu27_v2",
+                                "HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v2",
+                                "HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v2",
+                                "HLT_HLT_MonoCentralPFJet80_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v2",
+                                "HLT_HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v2",
+                                "HLT_HLT_Mu45_eta2p1_v1",
+                                "HLT_HLT_Mu50_eta2p1_v1",
+                                "HLT_HLT_Mu50_v1",
+                                "HLT_HLT_PFMET100_PFMHT100_IDTight_v1",
+                                "HLT_HLT_PFMET110_PFMHT110_IDTight_v1",
+                                "HLT_HLT_PFMET120_NoiseCleaned_BTagCSV0p72_v2",
+                                "HLT_HLT_PFMET120_NoiseCleaned_Mu5_v2",
+                                "HLT_HLT_PFMET120_PFMHT120_IDTight_v1",
+                                "HLT_HLT_PFMET170_NoiseCleaned_v2",
+                                "HLT_HLT_PFMET300_NoiseCleaned_v1",
+                                "HLT_HLT_PFMET400_NoiseCleaned_v1",
+                                "HLT_HLT_PFMET90_PFMHT90_IDTight_v1",
+                                "HLT_HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight_v2",
+                                "HLT_HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v2"};
+    //These values are changed during analysis!!
     bool isOldPXLFile;
 
     double m_pt_met_min_cut;

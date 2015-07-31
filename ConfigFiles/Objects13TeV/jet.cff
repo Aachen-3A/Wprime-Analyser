@@ -71,7 +71,7 @@ Jet.BJets.Gen.Label = "genBJet"
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution?rev=32
 
 # Switch for Jet Resolution correction
-Jet.Resolutions.Corr.use = 1
+Jet.Resolutions.Corr.use = 0
 
 #use 8tev numbers at the moment
 #Jet.Resolutions.Unmatched.File

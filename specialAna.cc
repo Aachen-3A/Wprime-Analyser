@@ -381,13 +381,15 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     mQCDTree["iso"]=0;
     mQCDTree["delta_phi"]=0;
     mQCDTree["ThisWeight"]=0;
+    mQCDTree["QCDWeight"]=0;
     mQCDTree["lepton_type"]=0;
+    mQCDTree["decay_mode"]=0;
 
 
     HistClass::CreateTree( &mQCDTree, "qcdtree");
 
-    TFile qcd_weight(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight"))).c_str());
-    qcd_weight_pt=(TH1D*) qcd_weight.Get("qcdFake_pt");
+    TFile qcd_weight_ele(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight.ele"))).c_str());
+    qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_pt");
 
 
 }
@@ -486,6 +488,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     }
     if(qcd_lepton && sel_met && qcd_lepton->getPt()>m_pt_min_cut){
         Fill_QCD_Tree(false);
+        weight*=qcd_weight;
         Fill_Particle_hisos(5, qcd_lepton , "iso_QCD");
         if(qcd_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Particle_hisos(1, qcd_lepton , "iso_QCD");
@@ -678,11 +681,20 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 
 bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
     bool passed = false;
-    bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").asBool();
-    bool tau_ISO = tau->getUserRecord("byTightIsolationMVA3newDMwLT").asBool();
-    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).asBool();
-    bool tau_MUO = tau->getUserRecord("againstMuonMedium2"/*"againstMuonTightMVA"*/).asBool();
+    bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
+    bool tau_ISO = tau->getUserRecord("byMediumIsolationMVA3newDMwLT").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).toDouble()>0.5;
+    bool tau_MUO = tau->getUserRecord("againstMuonLoose3"/*"againstMuonTightMVA"*/).toDouble()>0.5;
     if (tau_ID && tau_ISO && tau_ELE && tau_MUO) passed = true;
+    return passed;
+}
+bool specialAna::Check_Tau_ID_no_iso(pxl::Particle* tau) {
+    bool passed = false;
+    bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
+    bool tau_ISO = tau->getUserRecord("byMediumIsolationMVA3newDMwLT").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).toDouble()>0.5;
+    bool tau_MUO = tau->getUserRecord("againstMuonLoose3"/*"againstMuonTightMVA"*/).toDouble()>0.5;
+    if (tau_ID && !tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
 }
 
@@ -698,24 +710,34 @@ void specialAna::KinematicsSelector() {
     //we don't need std::vectors, do we?
     double m_leptonVetoPt=20;
     int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
-    int numVetoTau=vetoNumber(TauList,m_leptonVetoPt);
+    int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
 
     //cout<<numVetoMuo<<"  "<<numVetoEle<<"  "<<numVetoTau<<endl;
 
     //the ordering is important muon is last (overrides the first two and so on)
-    if( numVetoEle==0 && TauList->size()==1 && numVetoMuo==0 ){
-        sel_lepton=( pxl::Particle* ) TauList->at(0);
-        m_pt_min_cut=m_pt_min_cut_tau;
-        m_delta_phi_cut=m_delta_phi_cut_tau;
-        m_pt_met_min_cut=m_pt_met_min_cut_tau;
-        m_pt_met_max_cut=m_pt_met_max_cut_tau;
+    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
+        int passedID=0;
+        pxl::Particle* tmpTau;
+        for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
+            if( Check_Tau_ID(*it) ){
+                passedID++;
+                tmpTau=(*it);
+            }
+        }
+        if(passedID==1){
+            sel_lepton=tmpTau;
+            m_pt_min_cut=m_pt_min_cut_tau;
+            m_delta_phi_cut=m_delta_phi_cut_tau;
+            m_pt_met_min_cut=m_pt_met_min_cut_tau;
+            m_pt_met_max_cut=m_pt_met_max_cut_tau;
 
-        m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
-        m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
-        m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
-        sel_id=15;
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
+            sel_id=15;
+        }
     }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         int passedID=0;
@@ -1114,24 +1136,50 @@ void specialAna::QCDAnalyse() {
 
     double m_leptonVetoPt=20;
     int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
-    int numVetoTau=vetoNumber(TauList,m_leptonVetoPt);
+    int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
+    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
+        int passedID=0;
+        pxl::Particle* tmpTau;
+        for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
+            if( Check_Tau_ID_no_iso(*it) ){
+                passedID++;
+                tmpTau=(*it);
+            }
+        }
+        if(passedID==1){
+            qcd_lepton=tmpTau;
+            m_pt_min_cut=m_pt_min_cut_tau;
+            m_delta_phi_cut=m_delta_phi_cut_tau;
+            m_pt_met_min_cut=m_pt_met_min_cut_tau;
+            m_pt_met_max_cut=m_pt_met_max_cut_tau;
+
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
+            qcd_id=15;
+        }
+    }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         int passedID=0;
         pxl::Particle* tmpEle;
         for( std::vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
+            //cout<<(*it)->getUserRecord("IDFailValue")<<endl;
             if( (*it)->hasUserRecord("ISOfailed")){
                 if ( (*it)->getUserRecord("ISOfailed").toBool() ){
                     passedID++;
                     tmpEle=(*it);
                 }
-            }else if (EleList->size()==1){
-                passedID++;
-                tmpEle=( pxl::Particle* ) EleList->at(0);
-                break;
             }
+            //we can not do the fr if we tag the electrons!!
+            //else if (EleList->size()==1){
+                //passedID++;
+                //tmpEle=( pxl::Particle* ) EleList->at(0);
+                //break;
+            //}
         }
+        //cout<<passedID<<endl;
         if(passedID==1){
             qcd_lepton=tmpEle;
             m_pt_min_cut=m_pt_min_cut_ele;
@@ -1154,11 +1202,13 @@ void specialAna::QCDAnalyse() {
                     passedID++;
                     tmpMuo=(*it);
                 }
-            }else if (MuonList->size()==1){
-                passedID++;
-                tmpMuo=( pxl::Particle* ) MuonList->at(0);
-                break;
             }
+            //we can not do the fr if we tag the muons!!
+            //else if (MuonList->size()==1){
+                //passedID++;
+                //tmpMuo=( pxl::Particle* ) MuonList->at(0);
+                //break;
+            //}
         }
         if(passedID==1){
             qcd_lepton=tmpMuo;
@@ -1175,7 +1225,9 @@ void specialAna::QCDAnalyse() {
     }
 
     if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
-        weight *= max(0.,qcd_weight_pt->GetBinContent(qcd_weight_pt->FindBin(qcd_lepton->getPt())));
+        if(qcd_id==11){
+            qcd_weight = max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(qcd_lepton->getPt())));
+        }
         double mt=MT(qcd_lepton,sel_met);
         m_pt_met_min_cut=   m_pt_met_min_cut_funk_root.Eval(mt);
         m_pt_met_max_cut=   m_pt_met_max_cut_funk_root.Eval(mt);
@@ -1238,20 +1290,28 @@ void specialAna::Fill_Tree(){
 
 }
 void specialAna::Fill_QCD_Tree(bool iso){
+    mQCDTree["iso"]=iso;
+    mQCDTree["ThisWeight"]=weight;
+    mQCDTree["QCDWeight"]=qcd_weight;
+    mQCDTree["met"]=sel_met->getPt();
     if(iso){
-        mQCDTree["met"]=sel_met->getPt();
         mQCDTree["pt"]=sel_lepton->getPt();
         mQCDTree["delta_phi"]=DeltaPhi(sel_lepton,sel_met);
-        mQCDTree["iso"]=iso;
-        mQCDTree["ThisWeight"]=weight;
         mQCDTree["lepton_type"]=sel_lepton->getPdgNumber();
+        if(sel_lepton->hasUserRecord("decayMode")){
+            mQCDTree["decay_mode"]=sel_lepton->getUserRecord("decayMode").toDouble();
+        }else{
+            mQCDTree["decay_mode"]=-1;
+        }
     }else{
-        mQCDTree["met"]=sel_met->getPt();
         mQCDTree["pt"]=qcd_lepton->getPt();
         mQCDTree["delta_phi"]=DeltaPhi(qcd_lepton,sel_met);
-        mQCDTree["iso"]=iso;
-        mQCDTree["ThisWeight"]=weight;
         mQCDTree["lepton_type"]=qcd_lepton->getPdgNumber();
+        if(qcd_lepton->hasUserRecord("decayMode")){
+            mQCDTree["decay_mode"]=qcd_lepton->getUserRecord("decayMode").toDouble();
+        }else{
+            mQCDTree["decay_mode"]=-1;
+        }
     }
     HistClass::FillTree("qcdtree");
 
@@ -3021,6 +3081,23 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
     }
     return numVeto;
 }
+int specialAna::vetoNumberTau(vector< pxl::Particle* > *list, double ptTreshold){
+    //make veto numbers
+    //we don't need std::vectors, do we?
+    int numVeto=0;
+    bool passedID=false;
+    for( std::vector< pxl::Particle* >::const_iterator part_it = list->begin(); part_it != list->end(); ++part_it ) {
+        passedID=false;
+        passedID=Check_Tau_ID(*part_it);
+        if( (*part_it)->getPt()>ptTreshold && passedID ){
+            numVeto++;
+        }else if((*part_it)->getPt()>ptTreshold) {
+            //Lists are Pt sorted
+            break;
+        }
+    }
+    return numVeto;
+}
 
 void specialAna::printEvent(){
     map< string,int > pdgForPlotting;
@@ -3151,6 +3228,7 @@ void specialAna::initEvent( const pxl::Event* event ){
     //no pu weight at the moment!!
 
     weight = 1;
+    qcd_weight=1;
     wmass_stored=0;
     mtt_stored=0;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );

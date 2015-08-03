@@ -67,6 +67,7 @@ public:
     void aplyDataMCScaleFactors();
 
     bool Check_Tau_ID(pxl::Particle* tau);
+    bool Check_Tau_ID_no_iso(pxl::Particle* tau);
 
     void printEvent();
     void cleanJets();
@@ -98,6 +99,7 @@ public:
     double getWmass();
     double getInvMtt();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
+    int vetoNumberTau(vector< pxl::Particle* > *list, double ptTreshold);
 
 
     pxl::EventView *m_RecEvtView;
@@ -132,7 +134,7 @@ public:
     const std::string type[2]      = {"Scale", "Resolution"};
     const std::string updown[2]    = {"Up", "Down"};
 
-    TH1D* qcd_weight_pt;
+    TH1D* qcd_weight_ele_pt;
 
 
     std::vector<TString> d_mydisc= {
@@ -247,6 +249,7 @@ public:
     double temp_event;
 
     double weight;
+    double qcd_weight;
 
     unsigned int numMuon;
     unsigned int numEle;

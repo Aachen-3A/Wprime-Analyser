@@ -1311,8 +1311,11 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
             }
         }
-        if(Datastream.Contains("TT") and not Datastream.Contains("TT_Mtt-1000toInf")) {
-            if(getInvMtt() >= 1000) return true;
+        if(Datastream.Contains("TT") and not Datastream.Contains("TT_Mtt-")) {
+            if(getInvMtt() > 700) return true;
+        }
+        if(Datastream.Contains("TT_Mtt-700to1000")) {
+            if(getInvMtt() < 700 and getInvMtt() > 1000) return true;
         }
         if(Datastream.Contains("TT_Mtt-1000toInf")) {
             if(getInvMtt() < 1000) return true;

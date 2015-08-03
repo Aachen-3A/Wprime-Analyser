@@ -96,6 +96,7 @@ public:
     double getPtHatDi();
     double getGenHT();
     double getWmass();
+    double getInvMtt();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
 
 
@@ -255,8 +256,9 @@ public:
     unsigned int numJet;
     unsigned int numBJet;
 
-    //store the w mass to avoid calculations:
+    //store the w and tt mass to avoid calculations:
     double wmass_stored;
+    double mtt_stored;
 
     int events_;
     TFile* m_kfactorFile;

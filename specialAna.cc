@@ -1311,7 +1311,12 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
             }
         }
-
+        if(Datastream.Contains("TT") and not Datastream.Contains("TT_Mtt-1000toInf")) {
+            if(getInvMtt() >= 1000) return true;
+        }
+        if(Datastream.Contains("TT_Mtt-1000toInf")) {
+            if(getInvMtt() < 1000) return true;
+        }
 
 
 
@@ -1476,7 +1481,6 @@ bool specialAna::tail_selector( const pxl::Event* event) {
 
     return false;
 }
-
 
 
 void specialAna::Fill_Gen_Controll_histo() {
@@ -2969,6 +2973,39 @@ double specialAna::getWmass(){
     return wmass_stored;
 }
 
+double specialAna::getInvMtt(){
+    // if present, get ttbar invariant mass of event
+    if(mtt_stored != 0) {
+        return mtt_stored;
+    }
+       
+    pxl::Particle* sel_t    = 0;
+    pxl::Particle* sel_tbar = 0;
+  
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        int pdgCode = S3ListGen->at(i)->getPdgNumber();
+        int tmass = S3ListGen->at(i)->getMass();
+        
+        if (pdgCode==6) {
+            if (sel_t and tmass > sel_t->getMass()) sel_t = S3ListGen->at(i);
+            if (not sel_t) sel_t = S3ListGen->at(i);
+        }
+        if (pdgCode==-6) {
+            if (sel_tbar and tmass > sel_tbar->getMass()) sel_tbar = S3ListGen->at(i);
+            if (not sel_tbar) sel_tbar = S3ListGen->at(i);
+        }
+    }
+
+    if(sel_t and sel_tbar){
+        mtt_stored = sqrt(pow(sel_t->getMass(),2) + pow(sel_tbar->getMass(),2)
+                     + 2*sel_t->getE()*sel_tbar->getE()
+                     - 2*(sel_t->getPx()*sel_tbar->getPx() + sel_t->getPy()*sel_tbar->getPy() + sel_t->getPz()*sel_tbar->getPz())
+                     );
+    }
+    
+    return mtt_stored;
+}
+
 int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
     //make veto numbers
     //we don't need std::vectors, do we?
@@ -3122,6 +3159,7 @@ void specialAna::initEvent( const pxl::Event* event ){
 
     weight = 1;
     wmass_stored=0;
+    mtt_stored=0;
     m_RecEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Rec" );
     m_GenEvtView = event->getObjectOwner().findObject< pxl::EventView >( "Gen" );
     if(event->getObjectOwner().findObject< pxl::EventView >( "Trig" )){

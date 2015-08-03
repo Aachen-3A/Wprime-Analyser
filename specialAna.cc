@@ -2977,29 +2977,19 @@ double specialAna::getWmass(){
 }
 
 double specialAna::getInvMtt(){
-    // if present, get ttbar invariant mass of event
-    if(mtt_stored != 0) {
-        return mtt_stored;
-    }
+    if(mtt_stored != 0) return mtt_stored;
        
     pxl::Particle* sel_t    = 0;
     pxl::Particle* sel_tbar = 0;
   
     for(uint i = 0; i < S3ListGen->size(); i++){
         int pdgCode = S3ListGen->at(i)->getPdgNumber();
-        int tmass = S3ListGen->at(i)->getMass();
-        
-        if (pdgCode==6) {
-            if (sel_t and tmass > sel_t->getMass()) sel_t = S3ListGen->at(i);
-            if (not sel_t) sel_t = S3ListGen->at(i);
-        }
-        if (pdgCode==-6) {
-            if (sel_tbar and tmass > sel_tbar->getMass()) sel_tbar = S3ListGen->at(i);
-            if (not sel_tbar) sel_tbar = S3ListGen->at(i);
-        }
+        if (pdgCode==6  and not sel_t)    sel_t =    S3ListGen->at(i);
+        if (pdgCode==-6 and not sel_tbar) sel_tbar = S3ListGen->at(i);
     }
 
     if(sel_t and sel_tbar){
+        // invariant mass of ttbar system
         mtt_stored = sqrt(pow(sel_t->getMass(),2) + pow(sel_tbar->getMass(),2)
                      + 2*sel_t->getE()*sel_tbar->getE()
                      - 2*(sel_t->getPx()*sel_tbar->getPx() + sel_t->getPy()*sel_tbar->getPy() + sel_t->getPz()*sel_tbar->getPz())

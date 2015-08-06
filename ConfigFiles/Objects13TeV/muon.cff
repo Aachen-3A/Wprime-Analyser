@@ -9,7 +9,7 @@ Muon.Type.Rec = "Muon"
 
 
 Muon.Pt.min = 25
-Muon.Eta.max = 2.1
+Muon.Eta.max = 2.4
 Muon.DeltaR.max = 0.4
 Muon.InvertIsolation = 0
 Muon.CleanDuplicates = 0

@@ -63,6 +63,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     eventDisplayFile.open(m_cutdatafile.c_str(), std::fstream::out);
     events_ = 0;
 
+    n_lepton = 0; // counting leptons passing the selection
+
     m_kfactorFile= new TFile(m_kfactorFile_Config.c_str(),"READ");
     m_kfactorHist[0] = (TH1D*) m_kfactorFile->Get("k_fakp");
     m_kfactorHist[1] = (TH1D*) m_kfactorFile->Get("k_fakm");
@@ -83,6 +85,9 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     }
     HistClass::CreateHisto("MC_cutflow_Gen", 40, 0, 40,               "stage" );
+    HistClass::CreateHisto("MC_11_cutflow_Gen", 40, 0, 40,               "stage" );
+    HistClass::CreateHisto("MC_13_cutflow_Gen", 40, 0, 40,               "stage" );
+    HistClass::CreateHisto("MC_15_cutflow_Gen", 40, 0, 40,               "stage" );
 
 
     for(unsigned int i=0;i<3;i++){
@@ -172,8 +177,12 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateHisto(6,"Tau_dxy_error", 100, 0, 0.1, "#sigma(d_{xy}) [cm]");
     HistClass::CreateHisto(6,"Tau_dxy_Sig", 100, 0, 10, "Sig(d_{xy})");
     HistClass::CreateHisto("Tau_eta_phi", 80, -4, 4, 40, -3.2, 3.2,"#eta_{#tau}","#phi_{#tau} [rad]");
-    HistClass::CreateHisto(6,"Tau_discriminator", 67, 0, 67,"discriminator_{#tau}");
-    //HistClass::NameBins(3,"Tau_discriminator",67,d_mydisc);
+    HistClass::CreateHisto(6,"Tau_discriminator", d_mydisc.size(), 0, d_mydisc.size(), "discriminator_{#tau}");
+    for(unsigned int i=0;i<d_mydisc.size();i++){
+        for(unsigned int j=0;j<6;j++){
+            HistClass::FillStr(j,"Tau_discriminator",d_mydisc[i].Data(),0);
+        }
+    }
     HistClass::CreateHisto(15,"Tau_mt_decaymode", 5000, 0, 5000,"M_{T} [GeV]");
     HistClass::CreateHisto(25,"Tau_mt_genmatch", 5000, 0, 5000,"M_{T} [GeV]");
 
@@ -389,7 +398,11 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     HistClass::CreateTree( &mQCDTree, "qcdtree");
 
     TFile qcd_weight_ele(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight.ele"))).c_str());
-    qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_pt");
+    qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_0_pt");
+    qcd_weight_muo_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_1_pt");
+    qcd_weight_tau_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_2_pt");
+
+    numAllTaus=0;
 
 
 }
@@ -400,7 +413,7 @@ specialAna::~specialAna() {
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
 
-    HistClass::Fill("MC_cutflow_Gen",0,1.);
+    HistClass::Fill("MC_cutflow_Gen",0,weight);
 
     if(not runOnData){
         if(tail_selector(event)) {
@@ -411,23 +424,24 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         Fill_RECO_effs();
         TriggerAnalyser();
     }
-    HistClass::Fill("MC_cutflow_Gen",1,1.);
+    HistClass::Fill("MC_cutflow_Gen",1,weight);
 
     KinematicsSelector();
     QCDAnalyse();
+
 
 
     if (sel_lepton==0 and qcd_lepton==0){
         endEvent( event );
         return;
     }
-    HistClass::Fill("MC_cutflow_Gen",2,1.);
+    HistClass::Fill("MC_cutflow_Gen",2,weight);
 
     if (!triggerKinematics()){
         endEvent( event );
         return;
     }
-    HistClass::Fill("MC_cutflow_Gen",3,1.);
+    HistClass::Fill("MC_cutflow_Gen",3,weight);
 
     if(not runOnData){
         applyKfactor(event,0);
@@ -440,7 +454,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         return;
     }
     FillTriggers(1);
-    HistClass::Fill("MC_cutflow_Gen",4,1.);
+    HistClass::Fill("MC_cutflow_Gen",4,weight);
 
     cleanJets();
     Fill_stage_0_histos();
@@ -454,19 +468,22 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         Fill_Controll_histo(5, sel_lepton);
         if(sel_lepton->getUserRecord("passedDeltaPhi")){
             Fill_Controll_histo(1, sel_lepton);
-            HistClass::Fill("MC_cutflow_Gen",6,1.);
+            HistClass::Fill((boost::format("MC_%d_cutflow_Gen")%sel_lepton->getPdgNumber()).str().c_str(),6,weight);
         }
         if(sel_lepton->getUserRecord("passedPtMet")){
             Fill_Controll_histo(2, sel_lepton);
-            HistClass::Fill("MC_cutflow_Gen",7,1.);
+            HistClass::Fill((boost::format("MC_%d_cutflow_Gen")%sel_lepton->getPdgNumber()).str().c_str(),7,weight);
         }
         if(sel_lepton->getUserRecord("passed")){
+            if(sel_lepton->getPdgNumber()==15){
+                n_lepton++;
+            }
             Fill_Controll_histo(3, sel_lepton);
-            HistClass::Fill("MC_cutflow_Gen",8,1.);
+            HistClass::Fill((boost::format("MC_%d_cutflow_Gen")%sel_lepton->getPdgNumber()).str().c_str(),8,weight);
         }
         if(sel_lepton->getUserRecord("passed") && sel_lepton->getPdgNumber()==11 && sel_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event) ){
             Fill_Controll_histo(4, sel_lepton);
-            HistClass::Fill("MC_cutflow_Gen",9,1.);
+            HistClass::Fill((boost::format("MC_%d_cutflow_Gen")%sel_lepton->getPdgNumber()).str().c_str(),9,weight);
         }
 
         if(runOnData){
@@ -682,18 +699,18 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
     bool passed = false;
     bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
-    bool tau_ISO = tau->getUserRecord("byMediumIsolationMVA3newDMwLT").toDouble()>0.5;
-    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).toDouble()>0.5;
-    bool tau_MUO = tau->getUserRecord("againstMuonLoose3"/*"againstMuonTightMVA"*/).toDouble()>0.5;
+    bool tau_ISO = tau->getUserRecord("byMediumCombinedIsolationDeltaBetaCorr3Hits").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronLoose").toDouble()>0.5;
+    bool tau_MUO = tau->getUserRecord("againstMuonLoose3").toDouble()>0.5;
     if (tau_ID && tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
 }
 bool specialAna::Check_Tau_ID_no_iso(pxl::Particle* tau) {
     bool passed = false;
     bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
-    bool tau_ISO = tau->getUserRecord("byMediumIsolationMVA3newDMwLT").toDouble()>0.5;
-    bool tau_ELE = tau->getUserRecord("againstElectronMediumMVA5"/*"againstElectronTightMVA5"*/).toDouble()>0.5;
-    bool tau_MUO = tau->getUserRecord("againstMuonLoose3"/*"againstMuonTightMVA"*/).toDouble()>0.5;
+    bool tau_ISO = tau->getUserRecord("byMediumCombinedIsolationDeltaBetaCorr3Hits").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronLoose").toDouble()>0.5;
+    bool tau_MUO = tau->getUserRecord("againstMuonLoose3").toDouble()>0.5;
     if (tau_ID && !tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
 }
@@ -717,7 +734,7 @@ void specialAna::KinematicsSelector() {
     //cout<<numVetoMuo<<"  "<<numVetoEle<<"  "<<numVetoTau<<endl;
 
     //the ordering is important muon is last (overrides the first two and so on)
-    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
+    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0){
         int passedID=0;
         pxl::Particle* tmpTau;
         for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
@@ -1227,6 +1244,12 @@ void specialAna::QCDAnalyse() {
     if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
         if(qcd_id==11){
             qcd_weight = max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(qcd_lepton->getPt())));
+        }
+        if(qcd_id==13){
+            qcd_weight = max(0.,qcd_weight_muo_pt->GetBinContent(qcd_weight_muo_pt->FindBin(qcd_lepton->getPt())));
+        }
+        if(qcd_id==15){
+            qcd_weight = max(0.,qcd_weight_tau_pt->GetBinContent(qcd_weight_tau_pt->FindBin(qcd_lepton->getUserRecord("decayMode"))));
         }
         double mt=MT(qcd_lepton,sel_met);
         m_pt_met_min_cut=   m_pt_met_min_cut_funk_root.Eval(mt);
@@ -1848,13 +1871,17 @@ void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton)
     //for(uint j = 0; j < 67; j++) {
         //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->getUserRecord( (string)d_mydisc[j] ));
     //}
+
+    for(std::vector<TString>::iterator it = d_mydisc.begin(); it != d_mydisc.end(); it++){
+        HistClass::FillStr(hist_number,"Tau_discriminator",*it,lepton->getUserRecord( (string)(*it) ));
+    }
     //if(hist_number==0){
         //pxl::UserRecords::const_iterator us = lepton->getUserRecords().begin();
         //for( ; us != lepton->getUserRecords().end(); ++us ) {
             ////if ( string::npos == (*us).first.find( *it )){
-            //if ( string::npos != (*us).first.find( "against")){
+            ////if ( string::npos != (*us).first.find( "against")){
                 //triggers.insert(us->first);
-            //}
+            ////}
         //}
     //}
     if(lepton->hasUserRecord("decayMode")){
@@ -2069,7 +2096,7 @@ void specialAna::Create_RECO_object_effs(std::string object) {
     if (object == "TauVis") {
         HistClass::CreateProf(TString::Format("%s_RECO_vs_jetpT", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()),"(reco-gen)/gen");
         HistClass::CreateProf(TString::Format("%s_RECO_tau_vs_jet_pT", object.c_str()),         500, 0, 5000,TString::Format("p_{T}^{%s} (GeV)", object.c_str()),"(tau-jet)/tau");
-        for(int i=0;i<50;i++){
+        for(int i=0;i<60;i++){
             HistClass::CreateProf(TString::Format("%s_vtx_%i_RECO_vs_pT", object.c_str(),i),         500, 0, 5000,TString::Format("p_{T}^{%s(gen)} (GeV)", object.c_str()),"(reco-gen)/gen");
         }
         for(int i=0;i<15;i++){
@@ -3011,12 +3038,11 @@ double specialAna::getWmass(){
     pxl::Particle* lepton=0;
     pxl::Particle* neutrino=0;
     for(uint i = 0; i < S3ListGen->size(); i++){
-
-        if (abs(S3ListGen->at(i)->getPdgNumber())==24){
+        if (abs(S3ListGen->at(i)->getPdgNumber())==24 and S3ListGen->at(i)->getMass()>5){
             wmass_stored=S3ListGen->at(i)->getMass();
+            //cout<<wmass_stored<<"   "<<endl;
             return wmass_stored;
         }
-
         int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
         if((pdgCode==11 or pdgCode==13 or pdgCode==15) and lepton==0){
             lepton=S3ListGen->at(i);
@@ -3172,6 +3198,11 @@ void specialAna::endJob( const Serializable* ) {
         cout<<*it<<endl;
     }
     //        HistClass::CreateHisto(6,"ptoverMET",particleName[i].c_str(), 20, 0, 2,       TString::Format("#frac{p_{T}^{%s}}{MET}", particleLatex[i].c_str()) );
+
+    cout << "n_allTaus:   " << numAllTaus << endl;
+    cout << "n_lepton:   " << n_lepton << endl;
+    cout << "h_counters: " << HistClass::ReturnHist("h_counters")->GetBinContent(1) << endl;
+    cout << "efficiency: " << n_lepton / (HistClass::ReturnHist("h_counters")->GetBinContent(1)) << endl;
 
     cout << "h_counters: " << HistClass::ReturnHist("h_counters")->GetBinContent(1) << endl;
     file1->cd();
@@ -3395,10 +3426,14 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
 
     if( m_dataPeriod=="13TeV" ){
         double mass=getWmass();
+        double k_faktor=1.;
         if(mass>0){
-            weight*=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
-            //cout<<m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass))<<endl;
+            k_faktor=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
         }
+        if (k_faktor<0){
+            k_faktor=1.;
+        }
+        weight*=k_faktor;
 
     }else if(m_dataPeriod=="8TeV"){
         double mass=0.;

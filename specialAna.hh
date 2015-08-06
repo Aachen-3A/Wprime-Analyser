@@ -135,14 +135,35 @@ public:
     const std::string updown[2]    = {"Up", "Down"};
 
     TH1D* qcd_weight_ele_pt;
+    TH1D* qcd_weight_muo_pt;
+    TH1D* qcd_weight_tau_pt;
 
 
     std::vector<TString> d_mydisc= {
-        "byCombinedIsolationDeltaBetaCorrRaw3Hits",
-        "byIsolationMVA3newDMwLTraw",
-        "byIsolationMVA3newDMwoLTraw",
-        "byIsolationMVA3oldDMwLTraw",
-        "byIsolationMVA3oldDMwoLTraw",
+        "againstElectronLoose",
+        "againstElectronLooseMVA5",
+        "againstElectronMVA5category",
+        "againstElectronMedium",
+        "againstElectronMediumMVA5",
+        "againstElectronTight",
+        "againstElectronVLooseMVA5",
+        "againstMuonLoose",
+        "againstMuonLoose2",
+        "againstMuonLoose3",
+        "againstMuonLooseMVA",
+        //"againstMuonMVAraw",
+        "againstMuonMedium",
+        "againstMuonMedium2",
+        "againstMuonMediumMVA",
+        "againstMuonTight",
+        "againstMuonTight2",
+        "againstMuonTight3",
+        "againstMuonTightMVA",
+        //"byCombinedIsolationDeltaBetaCorrRaw3Hits",
+        //"byIsolationMVA3newDMwLTraw",
+        //"byIsolationMVA3newDMwoLTraw",
+        //"byIsolationMVA3oldDMwLTraw",
+        //"byIsolationMVA3oldDMwoLTraw",
         "byLooseCombinedIsolationDeltaBetaCorr3Hits",
         "byLooseIsolationMVA3newDMwLT",
         "byLooseIsolationMVA3newDMwoLT",
@@ -161,7 +182,6 @@ public:
         "byVLooseIsolationMVA3newDMwLT",
         "byVLooseIsolationMVA3newDMwoLT",
         "byVLooseIsolationMVA3oldDMwLT",
-        "byVLooseIsolationMVA3oldDMwoLT",
         "byVTightIsolationMVA3newDMwLT",
         "byVTightIsolationMVA3newDMwoLT",
         "byVTightIsolationMVA3oldDMwLT",
@@ -170,29 +190,8 @@ public:
         "byVVTightIsolationMVA3newDMwoLT",
         "byVVTightIsolationMVA3oldDMwLT",
         "byVVTightIsolationMVA3oldDMwoLT",
+        "decayModeFinding",
         "decayModeFindingNewDMs",
-        "againstMuonMedium2",
-        "againstMuonMediumMVA",
-        "againstMuonMVAraw",
-        "againstMuonLooseMVA",
-        "againstMuonTight2",
-        "againstMuonLoose3",
-        "againstMuonLoose",
-        "againstMuonTight",
-        "againstElectronLoose",
-        "againstElectronLooseMVA5",
-        "againstElectronVLooseMVA5",
-        "againstElectronMVA5category",
-        "againstMuonTight3",
-        "againstElectronMVA5raw",
-        "againstElectronMedium",
-        "againstElectronMediumMVA5",
-        "againstMuonTightMVA",
-        "againstMuonMedium",
-        "againstElectronTight",
-        "againstElectronTightMVA5",
-        "againstMuonLoose2",
-        "againstElectronVTightMVA5",
     };
 
     std::string x_bins_names[28] = { "HLT_HLT_Ele105_CaloIdVT_GsfTrkIdT_v2",
@@ -259,11 +258,17 @@ public:
     unsigned int numJet;
     unsigned int numBJet;
 
+
+    unsigned int numAllTaus;
+
     //store the w and tt mass to avoid calculations:
     double wmass_stored;
     double mtt_stored;
 
     int events_;
+
+    unsigned int n_lepton;
+
     TFile* m_kfactorFile;
     TH1D* m_kfactorHist[3];
 

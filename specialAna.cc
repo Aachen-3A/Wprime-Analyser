@@ -1082,12 +1082,14 @@ bool specialAna::triggerKinematics(){
 
         }
         if(sel_lepton->getName()=="Muon"){
-            if(sel_lepton->getPt()>20){
+            //&& fabs(sel_lepton->getEta())<2.1
+            if(sel_lepton->getPt()>30){
                 tiggerKinematics=true;
             }
         }
         if(sel_lepton->getName()=="Ele"){
-            if(sel_lepton->getPt()>25){
+            if(sel_lepton->getPt()>35 ){
+                //&& fabs(sel_lepton->getEta())<2.1
                 tiggerKinematics=true;
             }
         }
@@ -1102,12 +1104,14 @@ bool specialAna::triggerKinematics(){
 
         }
         if(qcd_lepton->getName()=="Muon"){
-            if(qcd_lepton->getPt()>20){
+            //&& fabs(qcd_lepton->getEta())<2.1
+            if(qcd_lepton->getPt()>30){
                 tiggerKinematics=true;
             }
         }
         if(qcd_lepton->getName()=="Ele"){
-            if(qcd_lepton->getPt()>25){
+            //&& fabs(qcd_lepton->getEta())<2.1
+            if(qcd_lepton->getPt()>35){
                 tiggerKinematics=true;
             }
         }
@@ -3063,11 +3067,14 @@ double specialAna::getWmass(){
 }
 
 double specialAna::getInvMtt(){
-    if(mtt_stored != 0) return mtt_stored;
-       
+    // if present, get ttbar invariant mass of event
+    if(mtt_stored != 0) {
+        return mtt_stored;
+    }
+
     pxl::Particle* sel_t    = 0;
     pxl::Particle* sel_tbar = 0;
-  
+
     for(uint i = 0; i < S3ListGen->size(); i++){
         int pdgCode = S3ListGen->at(i)->getPdgNumber();
         if (pdgCode==6  and not sel_t)    sel_t =    S3ListGen->at(i);
@@ -3081,7 +3088,7 @@ double specialAna::getInvMtt(){
                      - 2*(sel_t->getPx()*sel_tbar->getPx() + sel_t->getPy()*sel_tbar->getPy() + sel_t->getPz()*sel_tbar->getPz())
                      );
     }
-    
+
     return mtt_stored;
 }
 
@@ -3337,6 +3344,11 @@ void specialAna::initEvent( const pxl::Event* event ){
         (*part_it)->setUserRecord("tauJetphi",jet->Phi());
         delete jet;
 
+    }
+
+
+    if(TauList->size()>0){
+        numAllTaus++;
     }
 
 

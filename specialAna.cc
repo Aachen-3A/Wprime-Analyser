@@ -1935,6 +1935,8 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     //without systematics:
     if(syst==""){
 
+        HistClass::Fill(hist_number,str(boost::format("%s_nPrimaryVertices")%name ),m_RecEvtView->getUserRecord("NumVertices"),weight);
+
         HistClass::Fill(str(boost::format("%s_cutflow")%name).c_str() ,hist_number+1,weight);
         if (lepton->hasUserRecord("IDFailValue")){
             HistClass::Fill(hist_number,str(boost::format("%s_IDFail")%name ),lepton->getUserRecord("IDFailValue"),weight);
@@ -1977,8 +1979,6 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     HistClass::Fill(hist_number,str(boost::format("%s_pt%s")%name %syst ),lepton->getPt(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_eta%s")%name %syst ),lepton->getEta(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_phi%s")%name %syst ),lepton->getPhi(),weight);
-
-    HistClass::Fill(hist_number,str(boost::format("%s_nPrimaryVertices")%name ),m_RecEvtView->getUserRecord("NumVertices"),weight);
 
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi%s")%name %syst ),DeltaPhi(lepton,sel_met),weight);

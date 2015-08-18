@@ -1,0 +1,53 @@
+Ele.use = 1
+Ele.Type.Gen = "Ele"
+Ele.Type.Rec = "Ele"
+Ele.pt.min = 25
+Ele.eta.Barrel.max = 1.4442
+Ele.eta.Endcap.min = 1.566
+Ele.eta.Endcap.max = 2.5
+Ele.DeltaR.max = 0.4
+Ele.InvertIsolation = 0
+Ele.Rho.Label = "fixedGridRhoFastjetAll"
+
+# ID method to use. Supported:
+# - "CB"
+# - "HEEP"
+Ele.ID.Type = "switch"
+Ele.IdTag = 1
+
+Ele.ID.switchpt=100
+
+
+import "$PXLANA/specialAna/ConfigFiles/Objects13TeV/EleID/Ele_CBID_veto_r20.cff"
+import "$PXLANA/specialAna/ConfigFiles/Objects13TeV/EleID/Ele_HEEP_v60_cb.cff"
+
+# Errors:
+# Electron fake rate difference between MC and data: AN2012/415, Fig.21.
+Ele.Error.Fakes = 0.5
+# Same-sign studies in AN2011/256, Sec. 6.2, Fig. 9 show a scale factor for data
+# to MC 1.2 with 20 % uncertainty.
+Ele.Error.Charge = 0.3
+
+#https://indico.cern.ch/event/367861/contribution/2/material/slides/0.pdf
+
+Ele.EffArea.abs_eta = 1
+
+Ele.EffArea.eta_edges = 0.0, 0.8, 1.3, 2.0, 2.2, 5.
+
+Ele.EffArea.EA_charged_hadrons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
+
+Ele.EffArea.EA_neutral_hadrons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
+
+Ele.EffArea.EA_photons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
+
+
+
+
+#################
+## Sytematics  ##
+#################
+# configuration for systematic uncertainties
+#possible systematic options: Scale
+Ele.Syst.Types = Scale
+Ele.Syst.Scale.Barrel = 0.004
+Ele.Syst.Scale.Endcap = 0.008

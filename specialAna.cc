@@ -499,7 +499,8 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
                                 <<"MET "			<<sel_met->getPt()                                  << ": "
                                 <<"dphi "			<<DeltaPhi(sel_lepton->getPhi(),sel_met->getPhi())  << ": "
                                 <<"charge "   		<<sel_lepton->getCharge()                           << ": "
-                                <<"pt/met "			<<sel_lepton->getPt()/sel_met->getPt()              << endl;
+                                <<"pt/met "			<<sel_lepton->getPt()/sel_met->getPt()              << ": "
+                                <<"triggerselector "<<TriggerSelector_highpt(event)                     << endl;
             }
         }
     }
@@ -518,7 +519,6 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         }
         if(qcd_lepton->getUserRecord("passed") && qcd_lepton->getPdgNumber()==11 && qcd_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event)){
             Fill_Particle_hisos(4, qcd_lepton , "iso_QCD");
-            eventsAfterCuts << "triggerSelector_highpt True" << std::endl;
         }
 
     }

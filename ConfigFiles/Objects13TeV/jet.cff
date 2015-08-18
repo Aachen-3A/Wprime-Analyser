@@ -4,9 +4,9 @@
 # See also:
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
 Jet.use = 1
-Jet.Type.Gen = "AK5"
-Jet.Type.Rec = "AK5"
-Jet.pt.min = 50
+Jet.Type.Gen = "AK4"
+Jet.Type.Rec = "AK4"
+Jet.pt.min = 30
 Jet.eta.max = 2.4
 Jet.DeltaR.max = 0.5
 Jet.isPF = 1
@@ -71,7 +71,7 @@ Jet.BJets.Gen.Label = "genBJet"
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution?rev=32
 
 # Switch for Jet Resolution correction
-Jet.Resolutions.Corr.use = 0
+Jet.Resolutions.Corr.use = 1
 
 #use 8tev numbers at the moment
 #Jet.Resolutions.Unmatched.File
@@ -91,7 +91,7 @@ Jet.Resolution.data_MC_ratio = 1.079, 1.099, 1.121, 1.208, 1.254, 1.395, 1.056
 #################
 ## Sytematics  ##
 #################
-
+Jet.Syst.Types = Resolution, Scale
 # The uncertainties for resolution corrections are not used at the moment, only here for completeness.
 Jet.Resolution.data_MC_sys_up = 1.105, 1.127, 1.150, 1.254, 1.316, 1.458, 1.247
 Jet.Resolution.data_MC_sys_down = 1.053, 1.071, 1.092, 1.162, 1.192, 1.332, 0.865

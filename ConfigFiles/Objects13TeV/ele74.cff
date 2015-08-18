@@ -2,8 +2,8 @@ Ele.use = 1
 Ele.Type.Gen = "Ele"
 Ele.Type.Rec = "Ele"
 Ele.pt.min = 25
-Ele.eta.Barrel.max = 1.4442
-Ele.eta.Endcap.min = 1.566
+Ele.eta.Barrel.max = 1.442
+Ele.eta.Endcap.min = 1.56
 Ele.eta.Endcap.max = 2.5
 Ele.DeltaR.max = 0.4
 Ele.InvertIsolation = 0
@@ -47,5 +47,7 @@ Ele.EffArea.EA_photons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
 ## Sytematics  ##
 #################
 # configuration for systematic uncertainties
+#possible systematic options: Scale
+Ele.Syst.Types = Scale
 Ele.Syst.Scale.Barrel = 0.004
 Ele.Syst.Scale.Endcap = 0.008

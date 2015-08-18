@@ -26,7 +26,7 @@ Gamma.Endcap.SigmaIetaIeta.max = 0.031
 #
 # Use the following set of cuts?
 Gamma.CutBasedPhotonID2012Flag.use = 1
-Gamma.IDFlag = PhotonCutBasedIDTight
+Gamma.IDFlag = cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight
 
 # end CutBasedPhotonID2012Flag
 
@@ -120,3 +120,8 @@ Gamma.EffArea.EA_neutral_hadrons = 0.030, 0.057, 0.039, 0.015, 0.024, 0.039, 0.0
 
 Gamma.EffArea.EA_photons = 0.148, 0.130, 0.112, 0.216, 0.262, 0.260, 0.266
 
+#################
+## Sytematics  ##
+#################
+#possible systematic options:
+Gamma.Syst.Types =

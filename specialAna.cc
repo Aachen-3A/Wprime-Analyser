@@ -2,6 +2,7 @@
 #include "HistClass.hh"
 #include "Tools/Tools.hh"
 #include <csignal>
+#include "TVector3.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #include "boost/format.hpp"
@@ -50,6 +51,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_m_cut(                 cfg.GetItem< double >( "wprime.m_cut" ) ),
    m_cutdatafile(           cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
 
+   m_do_ztree( cfg.GetItem<bool>( "wprime.produce_ztree" ) ) ,
    m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
    d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
    m_dataPeriod(            cfg.GetItem< string >( "General.DataPeriod" ) ),
@@ -109,7 +111,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         HistClass::CreateHisto(6,"charge",particles[i].c_str(), 3, -1, 1,               TString::Format("q_{%s}", particleSymbols[i].c_str()) );
         HistClass::CreateHisto(6,"met",particles[i].c_str(), 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
         HistClass::CreateHisto(6,"met_phi",particles[i].c_str(),40, -3.2, 3.2,          "#phi_{E^{miss}_{T}} [rad]" );
-        HistClass::CreateHisto(6,"ET_MET",particles[i].c_str(),50, 0, 6,                TString::Format("p^{%s}_{T}/E^{miss}_{T}", particleSymbols[i].c_str()) );
+        HistClass::CreateHisto(6,"ET_MET",particles[i].c_str(),50, 0, 6,                "p_{T}/E^{miss}_{T}" );
 
         HistClass::CreateHisto(6,"jet_1_pt",particles[i].c_str(), 5000, 0, 5000,        "p_{T}^{jet} [GeV]" );
         HistClass::CreateHisto(6,"jet_1_eta",particles[i].c_str(), 80, -4, 4,           "#eta_{jet}" );
@@ -226,6 +228,17 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
     //HistClass::CreateHisto(6,"Muon_mt_reciprocal", 5000, 0, 1,"1/M_{T}^{#m [1/GeV]");
     HistClass::CreateHisto(6,"Muon_dpt_over_pt", 5000, 0, 6,"#sigma_{p_{T}}/p_{T}");
 
+
+    HistClass::CreateHisto(6,"Ele_mt_Ele_27", 5000, 0, 5000,             "M_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_met_Ele_27", 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_pt_Ele_27", 5000, 0, 5000,             "p_{T} [GeV]");
+    HistClass::CreateHisto(6,"Ele_mt_Ele_105", 5000, 0, 5000,             "M_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_met_Ele_105", 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_pt_Ele_105", 5000, 0, 5000,             "p_{T} [GeV]");
+    HistClass::CreateHisto(6,"Ele_mt_Ele_115", 5000, 0, 5000,             "M_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_met_Ele_115", 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
+    HistClass::CreateHisto(6,"Ele_pt_Ele_115", 5000, 0, 5000,             "p_{T} [GeV]");
+
     HistClass::CreateHisto(6,"Ele_CaloIso", 100, 0, 100,"CaloIso");
     HistClass::CreateHisto(6,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
     HistClass::CreateHisto(6,"Ele_Class", 100, 0, 100,"Class");
@@ -292,15 +305,21 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     //for qcd hist (as systematic)
     for(unsigned char pi=0; pi<3; pi++){
-        HistClass::CreateHisto(6,str(boost::format("%s_pt_syst_iso_QCD")%particles[pi]).c_str(), 5000, 0, 5000, std::string("p_{T}^{") + particleSymbols[pi] + "} [GeV]");
-        HistClass::CreateHisto(6,str(boost::format("%s_eta_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, std::string("#eta_{") + particleSymbols[pi] + "}");
-        HistClass::CreateHisto(6,str(boost::format("%s_phi_syst_iso_QCD")%particles[pi]).c_str(),40, -3.2, 3.2, std::string("#phi_{") + particleSymbols[pi] + "} [rad]");
+        HistClass::CreateHisto(6,str(boost::format("%s_pt_syst_iso_QCD")%particles[pi]).c_str(), 5000, 0, 5000, "p_{T} [GeV]");
+        HistClass::CreateHisto(6,str(boost::format("%s_eta_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, std::string("#eta (") + particleSymbols[pi] + ")");
+        HistClass::CreateHisto(6,str(boost::format("%s_phi_syst_iso_QCD")%particles[pi]).c_str(),40, -3.2, 3.2, std::string("#phi (") + particleSymbols[pi] + ") [rad]");
         HistClass::CreateHisto(6,str(boost::format("%s_DeltaPhi_syst_iso_QCD")%particles[pi]).c_str(),40, 0, 3.2, std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
-        HistClass::CreateHisto(6,str(boost::format("%s_mt_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, std::string("M_{T}_{") + particleSymbols[pi] + "} [GeV]");
-        HistClass::CreateHisto(6,str(boost::format("%s_ET_MET_syst_iso_QCD")%particles[pi]).c_str(),50, 0, 6, std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
+        HistClass::CreateHisto(6,str(boost::format("%s_mt_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, "M_{T} [GeV]");
+        HistClass::CreateHisto(6,str(boost::format("%s_ET_MET_syst_iso_QCD")%particles[pi]).c_str(),50, 0, 6, "p_{T}/E^{miss}_{T}");
         HistClass::CreateHisto(6,str(boost::format("%s_met_syst_iso_QCD")%particles[pi]).c_str(),5000, 0, 5000, "E^{miss}_{T} [GeV]");
         HistClass::CreateHisto(6,str(boost::format("%s_met_phi_syst_iso_QCD")%particles[pi]).c_str(),40, -3.2, 3.2,"#phi_{E^{miss}_{T}} [rad]");
     }
+    HistClass::CreateHisto("general_boson_qt",         500, 0, 5000,"q_{T} (GeV)");
+    HistClass::CreateHisto("general_boson_qt_ele",         500, 0, 5000,"q_{T} (GeV)");
+    HistClass::CreateHisto("general_boson_qt_muo",         500, 0, 5000,"q_{T} (GeV)");
+    HistClass::CreateProf("response",         500, 0, 5000,"q_{T} (GeV)","Response");
+    HistClass::CreateProf("response_ele",         500, 0, 5000,"q_{T} (GeV)","Response");
+    HistClass::CreateProf("response_muo",         500, 0, 5000,"q_{T} (GeV)","Response");
 
     if(not runOnData){
         if(useSyst){
@@ -312,22 +331,22 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
                             for(unsigned int stage=1;stage<5;stage++){
                                 HistClass::CreateHisto(boost::format("%d_%s_pt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        5000, 0, 5000,
-                                                       std::string("p_{T}^{") + particleSymbols[pi] + "} [GeV]");
+                                                       "p_{T} [GeV]");
                                 HistClass::CreateHisto(boost::format("%d_%s_eta_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        5000, 0, 5000,
-                                                       std::string("#eta_{") + particleSymbols[pi] + "}");
+                                                       std::string("#eta ({") + particleSymbols[pi] + ")");
                                 HistClass::CreateHisto(boost::format("%d_%s_phi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        40, -3.2, 3.2,
-                                                       std::string("#phi_{") + particleSymbols[pi] + "} [rad]");
+                                                       std::string("#phi (") + particleSymbols[pi] + ") [rad]");
                                 HistClass::CreateHisto(boost::format("%d_%s_DeltaPhi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        40, 0, 3.2,
                                                        std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
                                 HistClass::CreateHisto(boost::format("%d_%s_mt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        5000, 0, 5000,
-                                                       std::string("M_{T}_{") + particleSymbols[pi] + "} [GeV]");
+                                                       "M_{T} [GeV]");
                                 HistClass::CreateHisto(boost::format("%d_%s_ET_MET_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        50, 0, 6,
-                                                       std::string("p^{") + particleSymbols[pi] + "}_{T}/E^{miss}_{T}");
+                                                       "p_{T}/E^{miss}_{T}");
                                 HistClass::CreateHisto(boost::format("%d_%s_met_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
                                                        5000, 0, 5000,
                                                        "E^{miss}_{T} [GeV]");
@@ -339,6 +358,8 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
                 }
             }
         }
+
+
 
         int bins []={100,5000};
         double xmin []={-10,0};
@@ -397,6 +418,27 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
 
     HistClass::CreateTree( &mQCDTree, "qcdtree");
 
+
+    mZtree["lep_type"]=0;
+    mZtree["lep1_pt"]=0;
+    mZtree["lep1_eta"]=0;
+    mZtree["lep1_phi"]=0;
+    mZtree["lep1_E"]=0;
+
+    mZtree["lep2_pt"]=0;
+    mZtree["lep2_eta"]=0;
+    mZtree["lep2_phi"]=0;
+    mZtree["lep2_E"]=0;
+
+    mZtree["z_pt"]=0;
+    mZtree["z_eta"]=0;
+    mZtree["z_phi"]=0;
+    mZtree["z_E"]=0;
+    mZtree["met_pt"]=0;
+    mZtree["met_phi"]=0;
+
+    HistClass::CreateTree( &mZtree, "ztree");
+
     TFile qcd_weight_ele(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight.ele"))).c_str());
     qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_0_pt");
     qcd_weight_muo_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_1_pt");
@@ -428,9 +470,12 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
 
     KinematicsSelector();
     QCDAnalyse();
+    if(m_do_ztree){
+        ResponseAnalyse();
+    }
 
 
-
+    Fill_stage_0_histos();
     if (sel_lepton==0 and qcd_lepton==0){
         endEvent( event );
         return;
@@ -457,7 +502,7 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     HistClass::Fill("MC_cutflow_Gen",4,weight);
 
     cleanJets();
-    Fill_stage_0_histos();
+
 
 
 
@@ -983,8 +1028,27 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 }
                 triggered=(*us).second;
                 if(triggered){
-                    //cout<<"hurraayyyyy "<<(*us).first<<" "<< usePdgNumber<<endl;
-                    break;
+                    if(usePdgNumber==11){
+                        if(sel_lepton){
+                            if(!sel_lepton->hasUserRecord("Ele_27")){
+                                sel_lepton->setUserRecord("Ele_27",false);
+                            }
+                            if(!sel_lepton->hasUserRecord("Ele105")){
+                                sel_lepton->setUserRecord("Ele105",false);
+                            }
+                            if(!sel_lepton->hasUserRecord("Ele115")){
+                                sel_lepton->setUserRecord("Ele115",false);
+                            }
+                            if(string::npos != (*us).first.find( "HLT_Ele27")){
+                                sel_lepton->setUserRecord("Ele_27",true);
+                            }else if(string::npos != (*us).first.find( "HLT_Ele105")){
+                                sel_lepton->setUserRecord("Ele105",true);
+                            }else if(string::npos != (*us).first.find( "HLT_Ele115")){
+                                sel_lepton->setUserRecord("Ele115",true);
+                            }
+                        }
+                    }
+                    //break;
                 }
             }
         }
@@ -1280,6 +1344,146 @@ void specialAna::QCDAnalyse() {
 
 }
 
+
+void specialAna::ResponseAnalyse(){
+
+    std::vector<pxl::Particle*> goodEle;
+    std::vector<pxl::Particle*> goodMuo;
+
+    bool passedDilepton=false;
+
+    //make veto numbers
+    //we don't need std::vectors, do we?
+    double m_leptonVetoPt=20;
+    int numVetoMuo=vetoNumber(MuonList,m_leptonVetoPt);
+    int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
+    int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
+
+    if( EleList->size()>=2 && numVetoTau==0 && numVetoMuo==0 ){
+        int passedID=0;
+        for( std::vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
+            if( (*it)->hasUserRecord("IDpassed")){
+                if ( (*it)->getUserRecord("IDpassed").toBool() ){
+                    passedID++;
+                    goodEle.push_back(*it);
+                }
+            }else if (EleList->size()==2){
+                passedID=2;
+                goodEle.push_back(( pxl::Particle* ) EleList->at(0));
+                goodEle.push_back(( pxl::Particle* ) EleList->at(1));
+                break;
+            }
+        }
+
+        if(passedID==2){
+            passedDilepton=true;
+        }
+    }
+    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=2 ){
+        int passedID=0;
+        for( std::vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
+            if( (*it)->hasUserRecord("IDpassed")){
+                if (  (*it)->getUserRecord("IDpassed").toBool() ){
+                    passedID++;
+                    goodMuo.push_back(*it);
+                }
+            }else if (MuonList->size()==2){
+                passedID=2;
+                goodMuo.push_back(( pxl::Particle* ) MuonList->at(0));
+                goodMuo.push_back(( pxl::Particle* ) MuonList->at(1));
+                break;
+            }
+        }
+        if(passedID==2){
+            passedDilepton=true;
+        }
+    }
+
+    if(passedDilepton){
+        TVector3 qT=TVector3(0,0,0);
+        TLorentzVector Zcandidate=TLorentzVector();
+        TVector3 METvec=TVector3(sel_met->getPx(),sel_met->getPy(),0);
+
+
+        if(goodEle.size()==2){
+            qT.SetXYZ(
+                        goodEle.at(0)->getPx()+goodEle.at(1)->getPx(),
+                        goodEle.at(0)->getPy()+goodEle.at(1)->getPy(),
+                        0
+                        );
+            Zcandidate.SetPxPyPzE(   goodEle.at(0)->getPx()+goodEle.at(1)->getPx(),
+                                    goodEle.at(0)->getPy()+goodEle.at(1)->getPy(),
+                                    goodEle.at(0)->getPz()+goodEle.at(1)->getPz(),
+                                    goodEle.at(0)->getE()+goodEle.at(1)->getE()
+                                );
+        }
+        else if(goodMuo.size()==2){
+            qT.SetXYZ(
+                        goodMuo.at(0)->getPx()+goodMuo.at(1)->getPx(),
+                        goodMuo.at(0)->getPy()+goodMuo.at(1)->getPy(),
+                        0
+                        );
+            Zcandidate.SetPxPyPzE(   goodMuo.at(0)->getPx()+goodMuo.at(1)->getPx(),
+                                    goodMuo.at(0)->getPy()+goodMuo.at(1)->getPy(),
+                                    goodMuo.at(0)->getPz()+goodMuo.at(1)->getPz(),
+                                    goodMuo.at(0)->getE()+goodMuo.at(1)->getE()
+                                );
+        }
+
+
+        TVector3 utot = (-1.) * ( qT + METvec );
+        double u_par   = utot.Dot( qT.Unit() );
+        //double u_trans = utot.Dot( qT.Orthogonal().Unit() );
+        double R=      -u_par/qT.Perp();
+
+
+
+        if(Zcandidate.M()>80 && Zcandidate.M()<100){
+            if(goodEle.size()==2){
+                mZtree["lep_type"]=11;
+                mZtree["lep1_pt"]=goodEle.at(0)->getPt();
+                mZtree["lep1_eta"]=goodEle.at(0)->getEta();
+                mZtree["lep1_phi"]=goodEle.at(0)->getPhi();
+                mZtree["lep1_E"]=goodEle.at(0)->getE();
+                mZtree["lep1_pt"]=goodEle.at(1)->getPt();
+                mZtree["lep1_eta"]=goodEle.at(1)->getEta();
+                mZtree["lep1_phi"]=goodEle.at(1)->getPhi();
+                mZtree["lep1_E"]=goodEle.at(1)->getE();
+
+            }else{
+                mZtree["lep_type"]=13;
+                mZtree["lep1_pt"]=goodMuo.at(0)->getPt();
+                mZtree["lep1_eta"]=goodMuo.at(0)->getEta();
+                mZtree["lep1_phi"]=goodMuo.at(0)->getPhi();
+                mZtree["lep1_E"]=goodMuo.at(0)->getE();
+                mZtree["lep1_pt"]=goodMuo.at(1)->getPt();
+                mZtree["lep1_eta"]=goodMuo.at(1)->getEta();
+                mZtree["lep1_phi"]=goodMuo.at(1)->getPhi();
+                mZtree["lep1_E"]=goodMuo.at(1)->getE();
+            }
+
+
+            mZtree["z_pt"]=Zcandidate.Pt();
+            mZtree["z_eta"]=Zcandidate.Eta();
+            mZtree["z_phi"]=Zcandidate.Phi();
+            mZtree["z_E"]=Zcandidate.E();
+            mZtree["met_pt"]=sel_met->getPt();
+            mZtree["met_phi"]=sel_met->getPhi();
+            HistClass::FillTree("ztree");
+
+            HistClass::Fill("general_boson_qt",qT.Perp(),weight);
+            HistClass::Profile("response",qT.Perp(),R);
+            if(goodEle.size()==2){
+                HistClass::Fill("general_boson_qt_ele",qT.Perp(),weight);
+                HistClass::Profile("response_ele",qT.Perp(),R);
+            }else if(goodMuo.size()==2){
+                HistClass::Fill("general_boson_qt_muo",qT.Perp(),weight);
+                HistClass::Profile("response_muo",qT.Perp(),R);
+            }
+        }
+    }
+}
+
 void specialAna::Fill_Tree(){
     mLeptonTree["mt"]=MT(sel_lepton,sel_met);
     mLeptonTree["delta_phi"]=DeltaPhi(sel_lepton,sel_met);
@@ -1398,6 +1602,15 @@ bool specialAna::tail_selector( const pxl::Event* event) {
                 }
 
             }
+
+            //if(Datastream.Contains("FXFX") && !Datastream.Contains("HT")){
+                //if(m_GenEvtView->hasUserRecord("genHT")){
+                    //if(m_GenEvtView->getUserRecord("genHT").toDouble()>100){
+                        //return true;
+                    //}
+                //}
+            //}
+
         }
         if(Datastream.Contains("TT") and not Datastream.Contains("TT_Mtt-")) {
             if(getInvMtt() > 700) return true;
@@ -1768,6 +1981,26 @@ void specialAna::Fill_Controll_Muon_histo(int hist_number, pxl::Particle* lepton
 void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton){
     Fill_Particle_hisos(hist_number,lepton);
 
+
+    if(lepton->hasUserRecord("Ele_27")){
+        if(lepton->getUserRecord("Ele_27").toBool() && !lepton->getUserRecord("Ele105").toBool() && !lepton->getUserRecord("Ele115").toBool() ){
+            HistClass::Fill(hist_number, "Ele_mt_Ele_27",MT(lepton,sel_met),weight);
+            HistClass::Fill(hist_number, "Ele_pt_Ele_27",lepton->getPt(),weight);
+            HistClass::Fill(hist_number,"Ele_met_Ele_27",sel_met->getPt(),weight);
+        }else if(lepton->getUserRecord("Ele105").toBool() && !lepton->getUserRecord("Ele115").toBool()){
+            HistClass::Fill(hist_number, "Ele_mt_Ele_105",MT(lepton,sel_met),weight);
+            HistClass::Fill(hist_number, "Ele_pt_Ele_105",lepton->getPt(),weight);
+            HistClass::Fill(hist_number,"Ele_met_Ele_105",sel_met->getPt(),weight);
+        }else if(lepton->getUserRecord("Ele115").toBool()){
+            HistClass::Fill(hist_number, "Ele_mt_Ele_115",MT(lepton,sel_met),weight);
+            HistClass::Fill(hist_number, "Ele_pt_Ele_115",lepton->getPt(),weight);
+            HistClass::Fill(hist_number,"Ele_met_Ele_115",sel_met->getPt(),weight);
+        }
+    }
+
+
+
+
     HistClass::Fill(hist_number,"Ele_CaloIso",lepton->getUserRecord ("CaloIso"),weight);
     //HistClass::Fill(hist_number,"Ele_ChargeMatch",lepton->getUserRecord ("ChargeMatch"),weight);
     HistClass::Fill(hist_number,"Ele_Class",lepton->getUserRecord ("Class"),weight);
@@ -1937,7 +2170,6 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     if(syst==""){
 
         HistClass::Fill(hist_number,str(boost::format("%s_nPrimaryVertices")%name ),m_RecEvtView->getUserRecord("NumVertices"),weight);
-
         HistClass::Fill(str(boost::format("%s_cutflow")%name).c_str() ,hist_number+1,weight);
         if (lepton->hasUserRecord("IDFailValue")){
             HistClass::Fill(hist_number,str(boost::format("%s_IDFail")%name ),lepton->getUserRecord("IDFailValue"),weight);
@@ -1980,6 +2212,7 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
     HistClass::Fill(hist_number,str(boost::format("%s_pt%s")%name %syst ),lepton->getPt(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_eta%s")%name %syst ),lepton->getEta(),weight);
     HistClass::Fill(hist_number,str(boost::format("%s_phi%s")%name %syst ),lepton->getPhi(),weight);
+
 
     if(sel_met){
         HistClass::Fill(hist_number,str(boost::format("%s_DeltaPhi%s")%name %syst ),DeltaPhi(lepton,sel_met),weight);
@@ -3233,6 +3466,10 @@ void specialAna::endJob( const Serializable* ) {
     file1->mkdir("Ele");
     file1->cd("Ele/");
     HistClass::WriteAll("_Ele_");
+    file1->cd();
+    file1->mkdir("Other");
+    file1->cd("Other/");
+    HistClass::WriteAll("_general_");
     file1->cd();
     file1->mkdir("Trees");
     file1->cd("Trees/");

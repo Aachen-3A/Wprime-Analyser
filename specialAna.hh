@@ -80,6 +80,7 @@ public:
     void Create_trigger_effs();
     void TriggerAnalyser();
     void QCDAnalyse();
+    void ResponseAnalyse();
 
 
     bool tail_selector(const pxl::Event* event);
@@ -236,6 +237,7 @@ public:
     double m_min_mt_for_eventinfo;
     double m_m_cut;
     const std::string m_cutdatafile;
+    const bool m_do_ztree;
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
     const std::string m_dataPeriod;
@@ -307,6 +309,7 @@ public:
 
     std::unordered_map< string,float > mLeptonTree;
     std::unordered_map< string,float > mQCDTree;
+    std::unordered_map< string,float > mZtree;
 
     map< pxl::Particle*,pxl::Particle* > tau_gen_visMap;
 

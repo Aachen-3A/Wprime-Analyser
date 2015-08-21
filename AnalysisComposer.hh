@@ -1,6 +1,7 @@
 
 #include "Main/EventSelector.hh"
 #include "Main/PDFTool.hh"
+#include "Main/Systematics.hh"
 
 #include <exception>
 #include <sstream>
@@ -26,6 +27,7 @@ public:
                                        string outputDirectory,
                                        pdf::PDFInfo const &pdfInfo,
                                        EventSelector &selector,
+                                       Systematics &syst_shifter,
                                        const bool debug);
     void endAnalysis();
 

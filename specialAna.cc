@@ -9,7 +9,7 @@
 #pragma GCC diagnostic pop
 
 
-specialAna::specialAna( const Tools::MConfig &cfg ) :
+specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
    runOnData(       cfg.GetItem< bool >( "General.RunOnData" ) ),
    useSyst(         cfg.GetItem< bool >( "General.useSYST" ) ),
 
@@ -59,7 +59,7 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
    m_analyse_trigger( Tools::splitString< string >( cfg.GetItem< string >( "wprime.AnalyseTriggerList" ), true  ) ),
    config_(cfg)
 {
-
+    m_syst_shifter=&syst_shifter;
     string safeFileName = "SpecialHistos.root";
     file1 = new TFile(safeFileName.c_str(), "RECREATE");
     eventDisplayFile.open(m_cutdatafile.c_str(), std::fstream::out);
@@ -325,36 +325,41 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         if(useSyst){
             // 4 for loops to create 480 histograms
             for(unsigned int pi=0; pi<3; pi++){ // loop over particles
-                for(unsigned int si=0; si<5; si++){ // loop over shifted particles
-                    for(unsigned int ti=0; ti<2; ti++){ // loop over type
+                for(auto syst : syst_shifter.m_activeSystematics){
+                    if(syst->m_particleType=="MET"){
+                        syst->m_particleType="met";
+                    }
+
+                //for(unsigned int si=0; si<5; si++){ // loop over shifted particles
+                    //for(unsigned int ti=0; ti<2; ti++){ // loop over type
                         for(unsigned int ui=0; ui<2; ui++){ // loop over updown
                             for(unsigned int stage=1;stage<5;stage++){
-                                HistClass::CreateHisto(boost::format("%d_%s_pt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_pt_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        5000, 0, 5000,
                                                        "p_{T} [GeV]");
-                                HistClass::CreateHisto(boost::format("%d_%s_eta_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_eta_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        5000, 0, 5000,
                                                        std::string("#eta ({") + particleSymbols[pi] + ")");
-                                HistClass::CreateHisto(boost::format("%d_%s_phi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_phi_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        40, -3.2, 3.2,
                                                        std::string("#phi (") + particleSymbols[pi] + ") [rad]");
-                                HistClass::CreateHisto(boost::format("%d_%s_DeltaPhi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_DeltaPhi_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        40, 0, 3.2,
                                                        std::string("#Delta#phi(") + particleSymbols[pi] + ",E_{T}^{miss})");
-                                HistClass::CreateHisto(boost::format("%d_%s_mt_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_mt_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        5000, 0, 5000,
                                                        "M_{T} [GeV]");
-                                HistClass::CreateHisto(boost::format("%d_%s_ET_MET_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_ET_MET_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        50, 0, 6,
                                                        "p_{T}/E^{miss}_{T}");
-                                HistClass::CreateHisto(boost::format("%d_%s_met_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_met_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        5000, 0, 5000,
                                                        "E^{miss}_{T} [GeV]");
-                                HistClass::CreateHisto(boost::format("%d_%s_met_phi_syst_%s%s%s")%stage %particles[pi] %shifted[si] %type[ti] %updown[ui],
+                                HistClass::CreateHisto(boost::format("%d_%s_met_phi_syst_%s%s%s")%stage %particles[pi] %syst->m_particleType %syst->m_sysType %updown[ui],
                                                        40, -3.2, 3.2,"#phi_{E^{miss}_{T}} [rad]");
                             }
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -375,6 +380,12 @@ specialAna::specialAna( const Tools::MConfig &cfg ) :
         HistClass::CreateNSparse("W_pt_m_Gen",2,bins,xmin ,xmax ,xtitle  );
 
         Create_trigger_effs();
+    }
+
+    for(auto syst : syst_shifter.m_activeSystematics){
+        if(syst->m_particleType=="met"){
+            syst->m_particleType=m_METType;
+        }
     }
 
     Create_RECO_effs();
@@ -580,15 +591,21 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     // - check for newly created EventViews (did they fail?)
     // - fill (systematically shifted) particles into histograms
     if(!runOnData and useSyst){
-        FillSystematics(event, "Muon");
-        FillSystematicsUpDown(event, "Muon", "Up", "Resolution");
-        FillSystematicsUpDown(event, "Muon", "Down", "Resolution");
-        FillSystematics(event, "Ele");
-        FillSystematics(event, "Tau");
-        FillSystematics(event, "Jet");
-        FillSystematics(event, m_METType);
-        FillSystematicsUpDown(event, "Jet", "Up", "Resolution");
-        FillSystematicsUpDown(event, "Jet", "Down", "Resolution");
+        for(auto syst : m_syst_shifter->m_activeSystematics){
+
+            FillSystematicsUpDown(event, syst->m_particleType, "Up", syst->m_sysType);
+            FillSystematicsUpDown(event, syst->m_particleType, "Down", syst->m_sysType);
+
+            //FillSystematics(event, "Muon");
+            //FillSystematicsUpDown(event, "Muon", "Up", "Resolution");
+            //FillSystematicsUpDown(event, "Muon", "Down", "Resolution");
+            //FillSystematics(event, "Ele");
+            //FillSystematics(event, "Tau");
+            //FillSystematics(event, "Jet");
+            //FillSystematics(event, m_METType);
+            //FillSystematicsUpDown(event, "Jet", "Up", "Resolution");
+            //FillSystematicsUpDown(event, "Jet", "Down", "Resolution");
+        }
         // FillSystematics(event, "met");
     }
 
@@ -624,6 +641,11 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 
 
     if(tempEventView == 0){
+        std::vector< pxl::EventView* > views;
+        event->getObjectsOfType< pxl::EventView >(views);
+        for(auto v : views){
+            cout<<v->getName()<<endl;
+        }
         throw std::runtime_error("specialAna.cc: no EventView '" + particleName + "_syst" + shiftType + updown + "' found!");
     }
     // get all particles

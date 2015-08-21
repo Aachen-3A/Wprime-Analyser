@@ -43,6 +43,7 @@ pxl::AnalysisFork AnalysisComposer::addForkObjects ( const Tools::MConfig &confi
                                         string outputDirectory,
                                         pdf::PDFInfo const &pdfInfo,
                                         EventSelector &selector,
+                                        Systematics &syst_shifter,
                                         const bool debug){
     // This is the function where you need to initalize your Analysis.
     // Create one or several implementations of pxl::AnalysisProcess and
@@ -51,7 +52,7 @@ pxl::AnalysisFork AnalysisComposer::addForkObjects ( const Tools::MConfig &confi
     fork.setName( m_analysisName );
     // add validation to fork
     specialAna *ana = 0;
-    ana = new specialAna( config );
+    ana = new specialAna( config, syst_shifter );
     fork.insertObject( ana , "specialAna" );
     return fork;
 }

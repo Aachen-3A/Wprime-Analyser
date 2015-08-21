@@ -29,7 +29,7 @@ using namespace std;
 
 class specialAna : public pxl::AnalysisProcess  {
 public:
-    specialAna( const Tools::MConfig &config );
+    specialAna( const Tools::MConfig &config, Systematics &syst_shifter);
     virtual ~specialAna();
 
     virtual void endJob(const Serializable*);
@@ -244,6 +244,7 @@ public:
     const std::string m_kfactorFile_Config;
     const vector< string >  m_analyse_trigger;
     const Tools::MConfig config_;
+    Systematics* m_syst_shifter;
 
     double temp_run;
     double temp_ls;

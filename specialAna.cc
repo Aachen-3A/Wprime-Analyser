@@ -3373,7 +3373,7 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
             passedID=true;
         }
 
-        if( (*part_it)->getPt()>ptTreshold && passedID ){
+        if( (*part_it)->getPt()<ptTreshold && passedID ){
             numVeto++;
         }else if((*part_it)->getPt()>ptTreshold) {
             //Lists are Pt sorted

@@ -70,8 +70,7 @@ Ele.HEEPID.Barrel.HcalD1.Offset = 2
 Ele.HEEPID.Barrel.HcalD1.Slope = 0.03
 Ele.HEEPID.Barrel.HcalD1.RhoSlope = 0.28
 Ele.HEEPID.Barrel.NInnerLayerLostHits.max = 1
-Ele.HEEPID.Barrel.dxy.max = 0.00
-#Ele.HEEPID.Barrel.dxy.max = 0.02
+Ele.HEEPID.Barrel.dxy.max = 0.02
 Ele.HEEPID.Barrel.R29.max = 0.9
 Ele.HEEPID.Barrel.E1x5.min = 0.83
 Ele.HEEPID.Barrel.E2x5.min = 0.94
@@ -111,5 +110,7 @@ Ele.EffArea.EA_photons = 0.1013, 0.0988, 0.0572, 0.0842, 0.1530
 ## Sytematics  ##
 #################
 # configuration for systematic uncertainties
+#possible systematic options: Scale
+Ele.Syst.Types = Scale
 Ele.Syst.Scale.Barrel = 0.004
 Ele.Syst.Scale.Endcap = 0.008

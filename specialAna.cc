@@ -477,6 +477,18 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         Fill_RECO_effs();
         TriggerAnalyser();
     }
+    if (m_RecEvtView->hasUserRecord("filter_accept")){
+        if (!m_RecEvtView->getUserRecord("filter_accept").toBool()){
+            //cout<<"filter veto"<<endl;
+            //pxl::EventView *FilterView = event->getObjectOwner().findObject< pxl::EventView >( "Filter" );
+            //for(auto filter :FilterView->getUserRecords()){
+                //cout<<filter.first<<"  "<<  filter.second<<endl;
+            //}
+            endEvent( event );
+            return;
+        }
+    }
+
     HistClass::Fill("MC_cutflow_Gen",1,weight);
 
     KinematicsSelector();

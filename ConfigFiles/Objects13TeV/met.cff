@@ -8,8 +8,7 @@ MET.Type.Rec = slimmedMETsNoHF
 #MET.Type.Rec = slimmedMETs
 
 MET.pt.min = 0
-MET.dPhi.Ele.min = 0.1
-MET.dPhi.Ele.min = 0.1
+MET.dPhi.Ele.min = 0.0
 
 MET.Error.Fakes = 0.0
 

@@ -9,7 +9,7 @@ Muon.Type.Gen = "Muon"
 Muon.Type.Rec = "Muon"
 Muon.Rho.Label = "fixedGridRhoFastjetAll"
 
-Muon.Pt.min = 25
+Muon.Pt.min = 15
 Muon.Eta.max = 2.4
 Muon.DeltaR.max = 0.4
 Muon.InvertIsolation = 0
@@ -17,7 +17,7 @@ Muon.CleanDuplicates = 0
 
 
 ## IDs
-# Supported ID types: 
+# Supported ID types:
 #   - "CombinedID" --> "TightID" until PtSwitch is reached, then "HighPtID"
 #   - "HighPtID" --> Official HighPtID, useful after 200 GeV
 #   - "TightID"

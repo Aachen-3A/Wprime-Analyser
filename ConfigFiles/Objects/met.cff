@@ -10,4 +10,9 @@ MET.pt.min = 0.
 MET.dPhi.Ele.min = 0.0
 MET.Error.Fakes = 0.0
 
+#################
+## Sytematics  ##
+#################
+MET.Syst.Types = Scale
+
 

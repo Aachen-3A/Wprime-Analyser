@@ -106,6 +106,7 @@ public:
     pxl::EventView *m_RecEvtView;
     pxl::EventView *m_GenEvtView;
     pxl::EventView *m_TrigEvtView;
+    pxl::EventView *m_FilterEvtView;
 
     bool runOnData;
     bool useSyst;
@@ -267,6 +268,7 @@ public:
     //store the w and tt mass to avoid calculations:
     double wmass_stored;
     double mtt_stored;
+    int highEtTriggStored;
 
     int events_;
 

@@ -4,8 +4,9 @@ MET.IdTag = 1
 # MET Type to be used in Gen (especially important for matching).
 MET.Type.Gen = slimmedMETs_gen
 # Pile-Up (Type-0 PC), JEC (Type-I) and xy-shift corrected MET.
-MET.Type.Rec = slimmedMETsNoHF
-#MET.Type.Rec = slimmedMETs
+#MET.Type.Rec = slimmedMETsNoHF
+MET.Type.Rec = slimmedMETs
+#MET.Type.Rec = slimmedMETsPuppi
 
 MET.pt.min = 0
 MET.dPhi.Ele.min = 0.0

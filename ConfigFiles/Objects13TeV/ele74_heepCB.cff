@@ -2,8 +2,8 @@ Ele.use = 1
 Ele.Type.Gen = "Ele"
 Ele.Type.Rec = "Ele"
 Ele.pt.min = 25
-Ele.eta.Barrel.max = 1.4442
-Ele.eta.Endcap.min = 1.566
+Ele.eta.Barrel.max = 1.442
+Ele.eta.Endcap.min = 1.56
 Ele.eta.Endcap.max = 2.5
 Ele.DeltaR.max = 0.4
 Ele.InvertIsolation = 0
@@ -18,7 +18,7 @@ Ele.IdTag = 1
 Ele.ID.switchpt=100
 
 
-import "$PXLANA/specialAna/ConfigFiles/Objects13TeV/EleID/Ele_CBID_veto_r20.cff"
+import "$PXLANA/specialAna/ConfigFiles/Objects13TeV/EleID/Ele_CBID_loose_r20.cff"
 import "$PXLANA/specialAna/ConfigFiles/Objects13TeV/EleID/Ele_HEEP_v60_cb.cff"
 
 # Errors:

@@ -98,6 +98,7 @@ public:
     double getPtHatDi();
     double getGenHT();
     double getWmass();
+    double getZmass();
     double getInvMtt();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
     int vetoNumberTau(vector< pxl::Particle* > *list, double ptTreshold);
@@ -267,6 +268,7 @@ public:
 
     //store the w and tt mass to avoid calculations:
     double wmass_stored;
+    double zmass_stored;
     double mtt_stored;
     int highEtTriggStored;
 

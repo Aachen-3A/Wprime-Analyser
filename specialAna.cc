@@ -426,6 +426,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     HistClass::CreateTree( &mLeptonTree, "slimtree");
 
     mQCDTree["pt"]=0;
+    mQCDTree["eta"]=0;
     mQCDTree["met"]=0;
     mQCDTree["iso"]=0;
     mQCDTree["delta_phi"]=0;
@@ -600,8 +601,11 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
         if(qcd_lepton->getUserRecord("passed")){
             Fill_Particle_hisos(3, qcd_lepton , "iso_QCD");
         }
-        if(qcd_lepton->getUserRecord("passed") && qcd_lepton->getPdgNumber()==11 && qcd_lepton->getPt()>m_pt_min_cut_ele_high_pt && TriggerSelector_highpt(event)){
+        if(qcd_lepton->getUserRecord("passed") && qcd_lepton->getPdgNumber()==11 && qcd_lepton->getPt()>m_pt_min_cut_ele_high_pt ){
             Fill_Particle_hisos(4, qcd_lepton , "iso_QCD");
+        }
+        if(qcd_lepton->getPdgNumber()==11 && qcd_lepton->getPt()>m_pt_min_cut_ele_high_pt){
+            Fill_Particle_hisos(6, qcd_lepton, "iso_QCD");
         }
 
     }
@@ -1035,7 +1039,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 //string::npos != (*us).first.find( "HLT_Ele32_eta2p1_WP85_Gsf_") or
                 //string::npos != (*us).first.find( "HLT_Ele27_eta2p1_WP85_Gsf_") or
                 //string::npos != (*us).first.find( "HLT_Ele25WP60_SC4_Mass55_") or
-                //string::npos != (*us).first.find( "HLT_Mu17_Mu8_v") or
+                //string::npos != (*us).first.find( "HLT_Photon") or
 
 
                 string::npos != (*us).first.find( "HLT_MonoCentralPFJet80") or
@@ -1061,11 +1065,11 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 }
 
 
-                if(usePdgNumber==11 and string::npos == (*us).first.find( "Ele")){
+                if(usePdgNumber==11 and string::npos == (*us).first.find( "Ele") and qcd_lepton==0 ){
                     //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
                     continue;
                 }
-                if(usePdgNumber==13 and (string::npos == (*us).first.find( "Mu")  or string::npos != (*us).first.find( "MET"))){
+                if(usePdgNumber==13 and (string::npos == (*us).first.find( "Mu"))){
                     //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
                     continue;
                 }
@@ -1274,37 +1278,38 @@ void specialAna::QCDAnalyse() {
     int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
-    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
-        int passedID=0;
-        pxl::Particle* tmpTau;
-        for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
-            if( Check_Tau_ID_no_iso(*it) ){
-                passedID++;
-                tmpTau=(*it);
-            }
-        }
-        if(passedID==1){
-            qcd_lepton=tmpTau;
-            m_pt_min_cut=m_pt_min_cut_tau;
-            m_delta_phi_cut=m_delta_phi_cut_tau;
-            m_pt_met_min_cut=m_pt_met_min_cut_tau;
-            m_pt_met_max_cut=m_pt_met_max_cut_tau;
+    //if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
+        //int passedID=0;
+        //pxl::Particle* tmpTau;
+        //for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
+            //if( Check_Tau_ID_no_iso(*it) ){
+                //passedID++;
+                //tmpTau=(*it);
+            //}
+        //}
+        //if(passedID==1){
+            //qcd_lepton=tmpTau;
+            //m_pt_min_cut=m_pt_min_cut_tau;
+            //m_delta_phi_cut=m_delta_phi_cut_tau;
+            //m_pt_met_min_cut=m_pt_met_min_cut_tau;
+            //m_pt_met_max_cut=m_pt_met_max_cut_tau;
 
-            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
-            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
-            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
-            qcd_id=15;
-        }
-    }
+            //m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
+            //m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
+            //m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
+            //qcd_id=15;
+        //}
+    //}
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         int passedID=0;
         pxl::Particle* tmpEle;
         for( std::vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
-            //cout<<(*it)->getUserRecord("IDFailValue")<<endl;
-            if( (*it)->hasUserRecord("ISOfailed")){
-                if ( (*it)->getUserRecord("ISOfailed").toBool() ){
+
+            if( (*it)->hasUserRecord("loosIDnoISO")){
+                if ( (*it)->getUserRecord("loosIDnoISO").toBool() or (*it)->getUserRecord("loosIDandISO").toBool() ){
                     passedID++;
                     tmpEle=(*it);
+                    break;
                 }
             }
             //we can not do the fr if we tag the electrons!!
@@ -1315,7 +1320,7 @@ void specialAna::QCDAnalyse() {
             //}
         }
         //cout<<passedID<<endl;
-        if(passedID==1){
+        if(passedID>=1){
             qcd_lepton=tmpEle;
             m_pt_min_cut=m_pt_min_cut_ele;
             m_delta_phi_cut=m_delta_phi_cut_ele;
@@ -1328,36 +1333,36 @@ void specialAna::QCDAnalyse() {
             qcd_id=11;
         }
     }
-    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
-        int passedID=0;
-        pxl::Particle* tmpMuo;
-        for( std::vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
-            if( (*it)->hasUserRecord("ISOfailed")){
-                if ( not passedID &&  (*it)->getUserRecord("ISOfailed").toBool() ){
-                    passedID++;
-                    tmpMuo=(*it);
-                }
-            }
-            //we can not do the fr if we tag the muons!!
-            //else if (MuonList->size()==1){
-                //passedID++;
-                //tmpMuo=( pxl::Particle* ) MuonList->at(0);
-                //break;
+    //if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
+        //int passedID=0;
+        //pxl::Particle* tmpMuo;
+        //for( std::vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
+            //if( (*it)->hasUserRecord("ISOfailed")){
+                //if (  (*it)->getUserRecord("ISOfailed").toBool() ){
+                    //passedID++;
+                    //tmpMuo=(*it);
+                //}
             //}
-        }
-        if(passedID==1){
-            qcd_lepton=tmpMuo;
-            m_pt_min_cut=m_pt_min_cut_muo;
-            m_delta_phi_cut=m_delta_phi_cut_muo;
-            m_pt_met_min_cut=m_pt_met_min_cut_muo;
-            m_pt_met_max_cut=m_pt_met_max_cut_muo;
+            ////we can not do the fr if we tag the muons!!
+            ////else if (MuonList->size()==1){
+                ////passedID++;
+                ////tmpMuo=( pxl::Particle* ) MuonList->at(0);
+                ////break;
+            ////}
+        //}
+        //if(passedID==1){
+            //qcd_lepton=tmpMuo;
+            //m_pt_min_cut=m_pt_min_cut_muo;
+            //m_delta_phi_cut=m_delta_phi_cut_muo;
+            //m_pt_met_min_cut=m_pt_met_min_cut_muo;
+            //m_pt_met_max_cut=m_pt_met_max_cut_muo;
 
-            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
-            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
-            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
-            qcd_id=13;
-        }
-    }
+            //m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
+            //m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
+            //m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
+            //qcd_id=13;
+        //}
+    //}
 
     if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
         if(qcd_id==11){
@@ -1582,6 +1587,7 @@ void specialAna::Fill_QCD_Tree(bool iso){
     mQCDTree["met"]=sel_met->getPt();
     if(iso){
         mQCDTree["pt"]=sel_lepton->getPt();
+        mQCDTree["eta"]=sel_lepton->getEta();
         mQCDTree["delta_phi"]=DeltaPhi(sel_lepton,sel_met);
         mQCDTree["lepton_type"]=sel_lepton->getPdgNumber();
         if(sel_lepton->hasUserRecord("decayMode")){
@@ -1591,6 +1597,7 @@ void specialAna::Fill_QCD_Tree(bool iso){
         }
     }else{
         mQCDTree["pt"]=qcd_lepton->getPt();
+        mQCDTree["eta"]=qcd_lepton->getEta();
         mQCDTree["delta_phi"]=DeltaPhi(qcd_lepton,sel_met);
         mQCDTree["lepton_type"]=qcd_lepton->getPdgNumber();
         if(qcd_lepton->hasUserRecord("decayMode")){
@@ -1676,6 +1683,9 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             if(getInvMtt() < 1000) return true;
         }
 
+        if(Datastream.Contains("DYJetsToLL_M-50_")) {
+            if(getZmass() > 100) return true;
+        }
 
 
     }else if( m_dataPeriod=="8TeV" ){
@@ -3369,6 +3379,36 @@ double specialAna::getWmass(){
     }
     wmass_stored=-1;
     return wmass_stored;
+}
+
+double specialAna::getZmass(){
+    if(zmass_stored!=0){
+        return zmass_stored;
+    }
+    pxl::Particle* lepton=0;
+    pxl::Particle* neutrino=0;
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if (abs(S3ListGen->at(i)->getPdgNumber())==23 and S3ListGen->at(i)->getMass()>5){
+            zmass_stored=S3ListGen->at(i)->getMass();
+            return zmass_stored;
+        }
+        int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
+        if((pdgCode==11 or pdgCode==13 or pdgCode==15) and lepton==0){
+            lepton=S3ListGen->at(i);
+        }
+        if((pdgCode==11 or pdgCode==13 or pdgCode==15) and neutrino==0 and lepton!=0){
+            neutrino=S3ListGen->at(i);
+        }
+    }
+    if(neutrino!=0 and lepton!=0){
+        zmass_stored=Mass(neutrino,lepton);
+        return zmass_stored;
+    }else{
+        zmass_stored=-1;
+        return zmass_stored;
+    }
+    zmass_stored=-1;
+    return zmass_stored;
 }
 
 double specialAna::getInvMtt(){

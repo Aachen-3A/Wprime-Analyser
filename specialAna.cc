@@ -111,6 +111,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
         HistClass::CreateHisto(7,"mt_Flag_goodVertices",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
         HistClass::CreateHisto(7,"mt_Flag_eeBadScFilter",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
         HistClass::CreateHisto(7,"mt_allFilter",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
+        HistClass::CreateHisto(7,"mt_noFilterRun",particles[i].c_str(), 5000, 0, 5000,              "M_{T} [GeV]" );
 
         HistClass::CreateHisto(7,"mt_reciprocal",particles[i].c_str(), 5000, 0, 1,      "1/M_{T} [1/GeV]"     );
         HistClass::CreateHisto(7,"charge",particles[i].c_str(), 3, -1, 1,               TString::Format("q_{%s}", particleSymbols[i].c_str()) );
@@ -244,7 +245,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     HistClass::CreateHisto(7,"Ele_met_Ele_115", 5000, 0, 5000,             "E^{miss}_{T} [GeV]" );
     HistClass::CreateHisto(7,"Ele_pt_Ele_115", 5000, 0, 5000,             "p_{T} [GeV]");
 
-    HistClass::CreateHisto(7,"Ele_CaloIso", 100, 0, 100,"CaloIso");
+    HistClass::CreateHisto(7,"Ele_CaloIso", 100, 0, 10,"CaloIso");
     HistClass::CreateHisto(7,"Ele_ChargeMatch", 100, 0, 100,"ChargeMatch");
     HistClass::CreateHisto(7,"Ele_Class", 100, 0, 100,"Class");
     HistClass::CreateHisto(7,"Ele_DEtaSCCalo", 100, 0, 100,"DEtaSCCalo");
@@ -258,23 +259,23 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     HistClass::CreateHisto(7,"Ele_DxyBS", 100, 0, 100,"DxyBS");
     HistClass::CreateHisto(7,"Ele_Dz", 100, 0, 100,"Dz");
     HistClass::CreateHisto(7,"Ele_DzBS", 100, 0, 100,"DzBS");
-    HistClass::CreateHisto(7,"Ele_ECALIso", 100, 0, 100,"ECALIso");
-    HistClass::CreateHisto(7,"Ele_ECALIso03", 100, 0, 100,"ECALIso03");
-    HistClass::CreateHisto(7,"Ele_ECALIso04", 100, 0, 100,"ECALIso04");
+    HistClass::CreateHisto(7,"Ele_ECALIso", 100, 0, 10,"ECALIso");
+    HistClass::CreateHisto(7,"Ele_ECALIso03", 100, 0, 10,"ECALIso03");
+    HistClass::CreateHisto(7,"Ele_ECALIso04", 100, 0, 10,"ECALIso04");
     HistClass::CreateHisto(7,"Ele_ESCOverPout", 100, 0, 100,"ESCOverPout");
     HistClass::CreateHisto(7,"Ele_ESCSeedOverP", 100, 0, 100,"ESCSeedOverP");
     HistClass::CreateHisto(7,"Ele_ESCSeedPout", 100, 0, 100,"ESCSeedPout");
     HistClass::CreateHisto(7,"Ele_EoP", 100, 0, 100,"EoP");
     HistClass::CreateHisto(7,"Ele_GSFNormChi2", 100, 0, 100,"GSFNormChi2");
-    HistClass::CreateHisto(7,"Ele_HCALIso", 100, 0, 100,"HCALIso");
-    HistClass::CreateHisto(7,"Ele_HCALIso03", 100, 0, 100,"HCALIso03");
-    HistClass::CreateHisto(7,"Ele_HCALIso03d1", 100, 0, 100,"HCALIso03d1");
-    HistClass::CreateHisto(7,"Ele_HCALIso03d2", 100, 0, 100,"HCALIso03d2");
-    HistClass::CreateHisto(7,"Ele_HCALIso04", 100, 0, 100,"HCALIso04");
-    HistClass::CreateHisto(7,"Ele_HCALIso04d1", 100, 0, 100,"HCALIso04d1");
-    HistClass::CreateHisto(7,"Ele_HCALIso04d2", 100, 0, 100,"HCALIso04d2");
-    HistClass::CreateHisto(7,"Ele_HCALIsoConeDR03_2012", 100, 0, 100,"HCALIsoConeDR03_2012");
-    HistClass::CreateHisto(7,"Ele_HCALIsoConeDR04_2012", 100, 0, 100,"HCALIsoConeDR04_2012");
+    HistClass::CreateHisto(7,"Ele_HCALIso", 100, 0, 10,"HCALIso");
+    HistClass::CreateHisto(7,"Ele_HCALIso03", 100, 0, 10,"HCALIso03");
+    HistClass::CreateHisto(7,"Ele_HCALIso03d1", 100, 0, 10,"HCALIso03d1");
+    HistClass::CreateHisto(7,"Ele_HCALIso03d2", 100, 0, 10,"HCALIso03d2");
+    HistClass::CreateHisto(7,"Ele_HCALIso04", 100, 0, 10,"HCALIso04");
+    HistClass::CreateHisto(7,"Ele_HCALIso04d1", 100, 0, 10,"HCALIso04d1");
+    HistClass::CreateHisto(7,"Ele_HCALIso04d2", 100, 0, 10,"HCALIso04d2");
+    HistClass::CreateHisto(7,"Ele_HCALIsoConeDR03_2012", 100, 0, 10,"HCALIsoConeDR03_2012");
+    HistClass::CreateHisto(7,"Ele_HCALIsoConeDR04_2012", 100, 0, 10,"HCALIsoConeDR04_2012");
     HistClass::CreateHisto(7,"Ele_HCALOverECALd1", 100, 0, 100,"HCALOverECALd1");
     HistClass::CreateHisto(7,"Ele_HoEm", 100, 0, 100,"HoEm");
     HistClass::CreateHisto(7,"Ele_HoverE2012", 100, 0, 100,"HoverE2012");
@@ -287,24 +288,24 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     HistClass::CreateHisto(7,"Ele_SCEt", 100, 0, 100,"SCEt");
     HistClass::CreateHisto(7,"Ele_SCeta", 100, 0, 100,"SCeta");
     HistClass::CreateHisto(7,"Ele_TrackerP", 1000, 0, 1000,"TrackerP");
-    HistClass::CreateHisto(7,"Ele_TrkIso", 100, 0, 100,"TrkIso");
-    HistClass::CreateHisto(7,"Ele_TrkIso03", 100, 0, 100,"TrkIso03");
-    HistClass::CreateHisto(7,"Ele_TrkIso04", 100, 0, 100,"TrkIso04");
+    HistClass::CreateHisto(7,"Ele_TrkIso", 100, 0, 10,"TrkIso");
+    HistClass::CreateHisto(7,"Ele_TrkIso03", 100, 0, 10,"TrkIso03");
+    HistClass::CreateHisto(7,"Ele_TrkIso04", 100, 0, 10,"TrkIso04");
     HistClass::CreateHisto(7,"Ele_Vtx_X", 100, -50, 50,"Vtx_X");
     HistClass::CreateHisto(7,"Ele_Vtx_Y", 100, -50, 50,"Vtx_Y");
     HistClass::CreateHisto(7,"Ele_Vtx_Z", 100, -50, 50,"Vtx_Z");
-    HistClass::CreateHisto(7,"Ele_chargedHadronIso", 100, 0, 100,"chargedHadronIso");
+    HistClass::CreateHisto(7,"Ele_chargedHadronIso", 100, 0, 10,"chargedHadronIso");
     HistClass::CreateHisto(7,"Ele_convDcot", 100, 0, 100,"convDcot");
     HistClass::CreateHisto(7,"Ele_convDist", 100, 0, 100,"convDist");
     HistClass::CreateHisto(7,"Ele_convRadius", 100, 0, 100,"convRadius");
     HistClass::CreateHisto(7,"Ele_e1x5", 100, 0, 100,"e1x5");
     HistClass::CreateHisto(7,"Ele_e2x5", 100, 0, 100,"e2x5");
     HistClass::CreateHisto(7,"Ele_e5x5", 100, 0, 100,"e5x5");
-    HistClass::CreateHisto(7,"Ele_neutralHadronIso", 100, 0, 100,"neutralHadronIso");
+    HistClass::CreateHisto(7,"Ele_neutralHadronIso", 100, 0, 10,"neutralHadronIso");
     HistClass::CreateHisto(7,"Ele_photonIso", 100, 0, 100,"photonIso");
     HistClass::CreateHisto(7,"Ele_pin", 1000, 0, 1000,"pin");
     HistClass::CreateHisto(7,"Ele_pout", 1000, 0, 1000,"pout");
-    HistClass::CreateHisto(7,"Ele_puChargedHadronIso", 100, 0, 100,"puChargedHadronIso");
+    HistClass::CreateHisto(7,"Ele_puChargedHadronIso", 100, 0, 10,"puChargedHadronIso");
     HistClass::CreateHisto(7,"Ele_sigmaIetaIeta", 100, 0, 10,"sigmaIetaIeta");
 
 
@@ -2068,23 +2069,23 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     HistClass::Fill(hist_number,"Ele_DxyBS",lepton->getUserRecord ("DxyBS"),weight);
     HistClass::Fill(hist_number,"Ele_Dz",lepton->getUserRecord ("Dz"),weight);
     HistClass::Fill(hist_number,"Ele_DzBS",lepton->getUserRecord ("DzBS"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso",lepton->getUserRecord ("ECALIso"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso03",lepton->getUserRecord ("ECALIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_ECALIso04",lepton->getUserRecord ("ECALIso04"),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso",lepton->getUserRecord ("ECALIso").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso03",lepton->getUserRecord ("ECALIso03").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_ECALIso04",lepton->getUserRecord ("ECALIso04").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_ESCOverPout",lepton->getUserRecord ("ESCOverPout"),weight);
     HistClass::Fill(hist_number,"Ele_ESCSeedOverP",lepton->getUserRecord ("ESCSeedOverP"),weight);
     HistClass::Fill(hist_number,"Ele_ESCSeedPout",lepton->getUserRecord ("ESCSeedPout"),weight);
     HistClass::Fill(hist_number,"Ele_EoP",lepton->getUserRecord ("EoP"),weight);
     HistClass::Fill(hist_number,"Ele_GSFNormChi2",lepton->getUserRecord ("GSFNormChi2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso",lepton->getUserRecord ("HCALIso"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso",lepton->getUserRecord ("HCALIso").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_HCALIso03",lepton->getUserRecord ("HCALIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso03d1",lepton->getUserRecord ("HCALIso03d1"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso03d2",lepton->getUserRecord ("HCALIso03d2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04",lepton->getUserRecord ("HCALIso04"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04d1",lepton->getUserRecord ("HCALIso04d1"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIso04d2",lepton->getUserRecord ("HCALIso04d2"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR03_2012",lepton->getUserRecord ("HCALIsoConeDR03_2012"),weight);
-    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR04_2012",lepton->getUserRecord ("HCALIsoConeDR04_2012"),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso03d1",lepton->getUserRecord ("HCALIso03d1").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso03d2",lepton->getUserRecord ("HCALIso03d2").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04",lepton->getUserRecord ("HCALIso04").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04d1",lepton->getUserRecord ("HCALIso04d1").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIso04d2",lepton->getUserRecord ("HCALIso04d2").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR03_2012",lepton->getUserRecord ("HCALIsoConeDR03_2012").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_HCALIsoConeDR04_2012",lepton->getUserRecord ("HCALIsoConeDR04_2012").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_HCALOverECALd1",lepton->getUserRecord ("HCALOverECALd1"),weight);
     HistClass::Fill(hist_number,"Ele_HoEm",lepton->getUserRecord ("HoEm"),weight);
     HistClass::Fill(hist_number,"Ele_HoverE2012",lepton->getUserRecord ("HoverE2012"),weight);
@@ -2096,13 +2097,13 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     HistClass::Fill(hist_number,"Ele_SCEt",lepton->getUserRecord ("SCEt"),weight);
     HistClass::Fill(hist_number,"Ele_SCeta",lepton->getUserRecord ("SCeta"),weight);
     HistClass::Fill(hist_number,"Ele_TrackerP",lepton->getUserRecord ("TrackerP"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso",lepton->getUserRecord ("TrkIso"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso03",lepton->getUserRecord ("TrkIso03"),weight);
-    HistClass::Fill(hist_number,"Ele_TrkIso04",lepton->getUserRecord ("TrkIso04"),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso",lepton->getUserRecord ("TrkIso").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso03",lepton->getUserRecord ("TrkIso03").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_TrkIso04",lepton->getUserRecord ("TrkIso04").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_Vtx_X",lepton->getUserRecord ("Vtx_X"),weight);
     HistClass::Fill(hist_number,"Ele_Vtx_Y",lepton->getUserRecord ("Vtx_Y"),weight);
     HistClass::Fill(hist_number,"Ele_Vtx_Z",lepton->getUserRecord ("Vtx_Z"),weight);
-    HistClass::Fill(hist_number,"Ele_chargedHadronIso",lepton->getUserRecord ("chargedHadronIso"),weight);
+    HistClass::Fill(hist_number,"Ele_chargedHadronIso",lepton->getUserRecord ("chargedHadronIso").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_convDcot",lepton->getUserRecord ("convDcot"),weight);
     HistClass::Fill(hist_number,"Ele_convDist",lepton->getUserRecord ("convDist"),weight);
     HistClass::Fill(hist_number,"Ele_convRadius",lepton->getUserRecord ("convRadius"),weight);
@@ -2116,12 +2117,12 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
     //HistClass::Fill(hist_number,"Ele_eidTight",lepton->getUserRecord ("eidTight"),weight);
     //HistClass::Fill(hist_number,"Ele_fbrem",lepton->getUserRecord ("fbrem"),weight);
     //HistClass::Fill(hist_number,"Ele_id",lepton->getUserRecord ("id"),weight);
-    HistClass::Fill(hist_number,"Ele_neutralHadronIso",lepton->getUserRecord ("neutralHadronIso"),weight);
-    HistClass::Fill(hist_number,"Ele_photonIso",lepton->getUserRecord ("photonIso"),weight);
+    HistClass::Fill(hist_number,"Ele_neutralHadronIso",lepton->getUserRecord ("neutralHadronIso").toDouble()/lepton->getPt(),weight);
+    HistClass::Fill(hist_number,"Ele_photonIso",lepton->getUserRecord ("photonIso").toDouble()/lepton->getPt(),weight);
     HistClass::Fill(hist_number,"Ele_pin",lepton->getUserRecord ("pin"),weight);
     HistClass::Fill(hist_number,"Ele_pout",lepton->getUserRecord ("pout"),weight);
     if(lepton->hasUserRecord("puChargedHadronIso")){
-        HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso"),weight);
+        HistClass::Fill(hist_number,"Ele_puChargedHadronIso",lepton->getUserRecord ("puChargedHadronIso").toDouble()/lepton->getPt(),weight);
     }
     if(lepton->hasUserRecord("Ele_Match")){
         HistClass::Fill(hist_number,"Ele_Match",lepton->getUserRecord ("Match"),weight);
@@ -2274,17 +2275,21 @@ void specialAna::Fill_Particle_hisos(int hist_number, pxl::Particle* lepton , st
         HistClass::Fill(hist_number,str(boost::format("%s_met_phi%s")%name %syst ),sel_met->getPhi(),weight);
         if(syst==""){
             if(m_FilterEvtView){
-                if( m_FilterEvtView->getUserRecord("Flag_CSCTightHaloFilter").toBool()){
-                    HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_CSCTightHaloFilter")%name %syst ),MT(lepton,sel_met),weight);
-                }
-                if( m_FilterEvtView->getUserRecord("Flag_goodVertices").toBool()){
-                    HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_goodVertices")%name %syst ),MT(lepton,sel_met),weight);
-                }
-                if( m_FilterEvtView->getUserRecord("Flag_eeBadScFilter").toBool()){
-                    HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_eeBadScFilter")%name %syst ),MT(lepton,sel_met),weight);
-                }
-                if( m_FilterEvtView->getUserRecord("Flag_eeBadScFilter").toBool() &&m_FilterEvtView->getUserRecord("Flag_goodVertices").toBool() &&m_FilterEvtView->getUserRecord("Flag_CSCTightHaloFilter").toBool()){
-                    HistClass::Fill(hist_number,str(boost::format("%s_mt%s_allFilter")%name %syst ),MT(lepton,sel_met),weight);
+                if(m_FilterEvtView->hasUserRecord("Flag_CSCTightHaloFilter")){
+                    if( m_FilterEvtView->getUserRecord("Flag_CSCTightHaloFilter").toBool()){
+                        HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_CSCTightHaloFilter")%name %syst ),MT(lepton,sel_met),weight);
+                    }
+                    if( m_FilterEvtView->getUserRecord("Flag_goodVertices").toBool()){
+                        HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_goodVertices")%name %syst ),MT(lepton,sel_met),weight);
+                    }
+                    if( m_FilterEvtView->getUserRecord("Flag_eeBadScFilter").toBool()){
+                        HistClass::Fill(hist_number,str(boost::format("%s_mt%s_Flag_eeBadScFilter")%name %syst ),MT(lepton,sel_met),weight);
+                    }
+                    if( m_FilterEvtView->getUserRecord("Flag_eeBadScFilter").toBool() &&m_FilterEvtView->getUserRecord("Flag_goodVertices").toBool() &&m_FilterEvtView->getUserRecord("Flag_CSCTightHaloFilter").toBool()){
+                        HistClass::Fill(hist_number,str(boost::format("%s_mt%s_allFilter")%name %syst ),MT(lepton,sel_met),weight);
+                    }
+                }else{
+                   HistClass::Fill(hist_number,str(boost::format("%s_mt%s_noFilterRun")%name %syst ),MT(lepton,sel_met),weight);
                 }
             }
             if(JetList->size()>0){

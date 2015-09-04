@@ -58,7 +58,7 @@ public:
     void Fill_RECO_effs();
     void Fill_RECO_object_effs(std::string object, int id, std::vector< pxl::Particle* > part_list);
 
-    void FillSystematics(const pxl::Event* event, std::string const particleName);
+    //void FillSystematics(const pxl::Event* event, std::string const particleName);
     void FillSystematicsUpDown(const pxl::Event* event, std::string const particleName, std::string const updown, std::string const shiftType);
 
     void initEvent( const pxl::Event* event );
@@ -297,6 +297,7 @@ public:
     vector< pxl::Particle* > * METListGen;
     vector< pxl::Particle* > * JetListGen;
     vector< pxl::Particle* > * S3ListGen;
+    vector< pxl::Particle* > QCDLeptonList;
 
     pxl::Particle* sel_muon_gen;
     pxl::Particle* sel_tau_gen;

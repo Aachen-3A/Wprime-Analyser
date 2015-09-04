@@ -425,6 +425,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     mLeptonTree["lepton_type"]=0;
     HistClass::CreateTree( &mLeptonTree, "slimtree");
 
+    mQCDTree["lepton_n"]=0;
     mQCDTree["pt"]=0;
     mQCDTree["eta"]=0;
     mQCDTree["met"]=0;
@@ -643,12 +644,12 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     endEvent( event );
 }
 
-void specialAna::FillSystematics(const pxl::Event* event, std::string const particleName){
-    FillSystematicsUpDown(event, particleName, "Up", "Scale");
-    FillSystematicsUpDown(event, particleName, "Down", "Scale");
-    //FillSystematicsUpDown(event, particleName, "Up", "Resolution");
-    //FillSystematicsUpDown(event, particleName, "Down", "Resolution");
-}
+//void specialAna::FillSystematics(const pxl::Event* event, std::string const particleName){
+    //FillSystematicsUpDown(event, particleName, "Up", "Scale");
+    //FillSystematicsUpDown(event, particleName, "Down", "Scale");
+    ////FillSystematicsUpDown(event, particleName, "Up", "Resolution");
+    ////FillSystematicsUpDown(event, particleName, "Down", "Resolution");
+//}
 
 void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string const particleName, std::string const updown, std::string const shiftType){
     pxl::EventView *tempEventView;
@@ -672,12 +673,15 @@ void specialAna::FillSystematicsUpDown(const pxl::Event* event, std::string cons
 
 
     if(tempEventView == 0){
-        std::vector< pxl::EventView* > views;
-        event->getObjectsOfType< pxl::EventView >(views);
-        for(auto v : views){
-            cout<<v->getName()<<endl;
-        }
-        throw std::runtime_error("specialAna.cc: no EventView '" + particleName + "_syst" + shiftType + updown + "' found!");
+        //std::vector< pxl::EventView* > views;
+        //event->getObjectsOfType< pxl::EventView >(views);
+        //for(auto v : views){
+            //cout<<v->getName()<<endl;
+        //}
+        //throw std::runtime_error("specialAna.cc: no EventView '" + particleName + "_syst" + shiftType + updown + "' found!");
+        //cout<<"specialAna.cc: no EventView '" << particleName << "_syst" << shiftType << updown << "' found!"<<endl;
+        //if the event view has no particles of this type it will not be created!
+        return;
     }
     // get all particles
     std::vector< pxl::Particle* > shiftedParticles;
@@ -1278,38 +1282,37 @@ void specialAna::QCDAnalyse() {
     int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
-    //if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
-        //int passedID=0;
-        //pxl::Particle* tmpTau;
-        //for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
-            //if( Check_Tau_ID_no_iso(*it) ){
-                //passedID++;
-                //tmpTau=(*it);
-            //}
-        //}
-        //if(passedID==1){
-            //qcd_lepton=tmpTau;
-            //m_pt_min_cut=m_pt_min_cut_tau;
-            //m_delta_phi_cut=m_delta_phi_cut_tau;
-            //m_pt_met_min_cut=m_pt_met_min_cut_tau;
-            //m_pt_met_max_cut=m_pt_met_max_cut_tau;
+    if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
+        int passedID=0;
+        for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
+            if( Check_Tau_ID_no_iso(*it) ){
+                passedID++;
+                (*it)->setPdgNumber(15);
+                QCDLeptonList.push_back(*it);
+            }
+        }
+        if(passedID>=1){
+            qcd_lepton=QCDLeptonList.at(0);
+            m_pt_min_cut=m_pt_min_cut_tau;
+            m_delta_phi_cut=m_delta_phi_cut_tau;
+            m_pt_met_min_cut=m_pt_met_min_cut_tau;
+            m_pt_met_max_cut=m_pt_met_max_cut_tau;
 
-            //m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
-            //m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
-            //m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
-            //qcd_id=15;
-        //}
-    //}
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_tau;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_tau;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_tau;
+            qcd_id=15;
+        }
+    }
     if( EleList->size()>=1 && numVetoTau==0 && numVetoMuo==0 ){
         int passedID=0;
-        pxl::Particle* tmpEle;
         for( std::vector< pxl::Particle* >::iterator it = EleList->begin(); it != EleList->end(); ++it ) {
 
             if( (*it)->hasUserRecord("loosIDnoISO")){
                 if ( (*it)->getUserRecord("loosIDnoISO").toBool() or (*it)->getUserRecord("loosIDandISO").toBool() ){
                     passedID++;
-                    tmpEle=(*it);
-                    break;
+                    (*it)->setPdgNumber(11);
+                    QCDLeptonList.push_back(*it);
                 }
             }
             //we can not do the fr if we tag the electrons!!
@@ -1321,7 +1324,7 @@ void specialAna::QCDAnalyse() {
         }
         //cout<<passedID<<endl;
         if(passedID>=1){
-            qcd_lepton=tmpEle;
+            qcd_lepton=QCDLeptonList.at(0);
             m_pt_min_cut=m_pt_min_cut_ele;
             m_delta_phi_cut=m_delta_phi_cut_ele;
             m_pt_met_min_cut=m_pt_met_min_cut_ele;
@@ -1333,41 +1336,54 @@ void specialAna::QCDAnalyse() {
             qcd_id=11;
         }
     }
-    //if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
-        //int passedID=0;
-        //pxl::Particle* tmpMuo;
-        //for( std::vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
-            //if( (*it)->hasUserRecord("ISOfailed")){
-                //if (  (*it)->getUserRecord("ISOfailed").toBool() ){
-                    //passedID++;
-                    //tmpMuo=(*it);
-                //}
+    if( numVetoEle==0 && numVetoTau==0 && MuonList->size()>=1 ){
+        int passedID=0;
+        for( std::vector< pxl::Particle* >::iterator it = MuonList->begin(); it != MuonList->end(); ++it ) {
+            if( (*it)->hasUserRecord("ISOfailed")){
+                if (  (*it)->getUserRecord("ISOfailed").toBool() ){
+                    passedID++;
+                    (*it)->setPdgNumber(13);
+                    QCDLeptonList.push_back(*it);
+                }
+            }
+            //we can not do the fr if we tag the muons!!
+            //else if (MuonList->size()==1){
+                //passedID++;
+                //tmpMuo=( pxl::Particle* ) MuonList->at(0);
+                //break;
             //}
-            ////we can not do the fr if we tag the muons!!
-            ////else if (MuonList->size()==1){
-                ////passedID++;
-                ////tmpMuo=( pxl::Particle* ) MuonList->at(0);
-                ////break;
-            ////}
-        //}
-        //if(passedID==1){
-            //qcd_lepton=tmpMuo;
-            //m_pt_min_cut=m_pt_min_cut_muo;
-            //m_delta_phi_cut=m_delta_phi_cut_muo;
-            //m_pt_met_min_cut=m_pt_met_min_cut_muo;
-            //m_pt_met_max_cut=m_pt_met_max_cut_muo;
+        }
+        if(passedID>=1){
+            qcd_lepton=QCDLeptonList.at(0);
+            m_pt_min_cut=m_pt_min_cut_muo;
+            m_delta_phi_cut=m_delta_phi_cut_muo;
+            m_pt_met_min_cut=m_pt_met_min_cut_muo;
+            m_pt_met_max_cut=m_pt_met_max_cut_muo;
 
-            //m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
-            //m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
-            //m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
-            //qcd_id=13;
-        //}
-    //}
+            m_pt_met_min_cut_funk_root=m_pt_met_min_cut_funk_root_muo;
+            m_pt_met_max_cut_funk_root=m_pt_met_max_cut_funk_root_muo;
+            m_delta_phi_cut_funk_root=m_delta_phi_cut_funk_root_muo;
+            qcd_id=13;
+        }
+    }
 
     if(sel_met && qcd_lepton && qcd_lepton->getPt()>m_pt_min_cut){
         if(qcd_id==11){
             qcd_weight = max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(qcd_lepton->getPt())));
+            for(unsigned int i=1;  i<QCDLeptonList.size();i++){
+                qcd_weight*=(1-max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(QCDLeptonList[i]->getPt()))));
+            }
+            //for(unsigned int j=0;  j<QCDLeptonList.size();j++){
+                //qcd_weight = max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(QCDLeptonList[j]->getPt())));
+                //for(unsigned int i=0;  i<QCDLeptonList.size();i++){
+                    //if(i==j){
+                        //continue;
+                    //}
+                    //qcd_weight*=(1-max(0.,qcd_weight_ele_pt->GetBinContent(qcd_weight_ele_pt->FindBin(QCDLeptonList[i]->getPt()))));
+                //}
+            //}
         }
+
         if(qcd_id==13){
             qcd_weight = max(0.,qcd_weight_muo_pt->GetBinContent(qcd_weight_muo_pt->FindBin(qcd_lepton->getPt())));
         }
@@ -1581,11 +1597,13 @@ void specialAna::Fill_Tree(){
 
 }
 void specialAna::Fill_QCD_Tree(bool iso){
-    mQCDTree["iso"]=iso;
-    mQCDTree["ThisWeight"]=weight;
-    mQCDTree["QCDWeight"]=qcd_weight;
-    mQCDTree["met"]=sel_met->getPt();
+
     if(iso){
+        mQCDTree["lepton_n"]=0;
+        mQCDTree["iso"]=iso;
+        mQCDTree["ThisWeight"]=weight;
+        mQCDTree["QCDWeight"]=qcd_weight;
+        mQCDTree["met"]=sel_met->getPt();
         mQCDTree["pt"]=sel_lepton->getPt();
         mQCDTree["eta"]=sel_lepton->getEta();
         mQCDTree["delta_phi"]=DeltaPhi(sel_lepton,sel_met);
@@ -1595,18 +1613,29 @@ void specialAna::Fill_QCD_Tree(bool iso){
         }else{
             mQCDTree["decay_mode"]=-1;
         }
+        HistClass::FillTree("qcdtree");
     }else{
-        mQCDTree["pt"]=qcd_lepton->getPt();
-        mQCDTree["eta"]=qcd_lepton->getEta();
-        mQCDTree["delta_phi"]=DeltaPhi(qcd_lepton,sel_met);
-        mQCDTree["lepton_type"]=qcd_lepton->getPdgNumber();
-        if(qcd_lepton->hasUserRecord("decayMode")){
-            mQCDTree["decay_mode"]=qcd_lepton->getUserRecord("decayMode").toDouble();
-        }else{
-            mQCDTree["decay_mode"]=-1;
+        int i=0;
+        for(auto thisQCDlepton : QCDLeptonList){
+            mQCDTree["lepton_n"]=i;
+            i++;
+            mQCDTree["iso"]=iso;
+            mQCDTree["ThisWeight"]=weight;
+            mQCDTree["QCDWeight"]=qcd_weight;
+            mQCDTree["met"]=sel_met->getPt();
+            mQCDTree["pt"]=thisQCDlepton->getPt();
+            mQCDTree["eta"]=thisQCDlepton->getEta();
+            mQCDTree["delta_phi"]=DeltaPhi(thisQCDlepton,sel_met);
+            mQCDTree["lepton_type"]=thisQCDlepton->getPdgNumber();
+            if(thisQCDlepton->hasUserRecord("decayMode")){
+                mQCDTree["decay_mode"]=thisQCDlepton->getUserRecord("decayMode").toDouble();
+            }else{
+                mQCDTree["decay_mode"]=-1;
+            }
+            HistClass::FillTree("qcdtree");
         }
     }
-    HistClass::FillTree("qcdtree");
+
 
 }
 
@@ -3450,9 +3479,9 @@ int specialAna::vetoNumber(vector< pxl::Particle* > *list, double ptTreshold){
             passedID=true;
         }
 
-        if( (*part_it)->getPt()<ptTreshold && passedID ){
+        if( (*part_it)->getPt()>ptTreshold && passedID ){
             numVeto++;
-        }else if((*part_it)->getPt()>ptTreshold) {
+        }else if((*part_it)->getPt()<ptTreshold) {
             //Lists are Pt sorted
             break;
         }
@@ -3469,7 +3498,7 @@ int specialAna::vetoNumberTau(vector< pxl::Particle* > *list, double ptTreshold)
         passedID=Check_Tau_ID(*part_it);
         if( (*part_it)->getPt()>ptTreshold && passedID ){
             numVeto++;
-        }else if((*part_it)->getPt()>ptTreshold) {
+        }else if((*part_it)->getPt()<ptTreshold) {
             //Lists are Pt sorted
             break;
         }
@@ -4081,6 +4110,7 @@ void specialAna::endEvent( const pxl::Event* event ){
     METList = 0;
     JetList = 0;
     TauList = 0;
+    QCDLeptonList.clear();
 
     if( not runOnData ){
         for(auto it = TauVisListGen->begin();it!=TauVisListGen->end();){

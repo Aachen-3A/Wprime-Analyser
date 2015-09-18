@@ -81,6 +81,7 @@ public:
     void TriggerAnalyser();
     void QCDAnalyse();
     void ResponseAnalyse();
+    void WritePxlioEvent(const pxl::Event* event);
 
 
     bool tail_selector(const pxl::Event* event);
@@ -113,6 +114,8 @@ public:
     bool useSyst;
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
+    bool writePxlio;
+    pxl::OutputFile PxlOutFile;
 
     const double        m_pt_met_min_cut_ele,m_pt_met_max_cut_ele,m_delta_phi_cut_ele,m_pt_min_cut_ele;
     //for high pt ana use a higher theshold:
@@ -299,9 +302,9 @@ public:
     vector< pxl::Particle* > * S3ListGen;
     vector< pxl::Particle* > QCDLeptonList;
 
-    pxl::Particle* sel_muon_gen;
-    pxl::Particle* sel_tau_gen;
-    pxl::Particle* sel_ele_gen;
+    //pxl::Particle* sel_muon_gen;
+    //pxl::Particle* sel_tau_gen;
+    //pxl::Particle* sel_ele_gen;
 
     pxl::Particle* qcd_lepton;
 

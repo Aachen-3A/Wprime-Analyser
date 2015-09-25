@@ -99,6 +99,7 @@ public:
     double getPtHatDi();
     double getGenHT();
     double getWmass();
+    int getWdecay();
     double getZmass();
     double getInvMtt();
     int vetoNumber(vector< pxl::Particle* > *list, double ptTreshold);
@@ -246,7 +247,9 @@ public:
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
     const std::string m_dataPeriod;
-    const std::string m_kfactorFile_Config;
+    const std::string m_kfactorFile_ele_Config;
+    const std::string m_kfactorFile_muo_Config;
+    const std::string m_kfactorFile_tau_Config;
     const vector< string >  m_analyse_trigger;
     const Tools::MConfig config_;
     Systematics* m_syst_shifter;
@@ -279,8 +282,12 @@ public:
 
     unsigned int n_lepton;
 
-    TFile* m_kfactorFile;
-    TH1D* m_kfactorHist[3];
+    TFile* m_kfactorFile_ele;
+    TFile* m_kfactorFile_muo;
+    TFile* m_kfactorFile_tau;
+    TH1D* m_kfactorHist_ele[3];
+    TH1D* m_kfactorHist_muo[3];
+    TH1D* m_kfactorHist_tau[3];
 
     vector< pxl::Particle* > * EleList;
     vector< pxl::Particle* > * MuonList;

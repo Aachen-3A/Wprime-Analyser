@@ -71,9 +71,28 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
 
         n_lepton = 0; // counting leptons passing the selection
 
-        m_kfactorFile= new TFile(m_kfactorFile_Config.c_str(),"READ");
-        m_kfactorHist[0] = (TH1D*) m_kfactorFile->Get("k_fakp");
-        m_kfactorHist[1] = (TH1D*) m_kfactorFile->Get("k_fakm");
+        if( m_dataPeriod=="13TeV" ){
+            m_kfactorFile_ele= new TFile(m_kfactorFile_ele_Config.c_str(),"READ");
+            m_kfactorHist_ele[0] = (TH1D*) m_kfactorFile_ele->Get("k_fac_p");
+            m_kfactorHist_ele[1] = (TH1D*) m_kfactorFile_ele->Get("k_fac_m");
+            m_kfactorHist_ele[2] = (TH1D*) m_kfactorFile_ele->Get("k_fac_mean");
+
+            m_kfactorFile_muo= new TFile(m_kfactorFile_muo_Config.c_str(),"READ");
+            m_kfactorHist_muo[0] = (TH1D*) m_kfactorFile_muo->Get("k_fac_p");
+            m_kfactorHist_muo[1] = (TH1D*) m_kfactorFile_muo->Get("k_fac_m");
+            m_kfactorHist_muo[2] = (TH1D*) m_kfactorFile_muo->Get("k_fac_mean");
+
+            m_kfactorFile_tau= new TFile(m_kfactorFile_tau_Config.c_str(),"READ");
+            m_kfactorHist_tau[0] = (TH1D*) m_kfactorFile_tau->Get("k_fac_p");
+            m_kfactorHist_tau[1] = (TH1D*) m_kfactorFile_tau->Get("k_fac_m");
+            m_kfactorHist_tau[2] = (TH1D*) m_kfactorFile_tau->Get("k_fac_mean");
+        }else{
+            m_kfactorFile_ele= new TFile(m_kfactorFile_ele_Config.c_str(),"READ");
+            m_kfactorHist_ele[0] = (TH1D*) m_kfactorFile_ele->Get("k_fakp");
+            m_kfactorHist_ele[1] = (TH1D*) m_kfactorFile_ele->Get("k_fakm");
+            m_kfactorHist_ele[2] = (TH1D*) m_kfactorFile_ele->Get("k_fak_mean");
+        }
+
 
         if (writePxlio) {
             PxlOutFile.setCompressionMode(6);
@@ -3453,6 +3472,17 @@ double specialAna::getGenHT(){
     return ht;
 }
 
+int specialAna::getWdecay(){
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
+        if(pdgCode==11 or pdgCode==13 or pdgCode==15){
+            return pdgCode;
+        }
+    }
+    return 11;
+}
+
+
 double specialAna::getWmass(){
     if(wmass_stored!=0){
         return wmass_stored;
@@ -3901,9 +3931,16 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
 
     if( m_dataPeriod=="13TeV" ){
         double mass=getWmass();
+        int leptonID=getWdecay();
         double k_faktor=1.;
         if(mass>0){
-            k_faktor=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
+            if(leptonID==11){
+                k_faktor=m_kfactorHist_ele[mode]->GetBinContent(m_kfactorHist_ele[mode]->FindBin(mass));
+            }else if(leptonID==13){
+                k_faktor=m_kfactorHist_muo[mode]->GetBinContent(m_kfactorHist_muo[mode]->FindBin(mass));
+            }else if(leptonID==15){
+                k_faktor=m_kfactorHist_tau[mode]->GetBinContent(m_kfactorHist_tau[mode]->FindBin(mass));
+            }
         }
         if (k_faktor<0){
             k_faktor=1.;
@@ -3928,7 +3965,7 @@ void specialAna::applyKfactor(const pxl::Event* event , int mode){
             mass=Mass(S3ListGen->at(l), S3ListGen->at(nu));
         }
         if(mass!=0){
-            weight*=m_kfactorHist[mode]->GetBinContent(m_kfactorHist[mode]->FindBin(mass));
+            weight*=m_kfactorHist_ele[mode]->GetBinContent(m_kfactorHist_ele[mode]->FindBin(mass));
         }
 
 

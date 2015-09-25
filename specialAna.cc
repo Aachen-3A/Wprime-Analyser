@@ -57,7 +57,9 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
     d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
     m_dataPeriod(            cfg.GetItem< string >( "General.DataPeriod" ) ),
-    m_kfactorFile_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.WkfactorFile"))),
+    m_kfactorFile_ele_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.Ele.WkfactorFile"))),
+    m_kfactorFile_muo_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.Muo.WkfactorFile"))),
+    m_kfactorFile_tau_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.Tau.WkfactorFile"))),
     m_analyse_trigger( Tools::splitString< string >( cfg.GetItem< string >( "wprime.AnalyseTriggerList" ), true  ) ),
     config_(cfg)
     {
@@ -1713,16 +1715,16 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         if(Datastream.Contains("WTo") && Datastream.Contains("Nu_Tune4C_13TeV")) {
                 if(getWmass() > 200) return true;
         }
-         if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_200") || Datastream.Contains("Nu_M-200"))) {
+        else if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_200") || Datastream.Contains("Nu_M-200"))) {
                 if(getWmass() > 500) return true;
         }
-        if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_500") || Datastream.Contains("Nu_M-500"))) {
+        else if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_500") || Datastream.Contains("Nu_M-500"))) {
                 if(getWmass() > 1000) return true;
         }
-        if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_1000_13TeV") || Datastream.Contains("Nu_M-1000"))) {
+        else if(Datastream.Contains("WTo") && (Datastream.Contains("Nu_M_1000") || Datastream.Contains("Nu_M-1000"))) {
                 if(getWmass() > 3000) return true;
         }
-        if(Datastream.Contains("WJetsToLNu_")) {
+        else if(Datastream.Contains("WJetsToLNu_")) {
             if(getWmass() > 200) return true;
             //if(Datastream.Contains("WJetsToLNu_13TeV")){
                 //if (m_GenEvtView->getUserRecord("genHT").toDouble() > 100) return true;
@@ -3831,7 +3833,7 @@ void specialAna::initEvent( const pxl::Event* event ){
 
         if(m_dataPeriod=="13TeV"){
             //only take the sign of a generator weight!
-            event_weight/=fabs(event_weight);
+            //event_weight/=fabs(event_weight);
 
             weight = event_weight ;
         }else if(m_dataPeriod=="8TeV"){
@@ -3878,7 +3880,7 @@ void specialAna::initEvent( const pxl::Event* event ){
                 //}
                 //delete tmp;
         //}
-
+        HistClass::Fill("h_counters", 2, m_GenEvtView->getUserRecord( "Weight" )); // increment number of events
     }
 }
 

@@ -1769,14 +1769,14 @@ bool specialAna::tail_selector( const pxl::Event* event) {
             if(getInvMtt() > 700) return true;
         }
         if(Datastream.Contains("TT_Mtt-700to1000")) {
-            if(getInvMtt() < 700 and getInvMtt() > 1000) return true;
+            if(getInvMtt() < 700 or getInvMtt() > 1000) return true;
         }
         if(Datastream.Contains("TT_Mtt-1000toInf")) {
             if(getInvMtt() < 1000) return true;
         }
 
         if(Datastream.Contains("DYJetsToLL_M-50_")) {
-            if(getZmass() < 50 and getZmass() > 100) return true;
+            if(getZmass() < 50 or getZmass() > 100) return true;
         }
 
     }else if( m_dataPeriod=="8TeV" ){

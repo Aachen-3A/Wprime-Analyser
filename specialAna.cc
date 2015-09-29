@@ -1776,9 +1776,8 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         }
 
         if(Datastream.Contains("DYJetsToLL_M-50_")) {
-            if(getZmass() > 100) return true;
+            if(getZmass() < 50 and getZmass() > 100) return true;
         }
-
 
     }else if( m_dataPeriod=="8TeV" ){
         for(uint i = 0; i < S3ListGen->size(); i++){

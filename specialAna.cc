@@ -70,7 +70,6 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
         events_ = 0;
 
         n_lepton = 0; // counting leptons passing the selection
-
         if( m_dataPeriod=="13TeV" ){
             m_kfactorFile_ele= new TFile(m_kfactorFile_ele_Config.c_str(),"READ");
             m_kfactorHist_ele[0] = (TH1D*) m_kfactorFile_ele->Get("k_fac_p");
@@ -486,9 +485,15 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
         HistClass::CreateTree( &mZtree, "ztree");
 
         TFile qcd_weight_ele(Tools::musicAbsPath(Tools::ExpandPath( cfg.GetItem< std::string >("wprime.qcd_weight.ele"))).c_str());
-        qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_0_pt");
-        qcd_weight_muo_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_1_pt");
-        qcd_weight_tau_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_2_pt");
+        if( m_dataPeriod=="13TeV" ){
+            qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_0_pt");
+            qcd_weight_muo_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_1_pt");
+            qcd_weight_tau_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_2_pt");
+        }else{
+            qcd_weight_ele_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_pt");
+            qcd_weight_muo_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_pt");
+            qcd_weight_tau_pt=(TH1D*) qcd_weight_ele.Get("qcdFake_pt");
+        }
 
         numAllTaus=0;
 
@@ -856,7 +861,7 @@ bool specialAna::Check_Tau_ID(pxl::Particle* tau) {
     bool passed = false;
     bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
     bool tau_ISO = tau->getUserRecord("byMediumCombinedIsolationDeltaBetaCorr3Hits").toDouble()>0.5;
-    bool tau_ELE = tau->getUserRecord("againstElectronLoose").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronLooseMVA5").toDouble()>0.5;
     bool tau_MUO = tau->getUserRecord("againstMuonLoose3").toDouble()>0.5;
     if (tau_ID && tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
@@ -865,7 +870,7 @@ bool specialAna::Check_Tau_ID_no_iso(pxl::Particle* tau) {
     bool passed = false;
     bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
     bool tau_ISO = tau->getUserRecord("byMediumCombinedIsolationDeltaBetaCorr3Hits").toDouble()>0.5;
-    bool tau_ELE = tau->getUserRecord("againstElectronLoose").toDouble()>0.5;
+    bool tau_ELE = tau->getUserRecord("againstElectronLooseMVA5").toDouble()>0.5;
     bool tau_MUO = tau->getUserRecord("againstMuonLoose3").toDouble()>0.5;
     if (tau_ID && !tau_ISO && tau_ELE && tau_MUO) passed = true;
     return passed;
@@ -1282,10 +1287,10 @@ bool specialAna::triggerKinematics(){
     //same for qcd lepton candiadates
     if(qcd_lepton && sel_met){
         if(qcd_lepton->getName()==m_TauType){
-            //if(qcd_lepton->getPt()>100 && sel_met->getPt()>150){
+            if(qcd_lepton->getPt()>80 && sel_met->getPt()>150){
             //if(qcd_lepton->getPt()>50 && sel_met->getPt()>50){
                 tiggerKinematics=true;
-            //}
+            }
 
         }
         if(qcd_lepton->getName()=="Muon"){
@@ -1745,9 +1750,9 @@ bool specialAna::tail_selector( const pxl::Event* event) {
         }
         else if(Datastream.Contains("WJetsToLNu_")) {
             if(getWmass() > 200) return true;
-            //if(Datastream.Contains("WJetsToLNu_13TeV")){
-                //if (m_GenEvtView->getUserRecord("genHT").toDouble() > 100) return true;
-            //}
+            if(Datastream.Contains("WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8")){
+                if (m_GenEvtView->getUserRecord("genHT").toDouble() > 100) return true;
+            }
             if(getWmass()<0){
                 cout<<"-----------------------------------------"<<endl;
                 for(uint i = 0; i < S3ListGen->size(); i++){

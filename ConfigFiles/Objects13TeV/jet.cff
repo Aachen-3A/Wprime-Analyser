@@ -7,7 +7,7 @@ Jet.use = 1
 Jet.Type.Gen = "AK4"
 Jet.Type.Rec = "AK4"
 Jet.pt.min = 30
-Jet.eta.max = 5.
+Jet.eta.max = 2.4
 Jet.DeltaR.max = 0.5
 Jet.isPF = 1
 Jet.IdTag = 1
@@ -54,6 +54,9 @@ Jet.BJets.use = 0
 ############################
 Jet.BJets.Algo = "combinedInclusiveSecondaryVertexV2BJetTags"
 Jet.BJets.Discr.min = -9999
+Jet.BJets.separate = 0
+Jet.BJets.Type.Gen = "b"
+Jet.BJets.Type.Rec = "b"
 # Choose Algorithm for Flavour Identification of (B)Jets:
 # - algoFlavour
 # - physicsFlavour

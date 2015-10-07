@@ -65,8 +65,10 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     {
         m_syst_shifter=&syst_shifter;
         string safeFileName = "SpecialHistos.root";
+        string safeFileName1 = "GenEvent.txt";
         file1 = new TFile(safeFileName.c_str(), "RECREATE");
         eventDisplayFile.open(m_cutdatafile.c_str(), std::fstream::out);
+        GeneventDisplayFile.open(safeFileName1.c_str(), std::fstream::out);
         events_ = 0;
 
         n_lepton = 0; // counting leptons passing the selection
@@ -502,6 +504,86 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
 
 specialAna::~specialAna() {
 }
+void specialAna::boosting(const pxl::Event* event){
+    string datastream = event->getUserRecord( "Dataset" );
+    if( (datastream.find("WTo")!=1) and (datastream.find("WJets")!=1)){
+        return;
+    }
+    
+    if (HistClass::histo.find("h1_lep_boost")== HistClass::histo.end()){
+        HistClass::CreateHisto("lep_boost", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_qm", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost_qm", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_qp", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost_qp", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("lep_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_qm_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_qm_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("lep_boost_qp_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_qp_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+    }
+
+
+    pxl::Particle* w=0;
+    pxl::Particle* lepton=0;
+    pxl::Particle* neutrino=0;
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if (abs(S3ListGen->at(i)->getPdgNumber())==24 ){
+            w=S3ListGen->at(i);
+        }
+        int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
+        if((pdgCode==11 or pdgCode==13 or pdgCode==15) and lepton==0){
+            lepton=S3ListGen->at(i);
+            lepton->setCharge(S3ListGen->at(i)->getPdgNumber());
+        }
+        if((pdgCode==12 or pdgCode==14 or pdgCode==16) and neutrino==0){
+            neutrino=S3ListGen->at(i);
+        }
+    }
+    
+    if(w!=0 && lepton!=0 &&neutrino!=0){
+        lepton->boost( -(w->getBoostVector()) );
+        neutrino->boost( -(w->getBoostVector()) );
+        HistClass::Fill("lep_boost",lepton->getPhi(),weight);
+        HistClass::Fill("neu_boost",neutrino->getPhi(),1.);
+        HistClass::Fill("lep_boost_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+        HistClass::Fill("neu_boost_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+        HistClass::Fill("lep_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+        HistClass::Fill("neu_boost_cos",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        HistClass::Fill("add_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        if (lepton->getCharge() >0){
+            HistClass::Fill("lep_boost_qp",lepton->getPhi(),weight);
+            HistClass::Fill("neu_boost_qp",neutrino->getPhi(),weight);
+            HistClass::Fill("lep_boost_qp_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("neu_boost_qp_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("lep_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("neu_boost_cos_qp",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("add_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        }
+        else if (lepton->getCharge() < 0){
+            HistClass::Fill("lep_boost_qm",lepton->getPhi(),weight);
+            HistClass::Fill("neu_boost_qm",neutrino->getPhi(),weight);
+            HistClass::Fill("lep_boost_qm_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("neu_boost_qm_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("lep_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("neu_boost_cos_qm",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("add_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        }
+        lepton->boost(w->getBoostVector());
+        neutrino->boost(w->getBoostVector());
+    }
+}
 
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
@@ -671,7 +753,21 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
             FillSystematicsUpDown(event, syst->m_particleType, "Down", syst->m_sysType);
         }
     }
+    
+    if(not runOnData && sel_lepton && sel_met &&(MT(sel_lepton,sel_met) > 200)){
+        printGenEvent();
 
+    }
+    
+    //~ if(sel_lepton && sel_met && DeltaPhi(sel_lepton,sel_met) < 2.5 )
+        //~ printEvent();
+    //~ 
+    
+    if(not runOnData && sel_lepton && sel_met){
+        boosting(event);
+        DY_BG(event);
+    }   
+     
     endEvent( event );
 }
 
@@ -3648,6 +3744,60 @@ void specialAna::printEvent(){
 
 }
 
+void specialAna::printGenEvent(){
+    GeneventsAfterCutsEvents<<"<event>\n";
+    GeneventsAfterCutsEvents<<"#"<< temp_run << ":"
+                            << temp_ls << ":"
+                            << temp_event <<"\n";
+    for(std::vector< pxl::Particle* >::const_iterator part_it = S3ListGen->begin(); part_it != S3ListGen->end(); ++part_it){
+        int pdgCode= abs( (*part_it) ->getPdgNumber());
+        if(pdgCode>10 and  pdgCode<17 ){
+             GeneventsAfterCutsEvents<<(*part_it)->getPdgNumber()<<" "<<(*part_it)->getPx()<<" "<<(*part_it)->getPy()<<" "<<(*part_it)->getPz()<<" "<<(*part_it)->getE()<<"\n";
+                    }
+    }
+    //~ std::vector< pxl::Particle* > JetListGen;
+    for(std::vector< pxl::Particle* >::const_iterator part_it = JetListGen->begin(); part_it != JetListGen->end(); ++part_it){
+        if((*part_it)->getPt() >20 ){
+        GeneventsAfterCutsEvents<<"1"<<" "<<(*part_it)->getPx()<<" "<<(*part_it)->getPy()<<" "<<(*part_it)->getPz()<<" "<<(*part_it)->getE()<<"\n";
+        }
+    }
+
+    GeneventsAfterCutsEvents<<"</event>\n";
+
+}
+void specialAna::DY_BG(const pxl::Event* event){
+   
+//~ Für DY//TT:
+//~ check gen lepton: veto failed
+//~ eta// pt/MET (1 lep & 2 lep)  // delta phi (lep 2, met)
+    string datastream = event->getUserRecord( "Dataset" );
+    if( (datastream.find("DY")!=1 )and (datastream.find("TT")!=1) ){
+        return;
+    }
+    if (HistClass::histo.find("h1_DY_eta")== HistClass::histo.end()){
+        HistClass::CreateHisto("DY_eta", 80, -4, 4, "#eta" );
+        HistClass::CreateHisto("DY_DeltaPhi", 100, 0, 3.5, "#Delta#phi(e_{lost},E^{miss})");
+        HistClass::CreateHisto("DY_ET_MET",50, 0, 6,"p_{T}/E^{miss}_{T}" );
+        HistClass::CreateHisto("DY_pt",8000, 0, 8000,"p_{T} [GeV]" );
+    }
+    pxl::Particle* lost_particle = 0;
+    for(std::vector< pxl::Particle* >::const_iterator part_it = S3ListGen->begin(); part_it != S3ListGen->end(); ++part_it){
+        int pdgCode= abs( (*part_it) ->getPdgNumber());
+        if(pdgCode>10 and  pdgCode<17 ){
+            if (DeltaR(*part_it, sel_lepton) > 0.3) {
+                lost_particle = *part_it;
+                break;
+            }        
+        }
+    }
+    if (lost_particle){
+        HistClass::Fill("DY_eta", lost_particle->getEta() ,weight );
+        HistClass::Fill("DY_DeltaPhi", DeltaPhi(lost_particle->getPhi(), sel_met->getPhi() ) ,weight);
+        HistClass::Fill("DY_ET_MET", lost_particle->getPt()/sel_met->getPt()  ,weight );
+        HistClass::Fill("DY_pt", lost_particle->getPt() ,weight );
+    }
+}
+
 void specialAna::cleanJets(){
 
     bool deleteThisJet = false;
@@ -3701,6 +3851,14 @@ void specialAna::endJob( const Serializable* ) {
     file1->cd("MC/");
     HistClass::WriteAll("_Gen");
     //}
+    file1->cd();    
+    file1->mkdir("Boost");
+    file1->cd("Boost/");
+    HistClass::WriteAll("_boost");
+    file1->cd();
+    file1->mkdir("DY");
+    file1->cd("DY/");
+    HistClass::WriteAll("DY_");
     file1->cd();
     file1->mkdir("Taus");
     file1->cd("Taus/");
@@ -3742,6 +3900,9 @@ void specialAna::endJob( const Serializable* ) {
     outputstring = eventsAfterCutsEvents.str();
     eventDisplayFile << outputstring;
     eventDisplayFile.close();
+    std::string outputstring1 = GeneventsAfterCutsEvents.str();
+    GeneventDisplayFile << outputstring1;
+    GeneventDisplayFile.close();
     delete file1;
 }
 

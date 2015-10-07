@@ -32,13 +32,17 @@ public:
     specialAna( const Tools::MConfig &config, Systematics &syst_shifter);
     virtual ~specialAna();
 
+    virtual void boosting(const pxl::Event* event);
+    virtual void DY_BG( const pxl::Event* event);
     virtual void endJob(const Serializable*);
     virtual void analyseEvent( const pxl::Event* event );
 
     TFile* file1;
     ofstream eventDisplayFile;
+    ofstream GeneventDisplayFile;
     std::stringstream eventsAfterCuts;
     std::stringstream eventsAfterCutsEvents;
+    std::stringstream GeneventsAfterCutsEvents;;
 
     void Fill_stage_0_histos( );
     void Fill_Gen_Controll_histo( );
@@ -70,6 +74,7 @@ public:
     bool Check_Tau_ID_no_iso(pxl::Particle* tau);
 
     void printEvent();
+    void printGenEvent();
     void cleanJets();
 
 

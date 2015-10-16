@@ -622,11 +622,11 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     HistClass::Fill("MC_cutflow_Gen",1,weight);
 
     KinematicsSelector();
+
     QCDAnalyse();
     if(m_do_ztree){
         ResponseAnalyse();
     }
-
 
     Fill_stage_0_histos();
     if (sel_lepton==0 and qcd_lepton==0){
@@ -655,7 +655,6 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     HistClass::Fill("MC_cutflow_Gen",4,weight);
 
     cleanJets();
-
 
 
 
@@ -1113,7 +1112,7 @@ void specialAna::TriggerAnalyser(){
     for(pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin() ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
         if(string::npos != (*us).first.find( "HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80")){
             triggered=(*us).second;
-            if(triggered){
+            if(triggered > 0){
                 break;
             }
         }
@@ -1152,7 +1151,7 @@ void specialAna::FillTriggers(int ihist){
 }
 
 bool specialAna::TriggerSelector(const pxl::Event* event){
-    bool triggered=false;
+    double triggered=0;
 
 
     // Warning this disables all triggers
@@ -1238,7 +1237,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                     continue;
                 }
                 triggered=(*us).second;
-                if(triggered){
+                if(triggered > 0){
                     if(usePdgNumber==11){
                         if(sel_lepton){
                             if(!sel_lepton->hasUserRecord("Ele_27")){
@@ -1317,7 +1316,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                     continue;
                 }
                 triggered=(*us).second;
-                if(triggered){
+                if(triggered > 0){
                     if(usePdgNumber==11){
                         if(sel_lepton){
                             if(!sel_lepton->hasUserRecord("Ele_27")){
@@ -1352,7 +1351,11 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
     //}
 
 
-     return (triggered );
+    if (triggered>0) {
+        return true;
+    } else {
+        return false;
+    }
 
 }
 
@@ -1406,7 +1409,7 @@ bool specialAna::triggerKinematics(){
     return tiggerKinematics;
 }
 bool specialAna::TriggerSelector_highpt(const pxl::Event* event){
-    bool triggered=false;
+    double triggered=0;
 
 
     //I dont understand the 8TeV triggers at the moment!!
@@ -1420,14 +1423,18 @@ bool specialAna::TriggerSelector_highpt(const pxl::Event* event){
                 string::npos != (*us).first.find( "HLT_Ele105_CaloIdVT_GsfTrkIdT_v")
             ){
                 triggered=(*us).second;
-                if(triggered){
+                if(triggered > 0){
                     break;
                 }
             }
         }
     }
 
-     return (triggered );
+    if (triggered > 0 ) {
+        return true;
+    } else {
+        return false;
+    }
 
 }
 
@@ -2361,13 +2368,17 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
 
 }
 void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton) {
+    
     Fill_Particle_hisos(hist_number,lepton);
     //for(uint j = 0; j < 67; j++) {
         //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->getUserRecord( (string)d_mydisc[j] ));
     //}
 
+
     for(std::vector<TString>::iterator it = d_mydisc.begin(); it != d_mydisc.end(); it++){
-        HistClass::FillStr(hist_number,"Tau_discriminator",*it,lepton->getUserRecord( (string)(*it) ));
+        if ( lepton->hasUserRecord( (string)(*it) ) ) {
+            HistClass::FillStr(hist_number,"Tau_discriminator",*it,lepton->getUserRecord( (string)(*it) ));
+        }
     }
     //if(hist_number==0){
         //pxl::UserRecords::const_iterator us = lepton->getUserRecords().begin();

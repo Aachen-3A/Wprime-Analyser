@@ -20,6 +20,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
 
     writePxlio( cfg.GetItem< bool >( "General.writePxlio" ) ),
     PxlOutFile("SpecialPxlio.pxlio"),
+
     //wprime specific stuff
     m_pt_met_min_cut_ele(    cfg.GetItem< double >( "Ele.wprime.pt_met_cut_min" ) ),
     m_pt_met_max_cut_ele(    cfg.GetItem< double >( "Ele.wprime.pt_met_cut_max" ) ),
@@ -54,6 +55,8 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     m_cutdatafile(           cfg.GetItem< std::string >( "wprime.cutdatafile" ) ),
 
     m_do_ztree( cfg.GetItem<bool>( "wprime.produce_ztree" ) ) ,
+    m_do_complicated_tau_stuff( cfg.GetItem<bool>( "wprime.complicated_tau_stuff" ,false )) ,
+
     m_trigger_string( Tools::splitString< string >( cfg.GetItem< string >( "wprime.TriggerList" ), true  ) ),
     d_mydiscmu(  {"isPFMuon","isGlobalMuon","isTrackerMuon","isStandAloneMuon","isTightMuon","isHighPtMuon"} ),
     m_dataPeriod(            cfg.GetItem< string >( "General.DataPeriod" ) ),
@@ -630,14 +633,32 @@ void specialAna::KinematicsSelector() {
     //the ordering is important muon is last (overrides the first two and so on)
     if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0){
         int passedID=0;
-        pxl::Particle* tmpTau;
+        map<string,int> passedID_disc;
+        for(std::vector<TString>::iterator disc_it = d_mydisc.begin(); disc_it != d_mydisc.end(); disc_it++){
+            passedID_disc[(string)(*disc_it)]=0;
+        }
+        pxl::Particle* tmpTau=0;
         for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
-            if( Check_Tau_ID(*it) ){
-                passedID++;
-                tmpTau=(*it);
+            if(m_do_complicated_tau_stuff){
+
+                for(std::vector<TString>::iterator disc_it = d_mydisc.begin(); disc_it != d_mydisc.end(); disc_it++){
+                    if((*it)->getUserRecord( (string)(*disc_it) ).toDouble()>0.5){
+                        passedID_disc[(string)(*disc_it)]++;
+                        //use the highest pt tau!!
+                        //attention unclean
+                        if(tmpTau==0){
+                            tmpTau=(*it);
+                        }
+                    }
+                }
+            }else{
+                if( Check_Tau_ID(*it) ){
+                    passedID++;
+                    tmpTau=(*it);
+                }
             }
         }
-        if(passedID==1){
+        if(passedID==1 or (m_do_complicated_tau_stuff and tmpTau!=0)){
             sel_lepton=tmpTau;
             m_pt_min_cut=m_pt_min_cut_tau;
             m_delta_phi_cut=m_delta_phi_cut_tau;
@@ -1099,7 +1120,7 @@ bool specialAna::TriggerSelector_highpt(const pxl::Event* event){
 
 void specialAna::QCDAnalyse() {
     //inverted isolation
-    if(sel_lepton!=0){
+    if(sel_lepton!=0 or m_do_complicated_tau_stuff){
         return;
     }
     int qcd_id=0;
@@ -1112,13 +1133,29 @@ void specialAna::QCDAnalyse() {
     int numVetoTau=vetoNumberTau(TauList,m_leptonVetoPt);
     int numVetoEle=vetoNumber(EleList,m_leptonVetoPt);
 
+
     if( numVetoEle==0 && TauList->size()>=1 && numVetoMuo==0 ){
         int passedID=0;
+        map<string,int> passedID_disc;
+        for(std::vector<TString>::iterator disc_it = d_mydisc.begin(); disc_it != d_mydisc.end(); disc_it++){
+            passedID_disc[(string)(*disc_it)]=0;
+        }
         for( std::vector< pxl::Particle* >::iterator it = TauList->begin(); it != TauList->end(); ++it ) {
-            if( Check_Tau_ID_no_iso(*it) ){
-                passedID++;
-                (*it)->setPdgNumber(15);
-                QCDLeptonList.push_back(*it);
+
+            if(m_do_complicated_tau_stuff){
+                for(std::vector<TString>::iterator disc_it = d_mydisc.begin(); disc_it != d_mydisc.end(); disc_it++){
+                    if(not ((*it)->getUserRecord( (string)(*disc_it) ).toDouble()>0.5)){
+                        passedID_disc[(string)(*disc_it)]++;
+                        (*it)->setPdgNumber(15);
+                        QCDLeptonList.push_back(*it);
+                    }
+                }
+            }else{
+                if( Check_Tau_ID_no_iso(*it) ){
+                    passedID++;
+                    (*it)->setPdgNumber(15);
+                    QCDLeptonList.push_back(*it);
+                }
             }
         }
         if(passedID>=1){
@@ -2035,8 +2072,17 @@ void specialAna::Fill_Controll_Ele_histo(int hist_number, pxl::Particle* lepton)
 
 }
 void specialAna::Fill_Controll_Tau_histo(int hist_number, pxl::Particle* lepton) {
+    if(m_do_complicated_tau_stuff){
+        for(std::vector<TString>::iterator it = d_mydisc.begin(); it != d_mydisc.end(); it++){
+            if(lepton->getUserRecord( (string)(*it) ).toDouble()>0.5){
+                Fill_Particle_hisos(hist_number,lepton,(string)(*it));
+            }
+        }
+    }else{
+        Fill_Particle_hisos(hist_number,lepton);
+    }
 
-    Fill_Particle_hisos(hist_number,lepton);
+
     //for(uint j = 0; j < 67; j++) {
         //HistClass::Fill(hist_number,"Tau_discriminator",j+1,lepton->getUserRecord( (string)d_mydisc[j] ));
     //}

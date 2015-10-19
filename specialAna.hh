@@ -56,7 +56,9 @@ public:
     void Fill_QCD_Tree(bool iso);
 
     void FillTriggers(int ihist);
-
+	
+	void Create_Histos();
+    void Create_Trees();
     void Create_RECO_effs();
     void Create_RECO_object_effs(std::string object);
     void Fill_RECO_effs();
@@ -152,25 +154,25 @@ public:
 
 
     std::vector<TString> d_mydisc= {
-        "againstElectronLoose",
+        //"againstElectronLoose",
         "againstElectronLooseMVA5",
         "againstElectronMVA5category",
-        "againstElectronMedium",
+        //"againstElectronMedium",
         "againstElectronMediumMVA5",
-        "againstElectronTight",
+        //"againstElectronTight",
         "againstElectronVLooseMVA5",
-        "againstMuonLoose",
-        "againstMuonLoose2",
+        //"againstMuonLoose",
+        //"againstMuonLoose2",
         "againstMuonLoose3",
-        "againstMuonLooseMVA",
+        //"againstMuonLooseMVA",
         //"againstMuonMVAraw",
-        "againstMuonMedium",
-        "againstMuonMedium2",
-        "againstMuonMediumMVA",
-        "againstMuonTight",
-        "againstMuonTight2",
+        //"againstMuonMedium",
+        //"againstMuonMedium2",
+        //"againstMuonMediumMVA",
+        //"againstMuonTight",
+        //"againstMuonTight2",
         "againstMuonTight3",
-        "againstMuonTightMVA",
+        //"againstMuonTightMVA",
         //"byCombinedIsolationDeltaBetaCorrRaw3Hits",
         //"byIsolationMVA3newDMwLTraw",
         //"byIsolationMVA3newDMwoLTraw",
@@ -178,30 +180,30 @@ public:
         //"byIsolationMVA3oldDMwoLTraw",
         "byLooseCombinedIsolationDeltaBetaCorr3Hits",
         "byLooseIsolationMVA3newDMwLT",
-        "byLooseIsolationMVA3newDMwoLT",
-        "byLooseIsolationMVA3oldDMwLT",
-        "byLooseIsolationMVA3oldDMwoLT",
+        //"byLooseIsolationMVA3newDMwoLT",
+        //"byLooseIsolationMVA3oldDMwLT",
+        //"byLooseIsolationMVA3oldDMwoLT",
         "byMediumCombinedIsolationDeltaBetaCorr3Hits",
         "byMediumIsolationMVA3newDMwLT",
-        "byMediumIsolationMVA3newDMwoLT",
-        "byMediumIsolationMVA3oldDMwLT",
-        "byMediumIsolationMVA3oldDMwoLT",
+        //"byMediumIsolationMVA3newDMwoLT",
+        //"byMediumIsolationMVA3oldDMwLT",
+        //"byMediumIsolationMVA3oldDMwoLT",
         "byTightCombinedIsolationDeltaBetaCorr3Hits",
         "byTightIsolationMVA3newDMwLT",
-        "byTightIsolationMVA3newDMwoLT",
-        "byTightIsolationMVA3oldDMwLT",
-        "byTightIsolationMVA3oldDMwoLT",
+        //"byTightIsolationMVA3newDMwoLT",
+        //"byTightIsolationMVA3oldDMwLT",
+        //"byTightIsolationMVA3oldDMwoLT",
         "byVLooseIsolationMVA3newDMwLT",
-        "byVLooseIsolationMVA3newDMwoLT",
-        "byVLooseIsolationMVA3oldDMwLT",
+        //"byVLooseIsolationMVA3newDMwoLT",
+        //"byVLooseIsolationMVA3oldDMwLT",
         "byVTightIsolationMVA3newDMwLT",
-        "byVTightIsolationMVA3newDMwoLT",
-        "byVTightIsolationMVA3oldDMwLT",
-        "byVTightIsolationMVA3oldDMwoLT",
+        //"byVTightIsolationMVA3newDMwoLT",
+        //"byVTightIsolationMVA3oldDMwLT",
+        //"byVTightIsolationMVA3oldDMwoLT",
         "byVVTightIsolationMVA3newDMwLT",
-        "byVVTightIsolationMVA3newDMwoLT",
-        "byVVTightIsolationMVA3oldDMwLT",
-        "byVVTightIsolationMVA3oldDMwoLT",
+        //"byVVTightIsolationMVA3newDMwoLT",
+        //"byVVTightIsolationMVA3oldDMwLT",
+        //"byVVTightIsolationMVA3oldDMwoLT",
         "decayModeFinding",
         "decayModeFindingNewDMs",
     };
@@ -249,6 +251,7 @@ public:
     double m_m_cut;
     const std::string m_cutdatafile;
     const bool m_do_ztree;
+    const bool m_do_complicated_tau_stuff;
     const vector< string >  m_trigger_string;
     TString d_mydiscmu[6];
     const std::string m_dataPeriod;

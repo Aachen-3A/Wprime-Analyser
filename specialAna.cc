@@ -238,7 +238,9 @@ void specialAna::analyseEvent( const pxl::Event* event ) {
     if(m_RecEvtView==0){
         return;
     }
-    HistClass::Fill("h_general_nPrimaryVertices_event_weight",m_RecEvtView->getUserRecord("NumVertices"),event_weight);
+    if(not runOnData){
+    HistClass::Fill("h_general_nPrimaryVertices_event_weight",m_RecEvtView->getUserRecord("NumVertices"),m_GenEvtView->getUserRecord( "Weight" ));
+}
     HistClass::Fill("h_general_nPrimaryVertices_pileup_weight",m_RecEvtView->getUserRecord("NumVertices"),weight);
     HistClass::Fill("MC_cutflow_Gen",0,weight);
 

@@ -140,86 +140,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
 
 specialAna::~specialAna() {
 }
-void specialAna::boosting(const pxl::Event* event){
-    string datastream = event->getUserRecord( "Dataset" );
-    if( (datastream.find("WTo")!=1) and (datastream.find("WJets")!=1)){
-        return;
-    }
 
-    if (HistClass::histo.find("h1_lep_boost")== HistClass::histo.end()){
-        HistClass::CreateHisto("lep_boost", 100, -3.5, 3.5, "#phi(e)");
-        HistClass::CreateHisto("neu_boost", 100, -3.5, 3.5, "#phi(#nu)");
-        HistClass::CreateHisto("lep_boost_qm", 100, -3.5, 3.5, "#phi(e)");
-        HistClass::CreateHisto("neu_boost_qm", 100, -3.5, 3.5, "#phi(#nu)");
-        HistClass::CreateHisto("lep_boost_qp", 100, -3.5, 3.5, "#phi(e)");
-        HistClass::CreateHisto("neu_boost_qp", 100, -3.5, 3.5, "#phi(#nu)");
-        HistClass::CreateHisto("lep_boost_del", 100, 0, 3.5, "#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
-        HistClass::CreateHisto("lep_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
-        HistClass::CreateHisto("add_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
-        HistClass::CreateHisto("lep_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
-        HistClass::CreateHisto("add_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
-        HistClass::CreateHisto("lep_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
-        HistClass::CreateHisto("add_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
-        HistClass::CreateHisto("lep_boost_qm_del", 100, 0, 3.5, "#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_qm_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
-        HistClass::CreateHisto("lep_boost_qp_del", 100, 0, 3.5, "#Delta#phi(e,W)");
-        HistClass::CreateHisto("neu_boost_qp_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
-    }
-
-
-    pxl::Particle* w=0;
-    pxl::Particle* lepton=0;
-    pxl::Particle* neutrino=0;
-    for(uint i = 0; i < S3ListGen->size(); i++){
-        if (abs(S3ListGen->at(i)->getPdgNumber())==24 ){
-            w=S3ListGen->at(i);
-        }
-        int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
-        if((pdgCode==11 or pdgCode==13 or pdgCode==15) and lepton==0){
-            lepton=S3ListGen->at(i);
-            lepton->setCharge(S3ListGen->at(i)->getPdgNumber());
-        }
-        if((pdgCode==12 or pdgCode==14 or pdgCode==16) and neutrino==0){
-            neutrino=S3ListGen->at(i);
-        }
-    }
-
-    if(w!=0 && lepton!=0 &&neutrino!=0){
-        lepton->boost( -(w->getBoostVector()) );
-        neutrino->boost( -(w->getBoostVector()) );
-        HistClass::Fill("lep_boost",lepton->getPhi(),weight);
-        HistClass::Fill("neu_boost",neutrino->getPhi(),1.);
-        HistClass::Fill("lep_boost_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
-        HistClass::Fill("neu_boost_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
-        HistClass::Fill("lep_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
-        HistClass::Fill("neu_boost_cos",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-        HistClass::Fill("add_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-        if (lepton->getCharge() >0){
-            HistClass::Fill("lep_boost_qp",lepton->getPhi(),weight);
-            HistClass::Fill("neu_boost_qp",neutrino->getPhi(),weight);
-            HistClass::Fill("lep_boost_qp_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
-            HistClass::Fill("neu_boost_qp_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
-            HistClass::Fill("lep_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
-            HistClass::Fill("neu_boost_cos_qp",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-            HistClass::Fill("add_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-        }
-        else if (lepton->getCharge() < 0){
-            HistClass::Fill("lep_boost_qm",lepton->getPhi(),weight);
-            HistClass::Fill("neu_boost_qm",neutrino->getPhi(),weight);
-            HistClass::Fill("lep_boost_qm_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
-            HistClass::Fill("neu_boost_qm_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
-            HistClass::Fill("lep_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
-            HistClass::Fill("neu_boost_cos_qm",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-            HistClass::Fill("add_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
-        }
-        lepton->boost(w->getBoostVector());
-        neutrino->boost(w->getBoostVector());
-    }
-}
 
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
@@ -3593,6 +3514,87 @@ pxl::Particle* specialAna::Get_highest_pt_dauter( pxl::Particle* truth_tau) {
         }
     }
     return temp_part_dummy;
+}
+
+void specialAna::boosting(const pxl::Event* event){
+    string datastream = event->getUserRecord( "Dataset" );
+    if( (datastream.find("WTo")!=1) and (datastream.find("WJets")!=1)){
+        return;
+    }
+
+    if (HistClass::histo.find("h1_lep_boost")== HistClass::histo.end()){
+        HistClass::CreateHisto("lep_boost", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_qm", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost_qm", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_qp", 100, -3.5, 3.5, "#phi(e)");
+        HistClass::CreateHisto("neu_boost_qp", 100, -3.5, 3.5, "#phi(#nu)");
+        HistClass::CreateHisto("lep_boost_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("lep_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos_qp", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("add_boost_cos_qm", 100, -1.1, 1.1, "cos#Delta#phi((e+#nu),W)");
+        HistClass::CreateHisto("lep_boost_qm_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_qm_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+        HistClass::CreateHisto("lep_boost_qp_del", 100, 0, 3.5, "#Delta#phi(e,W)");
+        HistClass::CreateHisto("neu_boost_qp_del", 100, 0, 3.5, "#Delta#phi(#nu,W)");
+    }
+
+
+    pxl::Particle* w=0;
+    pxl::Particle* lepton=0;
+    pxl::Particle* neutrino=0;
+    for(uint i = 0; i < S3ListGen->size(); i++){
+        if (abs(S3ListGen->at(i)->getPdgNumber())==24 ){
+            w=S3ListGen->at(i);
+        }
+        int pdgCode= abs(S3ListGen->at(i)->getPdgNumber());
+        if((pdgCode==11 or pdgCode==13 or pdgCode==15) and lepton==0){
+            lepton=S3ListGen->at(i);
+            lepton->setCharge(S3ListGen->at(i)->getPdgNumber());
+        }
+        if((pdgCode==12 or pdgCode==14 or pdgCode==16) and neutrino==0){
+            neutrino=S3ListGen->at(i);
+        }
+    }
+
+    if(w!=0 && lepton!=0 &&neutrino!=0){
+        lepton->boost( -(w->getBoostVector()) );
+        neutrino->boost( -(w->getBoostVector()) );
+        HistClass::Fill("lep_boost",lepton->getPhi(),weight);
+        HistClass::Fill("neu_boost",neutrino->getPhi(),1.);
+        HistClass::Fill("lep_boost_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+        HistClass::Fill("neu_boost_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+        HistClass::Fill("lep_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+        HistClass::Fill("neu_boost_cos",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        HistClass::Fill("add_boost_cos",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        if (lepton->getCharge() >0){
+            HistClass::Fill("lep_boost_qp",lepton->getPhi(),weight);
+            HistClass::Fill("neu_boost_qp",neutrino->getPhi(),weight);
+            HistClass::Fill("lep_boost_qp_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("neu_boost_qp_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("lep_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("neu_boost_cos_qp",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("add_boost_cos_qp",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        }
+        else if (lepton->getCharge() < 0){
+            HistClass::Fill("lep_boost_qm",lepton->getPhi(),weight);
+            HistClass::Fill("neu_boost_qm",neutrino->getPhi(),weight);
+            HistClass::Fill("lep_boost_qm_del",DeltaPhi(lepton->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("neu_boost_qm_del",DeltaPhi(neutrino->getPhi(),w->getPhi()),weight);
+            HistClass::Fill("lep_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("neu_boost_cos_qm",cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+            HistClass::Fill("add_boost_cos_qm",cos(DeltaPhi(lepton->getPhi(),w->getPhi()))+cos(DeltaPhi(neutrino->getPhi(),w->getPhi())),weight);
+        }
+        lepton->boost(w->getBoostVector());
+        neutrino->boost(w->getBoostVector());
+    }
 }
 
 double specialAna::DeltaPhi(double a, double b) {

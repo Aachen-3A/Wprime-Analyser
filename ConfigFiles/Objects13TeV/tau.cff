@@ -10,8 +10,13 @@ Tau.pt.min = 50.
 Tau.Error.Fakes = 0.4
 Tau.Error.Charge = 1
 #For HPS
-Tau.Discriminators = decayModeFindingNewDMs
-#,againstElectronLooseMVA5,againstMuonLoose3,byMediumCombinedIsolationDeltaBetaCorr3Hits
+Tau.Discriminators = decayModeFindingNewDMs,againstElectronLooseMVA5,againstMuonLoose3
+#,byMediumCombinedIsolationDeltaBetaCorr3Hits
+
+#bool tau_ID = tau->getUserRecord("decayModeFindingNewDMs").toDouble()>0.5;
+#bool tau_ISO = tau->getUserRecord("byMediumCombinedIsolationDeltaBetaCorr3Hits").toDouble()>0.5;
+#bool tau_ELE = tau->getUserRecord("againstElectronLooseMVA5").toDouble()>0.5;
+#bool tau_MUO = tau->getUserRecord("againstMuonLoose3").toDouble()>0.5;
 #decayModeFindingNewDMs,againstElectronLooseMVA5,againstMuonLoose3
 #"againstElectronDeadECAL","againstElectronLoose","againstElectronLooseMVA5","againstElectronMVA5category","againstElectronMVA5raw","againstElectronMedium","againstElectronMediumMVA5","againstElectronTight","againstElectronTightMVA5","againstElectronVLooseMVA5","againstElectronVTightMVA5","againstMuonLoose","againstMuonLoose2","againstMuonLoose3","againstMuonLooseMVA","againstMuonMVAraw","againstMuonMedium","againstMuonMedium2","againstMuonMediumMVA","againstMuonTight","againstMuonTight2","againstMuonTight3","againstMuonTightMVA","byCombinedIsolationDeltaBetaCorrRaw","byCombinedIsolationDeltaBetaCorrRaw3Hits","byIsolationMVA3newDMwLTraw","byIsolationMVA3newDMwoLTraw","byIsolationMVA3oldDMwLTraw","byIsolationMVA3oldDMwoLTraw","byLooseCombinedIsolationDeltaBetaCorr","byLooseCombinedIsolationDeltaBetaCorr3Hits","byLooseIsolation","byLooseIsolationMVA3newDMwLT","byLooseIsolationMVA3newDMwoLT","byLooseIsolationMVA3oldDMwLT","byLooseIsolationMVA3oldDMwoLT","byMediumCombinedIsolationDeltaBetaCorr","byMediumCombinedIsolationDeltaBetaCorr3Hits","byMediumIsolationMVA3newDMwLT","byMediumIsolationMVA3newDMwoLT","byMediumIsolationMVA3oldDMwLT","byMediumIsolationMVA3oldDMwoLT","byTightCombinedIsolationDeltaBetaCorr","byTightCombinedIsolationDeltaBetaCorr3Hits","byTightIsolationMVA3newDMwLT","byTightIsolationMVA3newDMwoLT","byTightIsolationMVA3oldDMwLT","byTightIsolationMVA3oldDMwoLT","byVLooseCombinedIsolationDeltaBetaCorr","byVLooseIsolationMVA3newDMwLT","byVLooseIsolationMVA3newDMwoLT","byVLooseIsolationMVA3oldDMwLT","byVLooseIsolationMVA3oldDMwoLT","byVTightIsolationMVA3newDMwLT","byVTightIsolationMVA3newDMwoLT","byVTightIsolationMVA3oldDMwLT","byVTightIsolationMVA3oldDMwoLT","byVVTightIsolationMVA3newDMwLT","byVVTightIsolationMVA3newDMwoLT","byVVTightIsolationMVA3oldDMwLT","byVVTightIsolationMVA3oldDMwoLT","chargedIsoPtSum","decayModeFinding","decayModeFindingNewDMs","decayModeFindingOldDMs","neutralIsoPtSum","puCorrPtSum"
 ##BY DECAY MODE FINDING????

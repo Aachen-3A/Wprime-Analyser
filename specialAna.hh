@@ -281,6 +281,7 @@ public:
     const std::string m_kfactorFile_muo_Config;
     const std::string m_kfactorFile_tau_Config;
     const vector< string >  m_analyse_trigger;
+    const bool m_doPDcleaning;
     const Tools::MConfig config_;
     Systematics* m_syst_shifter;
 

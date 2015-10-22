@@ -64,6 +64,7 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     m_kfactorFile_muo_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.Muo.WkfactorFile"))),
     m_kfactorFile_tau_Config(    Tools::ExpandPath( cfg.GetItem< std::string >("wprime.Tau.WkfactorFile"))),
     m_analyse_trigger( Tools::splitString< string >( cfg.GetItem< string >( "wprime.AnalyseTriggerList" ), true  ) ),
+    m_doPDcleaning( cfg.GetItem<bool>( "wprime.PDcleaning", false  ) ),
     config_(cfg)
     {
         m_syst_shifter=&syst_shifter;
@@ -839,21 +840,24 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                         wrongDataset=true;
                     }else if(Datastream.Contains("MET") and  !( (string::npos != (*us).first.find( "Jet")) and (string::npos != (*us).first.find( "PFMET")) ) ){
                         wrongDataset=true;
-                    }else if(Datastream.Contains("BTagCSV") or
-                                Datastream.Contains("BTagMu") or
-                                Datastream.Contains("DoubleEG") or
-                                Datastream.Contains("DoubleMuon") or
-                                Datastream.Contains("HTMHT") or
-                                Datastream.Contains("JetHT") or
-                                Datastream.Contains("Jet") or
-                                Datastream.Contains("MuonEG")
-                            ){
-                        wrongDataset=true;
                     }
+                    //else if(Datastream.Contains("BTagCSV") or
+                                //Datastream.Contains("BTagMu") or
+                                //Datastream.Contains("DoubleEG") or
+                                //Datastream.Contains("DoubleMuon") or
+                                //Datastream.Contains("HTMHT") or
+                                //Datastream.Contains("JetHT") or
+                                //Datastream.Contains("Jet") or
+                                //Datastream.Contains("MuonEG")
+                            //){
+                        //wrongDataset=true;
+                    //}
                     if(wrongDataset){
                         //cout<<"wrong PD "<<(*us).first<<" "<< datastream<<endl;
                         //break here because the event will be in a other PD!!
-                        triggered = 0;
+                        if(m_doPDcleaning){
+                            triggered = 0;
+                        }
                         break;
                     }
                 }

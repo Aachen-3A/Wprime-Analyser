@@ -701,46 +701,60 @@ void specialAna::Create_trigger_effs() {
 }
 
 void specialAna::TriggerAnalyser(){
-    bool triggered=false;
+    double triggered=0;
+    double reftrigger=0;
 
     for(pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin() ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
-        if(string::npos != (*us).first.find( "HLT_HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80")){
+
+
+        if(string::npos != (*us).first.find( "HLT_Photon") and string::npos != (*us).first.find( "_R9Id90_HE10_IsoM_v")){
+            reftrigger=(*us).second;
+        }
+        if(string::npos != (*us).first.find( "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v")){
             triggered=(*us).second;
             if(triggered > 0){
                 break;
             }
         }
     }
-
-    for (std::vector< std::string >::const_iterator it=m_analyse_trigger.begin(); it!= m_analyse_trigger.end(); it++) {
-        if(TauList->size()>=1 && sel_met->getPt()>100 && (string::npos != it->find( "Tau")) ){
-            HistClass::FillEff((*it).c_str(), TauList->at(0)->getPt() , triggered);
-
-        }
-        if(sel_met && TauList->size()>=1 && TauList->at(0)->getPt()>80 && (string::npos != it->find( "MET")) ){
-            HistClass::FillEff((*it).c_str(), sel_met->getPt() , triggered);
+    if(reftrigger>0){
+        for (std::vector< std::string >::const_iterator it=m_analyse_trigger.begin(); it!= m_analyse_trigger.end(); it++) {
+            if(TauList->size()>=1 && sel_met->getPt()>140 && (string::npos != it->find( "Tau")) ){
+                HistClass::FillEff((*it).c_str(), TauList->at(0)->getPt() , (triggered > 0));
+            }
+            if(sel_met && TauList->size()>=1 && TauList->at(0)->getPt()>80 && (string::npos != it->find( "MET")) ){
+                HistClass::FillEff((*it).c_str(), sel_met->getPt() , (triggered > 0));
+            }
         }
     }
-
 }
 
 void specialAna::FillTriggers(int ihist){
     pxl::UserRecords::const_iterator us = m_TrigEvtView->getUserRecords().begin();
     for( ; us != m_TrigEvtView->getUserRecords().end(); ++us ) {
-        if(std::find(std::begin(x_bins_names), std::end(x_bins_names),(*us).first) != std::end(x_bins_names)){
-            HistClass::FillStr((boost::format("%d_all_triggers_Gen")%ihist).str().c_str(),((*us).first).c_str(),1.);
-            if(ihist==1 && sel_lepton){
-                if(sel_lepton->getPdgNumber()==11){
-                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%2).str().c_str(),((*us).first).c_str(),1.);
-                }
-                if(sel_lepton->getPdgNumber()==13){
-                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%3).str().c_str(),((*us).first).c_str(),1.);
-                }
-                if(sel_lepton->getPdgNumber()==15){
-                    HistClass::FillStr((boost::format("%d_all_triggers_Gen")%4).str().c_str(),((*us).first).c_str(),1.);
+        bool found=false;
+        for(auto trig : x_bins_names){
+            if(string::npos != (*us).first.find( trig)){
+                found=true;
+            }
+            if(found){
+                HistClass::FillStr((boost::format("%d_all_triggers_Gen")%ihist).str().c_str(),trig.c_str(),1.);
+                if(ihist==1 && sel_lepton){
+                    if(sel_lepton->getPdgNumber()==11){
+                        HistClass::FillStr((boost::format("%d_all_triggers_Gen")%2).str().c_str(),trig.c_str(),1.);
+                    }
+                    if(sel_lepton->getPdgNumber()==13){
+                        HistClass::FillStr((boost::format("%d_all_triggers_Gen")%3).str().c_str(),trig.c_str(),1.);
+                    }
+                    if(sel_lepton->getPdgNumber()==15){
+                        HistClass::FillStr((boost::format("%d_all_triggers_Gen")%4).str().c_str(),trig.c_str(),1.);
+                    }
                 }
             }
+            found=false;
         }
+        //if(std::find(std::begin(x_bins_names), std::end(x_bins_names),(*us).first) != std::end(x_bins_names)){
+        //}
     }
 }
 
@@ -823,10 +837,21 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                         wrongDataset=true;
                     }else if(Datastream.Contains("MET") and  !( (string::npos != (*us).first.find( "Jet")) and (string::npos != (*us).first.find( "PFMET")) ) ){
                         wrongDataset=true;
+                    }else if(Datastream.Contains("BTagCSV") or
+                                Datastream.Contains("BTagMu") or
+                                Datastream.Contains("DoubleEG") or
+                                Datastream.Contains("DoubleMuon") or
+                                Datastream.Contains("HTMHT") or
+                                Datastream.Contains("JetHT") or
+                                Datastream.Contains("Jet") or
+                                Datastream.Contains("MuonEG")
+                            ){
+                        wrongDataset=true;
                     }
                     if(wrongDataset){
                         //cout<<"wrong PD "<<(*us).first<<" "<< datastream<<endl;
                         //break here because the event will be in a other PD!!
+                        triggered = 0;
                         break;
                     }
                 }
@@ -835,6 +860,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
                 if(usePdgNumber==11 and string::npos == (*us).first.find( "Ele") ){
                     //cout<<"hump "<<(*us).first<<" "<< usePdgNumber<<endl;
                     if(sel_lepton!=0){
+                        //this is a real electron event this has to be triggerd by a electron trigger!!
                         continue;
                     }else if(string::npos == (*us).first.find( "Photon")){
                         continue;
@@ -965,11 +991,7 @@ bool specialAna::TriggerSelector(const pxl::Event* event){
     //}
 
 
-    if (triggered>0) {
-        return true;
-    } else {
-        return false;
-    }
+    return (triggered>0);
 
 }
 
@@ -2270,12 +2292,12 @@ void specialAna::Create_Histos(){
     }
 
 
-    HistClass::CreateHisto("0_all_triggers_Gen", 28, 0, 28, "trigger");
-    HistClass::CreateHisto("1_all_triggers_Gen", 28, 0, 28, "trigger");
-    HistClass::CreateHisto("2_all_triggers_Gen", 28, 0, 28, "trigger");
-    HistClass::CreateHisto("3_all_triggers_Gen", 28, 0, 28, "trigger");
-    HistClass::CreateHisto("4_all_triggers_Gen", 28, 0, 28, "trigger");
-    for(int i=0;i<28;i++){
+    HistClass::CreateHisto("0_all_triggers_Gen", x_bins_names.size(), 0, x_bins_names.size(), "trigger");
+    HistClass::CreateHisto("1_all_triggers_Gen", x_bins_names.size(), 0, x_bins_names.size(), "trigger");
+    HistClass::CreateHisto("2_all_triggers_Gen", x_bins_names.size(), 0, x_bins_names.size(), "trigger");
+    HistClass::CreateHisto("3_all_triggers_Gen", x_bins_names.size(), 0, x_bins_names.size(), "trigger");
+    HistClass::CreateHisto("4_all_triggers_Gen", x_bins_names.size(), 0, x_bins_names.size(), "trigger");
+    for(unsigned int i=0;i<x_bins_names.size();i++){
         HistClass::FillStr("0_all_triggers_Gen",x_bins_names[i].c_str(),0);
         HistClass::FillStr("1_all_triggers_Gen",x_bins_names[i].c_str(),0);
         HistClass::FillStr("2_all_triggers_Gen",x_bins_names[i].c_str(),0);

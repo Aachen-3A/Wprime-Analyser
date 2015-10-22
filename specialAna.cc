@@ -12,7 +12,7 @@
 specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
     runOnData(       cfg.GetItem< bool >( "General.RunOnData" ) ),
     useSyst(         cfg.GetItem< bool >( "General.useSYST" ) ),
-
+    MC_d(            cfg.GetItem< bool >( "General.MC_d"    ) ),
     m_JetAlgo(       cfg.GetItem< string >( "Jet.Type.Rec" ) ),
     m_BJets_algo(    cfg.GetItem< string >( "Jet.BJets.Algo" ) ),
     m_METType(       cfg.GetItem< string >( "MET.Type.Rec" ) ),
@@ -100,8 +100,13 @@ specialAna::specialAna( const Tools::MConfig &cfg, Systematics &syst_shifter) :
 
         // number of events, saved in a histogram
         HistClass::CreateHistoUnchangedName("h_counters", 10, 0, 11, "N_{events}");
-
-
+        HistClass::CreateHisto("h_general_nPrimaryVertices_event_weight", 100, 0, 100,  "number of primary vertices");
+        HistClass::CreateHisto("h_general_nPrimaryVertices_pileup_weight", 100, 0, 100,  "number of primary vertices");
+        HistClass::CreateHisto("general_pileup_weight", 100, -5, 5,  "pileup weight");
+        if(MC_d==true){
+            HistClass::CreateHisto("h_MC_vertex_distribution",50,0,50,"N_{vertices}");
+            HistClass::CreateHisto("h_MC_vertex_fail",50,0,50,"");
+        }
         if(not runOnData){
             HistClass::CreateHisto("MC_W_m_Gen", 8000, 0, 8000, "M_{W} [GeV]");
             HistClass::CreateHisto("MC_W_pthat2_Gen", 8000, 0, 8000, "p_{T}^{W} [GeV]");
@@ -505,9 +510,23 @@ specialAna::~specialAna() {
 
 void specialAna::analyseEvent( const pxl::Event* event ) {
     initEvent( event );
+    
+    
+    // pileup MC distribution
+    if (MC_d==true){
+        if(m_GenEvtView->hasUserRecord( "NumVerticesPUTrue" )){
+            HistClass::Fill("h_MC_vertex_distribution",m_GenEvtView->getUserRecord( "NumVerticesPUTrue" ),1);
+        }
+        else HistClass::Fill("h_MC_vertex_fail",25,1);
+    }
+
+    
+    
     if(m_RecEvtView==0){
         return;
     }
+    HistClass::Fill("h_general_nPrimaryVertices_event_weight",m_RecEvtView->getUserRecord("NumVertices"),event_weight);
+    HistClass::Fill("h_general_nPrimaryVertices_pileup_weight",m_RecEvtView->getUserRecord("NumVertices"),weight);
     HistClass::Fill("MC_cutflow_Gen",0,weight);
 
     if(not runOnData){
@@ -3700,7 +3719,9 @@ void specialAna::endJob( const Serializable* ) {
     file1->mkdir("MC");
     file1->cd("MC/");
     HistClass::WriteAll("_Gen");
-    //}
+    if(MC_d==true)
+    HistClass::WriteAll("h_MC_");
+        //}
     file1->cd();
     file1->mkdir("Taus");
     file1->cd("Taus/");
@@ -3864,12 +3885,12 @@ void specialAna::initEvent( const pxl::Event* event ){
 
         //double varKfactor_weight = m_GenEvtView->getUserRecord_def( "kfacWeight",1. );
         double pileup_weight = m_GenEvtView->getUserRecord_def( "PUWeight",1.);
-
+        HistClass::Fill("general_pileup_weight",pileup_weight,1);
         if(m_dataPeriod=="13TeV"){
             //only take the sign of a generator weight!
             //event_weight/=fabs(event_weight);
 
-            weight = event_weight ;
+            weight = event_weight * pileup_weight;
         }else if(m_dataPeriod=="8TeV"){
             weight = event_weight  * pileup_weight;
         }else{

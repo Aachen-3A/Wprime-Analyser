@@ -111,8 +111,10 @@ public:
     pxl::EventView *m_TrigEvtView;
     pxl::EventView *m_FilterEvtView;
 
+    
     bool runOnData;
     bool useSyst;
+    bool MC_d;
     string const m_JetAlgo, m_BJets_algo, m_METType, m_TauType;
 
     bool writePxlio;
